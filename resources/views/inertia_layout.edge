@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#16a34a">
+
+  <title inertia>Fixtura</title>
+
+  @vite(['inertia/app/app.ts', `inertia/pages/${page.component}.vue`])
+  @inertiaHead()
+  @stack('dumper')
+</head>
+
+<body class="min-h-screen bg-sand-1 font-sans text-sand-12 antialiased">
+  @inertia()
+</body>
+
+</html>

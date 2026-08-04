@@ -1,0 +1,43 @@
+@import 'tailwindcss';
+
+/*
+|--------------------------------------------------------------------------
+| Thème Fixtura (Tailwind v4 — CSS-first)
+|--------------------------------------------------------------------------
+| Palette « sand » neutre pour les surfaces admin + un vert « terrain » comme
+| couleur primaire. Les polices sont volontairement en stack système pour
+| l'instant (RGPD : pas de CDN de fonts). Le self-hosting woff2 sera fait en
+| phase de finitions.
+*/
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+
+  /* Couleur primaire — vert terrain */
+  --color-primary: #16a34a;
+  --color-primary-50: #f0fdf4;
+  --color-primary-100: #dcfce7;
+  --color-primary-200: #bbf7d0;
+  --color-primary-300: #86efac;
+  --color-primary-400: #4ade80;
+  --color-primary-500: #22c55e;
+  --color-primary-600: #16a34a;
+  --color-primary-700: #15803d;
+  --color-primary-800: #166534;
+  --color-primary-900: #14532d;
+
+  /* Neutres « sand » */
+  --color-sand-1: #fdfdfc;
+  --color-sand-2: #f9f9f8;
+  --color-sand-3: #f1f0ef;
+  --color-sand-4: #e9e8e6;
+  --color-sand-5: #e2e1de;
+  --color-sand-6: #dad9d6;
+  --color-sand-7: #cfceca;
+  --color-sand-8: #bcbbb5;
+  --color-sand-9: #8d8d86;
+  --color-sand-10: #82827c;
+  --color-sand-11: #63635e;
+  --color-sand-12: #21201c;
+}

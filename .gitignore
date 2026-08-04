@@ -5,6 +5,9 @@ node_modules
 build
 tmp
 
+# Frontend compiled assets
+public/assets
+
 # Environment / secrets
 .env
 .env.local
@@ -16,9 +19,11 @@ coverage
 # Logs
 *.log
 npm-debug.log*
+yarn-error.log
 
 # OS / editor
 .DS_Store
 .idea
 .vscode
+.fleet
 *.swp
