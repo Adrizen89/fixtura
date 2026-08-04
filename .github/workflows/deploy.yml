@@ -1,0 +1,40 @@
+name: deploy
+
+# Déploie sur le VPS après une CI verte sur main (ou manuellement).
+on:
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+# Un seul déploiement à la fois
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Déploiement VPS
+    runs-on: ubuntu-latest
+    # Seulement si la CI a réussi (ou déclenchement manuel)
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Déployer via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script_stop: true
+          script: |
+            cd /var/www/fixtura
+            git pull --ff-only
+            npm ci
+            node ace build
+            cp .env build/.env
+            cd build && npm ci --omit=dev
+            node ace migration:run --force
+            cd ..
+            pm2 reload ecosystem.config.cjs
+            pm2 save
