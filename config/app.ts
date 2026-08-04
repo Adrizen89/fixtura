@@ -26,6 +26,14 @@ export const http = defineConfig({
   useAsyncLocalStorage: false,
 
   /**
+   * Fait confiance au reverse proxy (nginx) pour lire X-Forwarded-Proto /
+   * X-Forwarded-For (détection HTTPS, IP réelle). Sûr ici : en prod l'app
+   * n'écoute que sur 127.0.0.1 (HOST=127.0.0.1), donc seules les connexions
+   * de nginx (loopback) l'atteignent.
+   */
+  trustProxy: () => true,
+
+  /**
    * Manage cookies configuration. The settings for the session id cookie are
    * defined inside the "config/session.ts" file.
    */
