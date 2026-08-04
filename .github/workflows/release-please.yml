@@ -1,0 +1,21 @@
+name: release-please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      # Ouvre/maj une PR de release à partir des Conventional Commits, puis
+      # (une fois la PR mergée) crée le tag, la GitHub Release et le CHANGELOG.
+      # La config est lue depuis release-please-config.json + le manifest.
+      - uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
