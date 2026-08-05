@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.3](https://github.com/Adrizen89/fixtura/compare/v0.1.2...v0.1.3) (2026-08-05)
+
+
+### ✨ Fonctionnalités
+
+* **planning:** génération du planning (aperçu, validation, régénération) ([#16](https://github.com/Adrizen89/fixtura/issues/16)) ([d25b93e](https://github.com/Adrizen89/fixtura/commit/d25b93e5bd95cc64863ababf867e34464fafc099)), closes [#2](https://github.com/Adrizen89/fixtura/issues/2)
+* **results:** saisie des scores multi-organisateurs + classement en direct ([#17](https://github.com/Adrizen89/fixtura/issues/17)) ([0a09708](https://github.com/Adrizen89/fixtura/commit/0a09708442d56bb506b75332551459321e3a5b78)), closes [#3](https://github.com/Adrizen89/fixtura/issues/3)
+* **teams:** CRUD des équipes d'un tournoi (ajout/renommage/suppression) ([#13](https://github.com/Adrizen89/fixtura/issues/13)) ([7d80518](https://github.com/Adrizen89/fixtura/commit/7d805185acbeda76d0edb9254ca9ae9d6528a1f9)), closes [#1](https://github.com/Adrizen89/fixtura/issues/1)
+
 ## [0.1.2](https://github.com/Adrizen89/fixtura/compare/v0.1.1...v0.1.2) (2026-08-05)
 
 
