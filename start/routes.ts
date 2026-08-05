@@ -16,6 +16,7 @@ const TournamentsController = () => import('#controllers/tournaments_controller'
 const TeamsController = () => import('#controllers/teams_controller')
 const PlanningController = () => import('#controllers/planning_controller')
 const ResultsController = () => import('#controllers/results_controller')
+const PublicController = () => import('#controllers/public_controller')
 
 /**
  * Routes du temps réel (SSE) : `__transmit/events` (flux), `__transmit/subscribe`
@@ -31,6 +32,13 @@ transmit.registerRoutes()
  * automatiquement vers /login.
  */
 router.on('/').redirect('/tournaments')
+
+/**
+ * Écran public d'un tournoi — sans auth, via le `public_slug` non devinable.
+ * Lecture seule (planning, résultats, classement en direct), mobile-first et
+ * lisible de loin. Rafraîchissement via SSE (canal `tournaments/{public_slug}`).
+ */
+router.get('/t/:slug', [PublicController, 'show']).as('public.tournament')
 
 /**
  * Authentification — accessible aux invités uniquement.
