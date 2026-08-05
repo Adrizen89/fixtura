@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.4](https://github.com/Adrizen89/fixtura/compare/v0.1.3...v0.1.4) (2026-08-05)
+
+
+### ✨ Fonctionnalités
+
+* **public:** écran public temps réel d'un tournoi (/t/:slug) ([#21](https://github.com/Adrizen89/fixtura/issues/21)) ([a5639c9](https://github.com/Adrizen89/fixtura/commit/a5639c9b5fb3ad27922212cc2a3abff63b518d6a))
+* **public:** écran public temps réel d'un tournoi (/t/:slug) ([#22](https://github.com/Adrizen89/fixtura/issues/22)) ([cdc28b1](https://github.com/Adrizen89/fixtura/commit/cdc28b141a42bfa3eb6771463ec92eb8baa3ba1d))
+* **realtime:** diffusion SSE des scores et du classement en direct ([#19](https://github.com/Adrizen89/fixtura/issues/19)) ([90dab0e](https://github.com/Adrizen89/fixtura/commit/90dab0ec25744ff17ed2a2f53b9af3f7b32b2308))
+
 ## [0.1.3](https://github.com/Adrizen89/fixtura/compare/v0.1.2...v0.1.3) (2026-08-05)
 
 
