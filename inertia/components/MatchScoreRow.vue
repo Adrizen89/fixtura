@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { watch } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import type { ResultMatchRow } from '~/app/types'
 
@@ -11,6 +12,21 @@ const form = useForm<{ homeScore: number | null; awayScore: number | null }>({
   homeScore: props.match.homeScore,
   awayScore: props.match.awayScore,
 })
+
+/**
+ * Reflète en direct un score saisi par un autre organisateur (props mises à jour
+ * via SSE), sauf si une saisie est en cours dans cette ligne (`form.isDirty`) —
+ * on ne clobbe jamais ce que l'utilisateur est en train de taper.
+ */
+watch(
+  () => [props.match.homeScore, props.match.awayScore] as const,
+  ([homeScore, awayScore]) => {
+    if (form.isDirty) return
+    form.homeScore = homeScore
+    form.awayScore = awayScore
+    form.defaults({ homeScore, awayScore })
+  }
+)
 
 function submit() {
   form.patch(`/tournaments/${props.tournamentId}/matches/${props.match.id}`, {

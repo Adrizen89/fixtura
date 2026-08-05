@@ -17,7 +17,10 @@ const shieldConfig = defineConfig({
    */
   csrf: {
     enabled: true,
-    exceptRoutes: [],
+    // Les endpoints SSE de transmit (`/__transmit/*`) sont exemptés : ils gèrent
+    // uniquement des abonnements à un flux public en lecture seule et sont
+    // appelés par `@adonisjs/transmit-client` (sans jeton CSRF de formulaire).
+    exceptRoutes: (ctx) => ctx.request.url().startsWith('/__transmit'),
     enableXsrfCookie: true,
     methods: ['POST', 'PUT', 'PATCH', 'DELETE'],
   },
