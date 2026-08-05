@@ -90,6 +90,14 @@ export interface ResultMatchRow {
   updatedAt: string | null
 }
 
+/** Événement reçu sur le canal SSE d'un tournoi (miroir de #services/realtime). */
+export interface ResultsLiveUpdate {
+  type: 'results:updated'
+  matchId: number
+  matches: ResultMatchRow[]
+  standings: StandingRow[]
+}
+
 export interface TournamentFormData {
   name: string
   category: string

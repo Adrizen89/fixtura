@@ -8,6 +8,7 @@
 */
 
 import router from '@adonisjs/core/services/router'
+import transmit from '@adonisjs/transmit/services/main'
 import { middleware } from '#start/kernel'
 
 const AuthController = () => import('#controllers/auth_controller')
@@ -15,6 +16,15 @@ const TournamentsController = () => import('#controllers/tournaments_controller'
 const TeamsController = () => import('#controllers/teams_controller')
 const PlanningController = () => import('#controllers/planning_controller')
 const ResultsController = () => import('#controllers/results_controller')
+
+/**
+ * Routes du temps réel (SSE) : `__transmit/events` (flux), `__transmit/subscribe`
+ * et `__transmit/unsubscribe`. Volontairement **publiques** : l'écran public
+ * (lecture seule, sans auth) doit pouvoir s'abonner au flux d'un tournoi. Elles
+ * sont exemptées du CSRF (cf. config/shield.ts) — simple abonnement à des données
+ * déjà publiques.
+ */
+transmit.registerRoutes()
 
 /**
  * Racine → liste des tournois. Si non connecté, le middleware `auth` renverra
