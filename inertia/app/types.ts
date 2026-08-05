@@ -40,6 +40,29 @@ export interface Tournament {
   teamsCount?: number
 }
 
+export interface PlanningMatchView {
+  terrainNumber: number
+  homeTeam: string
+  awayTeam: string
+  homeScore: number | null
+  awayScore: number | null
+  status: string
+}
+
+export interface PlanningSlotView {
+  time: string
+  matches: PlanningMatchView[]
+}
+
+export interface PlanningView {
+  slots: PlanningSlotView[]
+  matchCount: number
+  roundsCount: number
+  slotsCount: number
+  startTime: string
+  endTime: string
+}
+
 export interface TournamentFormData {
   name: string
   category: string

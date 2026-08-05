@@ -1,8 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Tournament from '#models/tournament'
+import Match from '#models/match'
 import { tournamentValidator } from '#validators/tournament'
 import { generatePublicSlug } from '#services/public_slug'
+import { viewFromMatches } from '#services/planning'
 
 export default class TournamentsController {
   /**
@@ -56,14 +58,26 @@ export default class TournamentsController {
     return response.redirect().toRoute('tournaments.show', { id: tournament.id })
   }
 
-  /** Détail d'un tournoi (+ équipes). */
+  /** Détail d'un tournoi (+ équipes + planning persisté le cas échéant). */
   async show({ inertia, params, auth }: HttpContext) {
     const tournament = await this.scoped(auth)
       .where('id', params.id)
       .preload('teams', (q) => q.orderBy('name'))
       .firstOrFail()
 
-    return inertia.render('tournaments/show', { tournament: tournament.serialize() })
+    const matches = await Match.query()
+      .where('tournament_id', tournament.id)
+      .preload('homeTeam')
+      .preload('awayTeam')
+      .orderBy('scheduled_at')
+      .orderBy('terrain_number')
+
+    const planning = matches.length ? viewFromMatches(matches, tournament.matchDurationMin) : null
+
+    return inertia.render('tournaments/show', {
+      tournament: tournament.serialize(),
+      planning,
+    })
   }
 
   /** Formulaire d'édition. */
