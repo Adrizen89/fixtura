@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/Adrizen89/fixtura/compare/v0.1.1...v0.1.2) (2026-08-05)
+
+
+### 🐛 Corrections
+
+* charge nvm (fonction shell) avant usage dans le hook cloud ([9736281](https://github.com/Adrizen89/fixtura/commit/9736281b74274768fc0ad78aa06a92c3a889a216))
+
 ## [0.1.1](https://github.com/Adrizen89/fixtura/compare/v0.1.0...v0.1.1) (2026-08-05)
 
 
