@@ -13,11 +13,13 @@ fi
 
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
 
-# --- Node 24 (installé par le Setup Script de l'env cloud) ---
+# --- Node 24 (le cloud fournit 20/21/22 ; on l'installe si absent) ---
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 # shellcheck disable=SC1090,SC1091
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-nvm use 24 >/dev/null 2>&1 || nvm use default >/dev/null 2>&1 || true
+if ! nvm use 24 >/dev/null 2>&1; then
+  nvm install 24 >/dev/null 2>&1 && nvm use 24 >/dev/null 2>&1 || true
+fi
 
 # --- PostgreSQL (au cas où) + rôle/base de dev (idempotent) ---
 sudo service postgresql start >/dev/null 2>&1 || service postgresql start >/dev/null 2>&1 || true
