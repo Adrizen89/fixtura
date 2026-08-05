@@ -13,6 +13,7 @@ import { middleware } from '#start/kernel'
 const AuthController = () => import('#controllers/auth_controller')
 const TournamentsController = () => import('#controllers/tournaments_controller')
 const TeamsController = () => import('#controllers/teams_controller')
+const PlanningController = () => import('#controllers/planning_controller')
 
 /**
  * Racine → liste des tournois. Si non connecté, le middleware `auth` renverra
@@ -40,5 +41,12 @@ router
     router.resource('tournaments', TournamentsController)
     // Équipes gérées depuis la page du tournoi (ajout / renommage / suppression).
     router.resource('tournaments.teams', TeamsController).only(['store', 'update', 'destroy'])
+    // Génération du planning : aperçu (GET) puis validation/persistance (POST).
+    router
+      .get('/tournaments/:id/planning', [PlanningController, 'preview'])
+      .as('tournaments.planning.preview')
+    router
+      .post('/tournaments/:id/planning', [PlanningController, 'store'])
+      .as('tournaments.planning.store')
   })
   .use(middleware.auth())

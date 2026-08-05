@@ -4,11 +4,14 @@ import { Head, Link } from '@inertiajs/vue3'
 import AdminLayout from '~/layouts/AdminLayout.vue'
 import StatusBadge from '~/components/StatusBadge.vue'
 import TeamsManager from '~/components/TeamsManager.vue'
-import type { Tournament } from '~/app/types'
+import PlanningGrid from '~/components/PlanningGrid.vue'
+import type { PlanningView, Tournament } from '~/app/types'
 
-const props = defineProps<{ tournament: Tournament }>()
+const props = defineProps<{ tournament: Tournament; planning: PlanningView | null }>()
 
 const teams = computed(() => props.tournament.teams ?? [])
+const canGenerate = computed(() => teams.value.length >= 2)
+const planningHref = `/tournaments/${props.tournament.id}/planning`
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('fr-FR', {
@@ -86,11 +89,43 @@ function hhmm(v: string | null) {
       <TeamsManager :tournament-id="tournament.id" :teams="teams" />
     </div>
 
-    <!-- Planning (généré à l'étape suivante) -->
-    <section class="mt-6 rounded-2xl border border-dashed border-sand-7 bg-white p-8 text-center">
-      <p class="text-sand-11">
-        La génération du planning et la saisie des résultats arrivent aux étapes suivantes.
-      </p>
+    <!-- Planning -->
+    <section class="mt-6 rounded-2xl border border-sand-6 bg-white p-6">
+      <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base font-semibold text-sand-12">Planning</h2>
+          <p v-if="planning" class="mt-0.5 text-sm text-sand-11">
+            {{ planning.matchCount }} matchs · {{ planning.roundsCount }} journées ·
+            {{ planning.startTime }}–{{ planning.endTime }}
+          </p>
+        </div>
+        <Link
+          v-if="canGenerate"
+          :href="planningHref"
+          class="shrink-0 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700"
+        >
+          {{ planning ? 'Régénérer le planning' : 'Générer le planning' }}
+        </Link>
+      </div>
+
+      <!-- Planning persisté -->
+      <PlanningGrid v-if="planning" :slots="planning.slots" show-scores />
+
+      <!-- Pas encore de planning -->
+      <div v-else class="rounded-lg border border-dashed border-sand-7 px-4 py-8 text-center">
+        <p v-if="!canGenerate" class="text-sm text-sand-11">
+          Ajoutez au moins 2 équipes pour générer le planning.
+        </p>
+        <template v-else>
+          <p class="text-sm text-sand-11">Aucun planning généré pour l'instant.</p>
+          <Link
+            :href="planningHref"
+            class="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700"
+          >
+            Générer le planning
+          </Link>
+        </template>
+      </div>
     </section>
   </AdminLayout>
 </template>
