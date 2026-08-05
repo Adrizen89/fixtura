@@ -14,6 +14,7 @@ const AuthController = () => import('#controllers/auth_controller')
 const TournamentsController = () => import('#controllers/tournaments_controller')
 const TeamsController = () => import('#controllers/teams_controller')
 const PlanningController = () => import('#controllers/planning_controller')
+const ResultsController = () => import('#controllers/results_controller')
 
 /**
  * Racine → liste des tournois. Si non connecté, le middleware `auth` renverra
@@ -48,5 +49,10 @@ router
     router
       .post('/tournaments/:id/planning', [PlanningController, 'store'])
       .as('tournaments.planning.store')
+    // Saisie des résultats (grille + classement en direct) et mise à jour d'un score.
+    router.get('/tournaments/:id/results', [ResultsController, 'index']).as('tournaments.results')
+    router
+      .patch('/tournaments/:id/matches/:matchId', [ResultsController, 'update'])
+      .as('tournaments.matches.update')
   })
   .use(middleware.auth())
