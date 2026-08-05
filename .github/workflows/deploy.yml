@@ -1,24 +1,66 @@
-name: deploy
+name: Déploiement
 
-# Déploie sur le VPS après une CI verte sur main (ou manuellement).
 on:
-  workflow_run:
-    workflows: ['CI']
-    types: [completed]
+  push:
     branches: [main]
-  workflow_dispatch:
+  pull_request:
 
-# Un seul déploiement à la fois
-concurrency:
-  group: deploy-production
-  cancel-in-progress: false
+# Env commun aux jobs qui démarrent l'app (tests, build).
+# Valeurs factices : les tests unitaires ne se connectent pas à la base.
+env:
+  TZ: UTC
+  HOST: localhost
+  PORT: '3333'
+  LOG_LEVEL: info
+  APP_KEY: 0123456789abcdef0123456789abcdef
+  SESSION_DRIVER: cookie
+  DB_HOST: 127.0.0.1
+  DB_PORT: '5432'
+  DB_USER: fixtura
+  DB_PASSWORD: fixtura
+  DB_DATABASE: fixtura
 
 jobs:
-  deploy:
-    name: Déploiement VPS
+  quality:
+    name: Types et lint
     runs-on: ubuntu-latest
-    # Seulement si la CI a réussi (ou déclenchement manuel)
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    env:
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: node ace test unit
+
+  build:
+    name: Construire l'app
+    needs: quality
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: node ace build
+
+  deploy:
+    name: Migrer et déployer
+    needs: build
+    runs-on: ubuntu-latest
+    # Uniquement sur un push vers main — jamais sur les pull requests.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
     steps:
       - name: Déployer via SSH
         uses: appleboy/ssh-action@v1
