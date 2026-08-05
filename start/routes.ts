@@ -12,6 +12,7 @@ import { middleware } from '#start/kernel'
 
 const AuthController = () => import('#controllers/auth_controller')
 const TournamentsController = () => import('#controllers/tournaments_controller')
+const TeamsController = () => import('#controllers/teams_controller')
 
 /**
  * Racine → liste des tournois. Si non connecté, le middleware `auth` renverra
@@ -37,5 +38,7 @@ router.post('/logout', [AuthController, 'logout']).as('logout').use(middleware.a
 router
   .group(() => {
     router.resource('tournaments', TournamentsController)
+    // Équipes gérées depuis la page du tournoi (ajout / renommage / suppression).
+    router.resource('tournaments.teams', TeamsController).only(['store', 'update', 'destroy'])
   })
   .use(middleware.auth())
