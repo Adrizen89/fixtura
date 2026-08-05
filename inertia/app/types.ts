@@ -63,6 +63,33 @@ export interface PlanningView {
   endTime: string
 }
 
+export interface StandingRow {
+  rank: number
+  teamId: number
+  teamName: string
+  played: number
+  won: number
+  drawn: number
+  lost: number
+  goalsFor: number
+  goalsAgainst: number
+  goalDifference: number
+  points: number
+}
+
+export interface ResultMatchRow {
+  id: number
+  time: string
+  terrainNumber: number
+  homeTeam: string
+  awayTeam: string
+  homeScore: number | null
+  awayScore: number | null
+  status: string
+  updatedBy: string | null
+  updatedAt: string | null
+}
+
 export interface TournamentFormData {
   name: string
   category: string

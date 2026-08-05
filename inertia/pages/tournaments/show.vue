@@ -12,6 +12,7 @@ const props = defineProps<{ tournament: Tournament; planning: PlanningView | nul
 const teams = computed(() => props.tournament.teams ?? [])
 const canGenerate = computed(() => teams.value.length >= 2)
 const planningHref = `/tournaments/${props.tournament.id}/planning`
+const resultsHref = `/tournaments/${props.tournament.id}/results`
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('fr-FR', {
@@ -99,13 +100,26 @@ function hhmm(v: string | null) {
             {{ planning.startTime }}–{{ planning.endTime }}
           </p>
         </div>
-        <Link
-          v-if="canGenerate"
-          :href="planningHref"
-          class="shrink-0 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700"
-        >
-          {{ planning ? 'Régénérer le planning' : 'Générer le planning' }}
-        </Link>
+        <div class="flex shrink-0 items-center gap-2">
+          <Link
+            v-if="planning"
+            :href="resultsHref"
+            class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700"
+          >
+            Saisir les résultats
+          </Link>
+          <Link
+            v-if="canGenerate"
+            :href="planningHref"
+            :class="
+              planning
+                ? 'rounded-lg border border-sand-7 px-4 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12'
+                : 'rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700'
+            "
+          >
+            {{ planning ? 'Régénérer le planning' : 'Générer le planning' }}
+          </Link>
+        </div>
       </div>
 
       <!-- Planning persisté -->
