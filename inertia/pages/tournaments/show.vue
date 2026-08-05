@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { Head, Link } from '@inertiajs/vue3'
 import AdminLayout from '~/layouts/AdminLayout.vue'
 import StatusBadge from '~/components/StatusBadge.vue'
+import TeamsManager from '~/components/TeamsManager.vue'
 import type { Tournament } from '~/app/types'
 
 const props = defineProps<{ tournament: Tournament }>()
@@ -43,7 +44,9 @@ function hhmm(v: string | null) {
           </Link>
         </div>
       </div>
-      <p class="mt-1 text-sand-11">{{ tournament.category }} · {{ formatDate(tournament.eventDate) }}</p>
+      <p class="mt-1 text-sand-11">
+        {{ tournament.category }} · {{ formatDate(tournament.eventDate) }}
+      </p>
     </div>
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -79,19 +82,8 @@ function hhmm(v: string | null) {
         </dl>
       </section>
 
-      <!-- Équipes (gestion à l'étape suivante) -->
-      <section class="rounded-2xl border border-sand-6 bg-white p-6">
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-base font-semibold text-sand-12">Équipes</h2>
-          <span class="text-sm text-sand-11">{{ teams.length }}</span>
-        </div>
-        <ul v-if="teams.length" class="space-y-1 text-sm text-sand-12">
-          <li v-for="team in teams" :key="team.id" class="rounded-md bg-sand-2 px-3 py-1.5">
-            {{ team.name }}
-          </li>
-        </ul>
-        <p v-else class="text-sm text-sand-11">Aucune équipe pour l'instant.</p>
-      </section>
+      <!-- Équipes -->
+      <TeamsManager :tournament-id="tournament.id" :teams="teams" />
     </div>
 
     <!-- Planning (généré à l'étape suivante) -->
