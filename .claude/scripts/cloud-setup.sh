@@ -14,11 +14,15 @@ fi
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
 
 # --- Node 24 (le cloud fournit 20/21/22 ; on l'installe si absent) ---
+# nvm est une FONCTION shell : il faut sourcer nvm.sh avant de l'utiliser.
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+[ -s "$NVM_DIR/nvm.sh" ] || for d in "$HOME/.nvm" /usr/local/share/nvm /usr/local/nvm /opt/nvm /root/.nvm; do
+  [ -s "$d/nvm.sh" ] && export NVM_DIR="$d" && break
+done
 # shellcheck disable=SC1090,SC1091
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-if ! nvm use 24 >/dev/null 2>&1; then
-  nvm install 24 >/dev/null 2>&1 && nvm use 24 >/dev/null 2>&1 || true
+if command -v nvm >/dev/null 2>&1; then
+  nvm use 24 >/dev/null 2>&1 || { nvm install 24 >/dev/null 2>&1 && nvm use 24 >/dev/null 2>&1; } || true
 fi
 
 # --- PostgreSQL (au cas où) + rôle/base de dev (idempotent) ---
