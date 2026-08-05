@@ -54,14 +54,25 @@ const live = computed(() => {
   <Head :title="`Résultats — ${tournament.name}`" />
 
   <AdminLayout>
-    <div class="mb-6">
-      <Link :href="showHref" class="text-sm text-sand-11 hover:text-sand-12">
-        ← {{ tournament.name }}
-      </Link>
-      <h1 class="mt-1 text-2xl font-bold tracking-tight text-sand-12">Saisie des résultats</h1>
-      <p class="mt-1 text-sand-11">
-        Saisissez les scores au fil des matchs — le classement se met à jour aussitôt.
-      </p>
+    <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <Link :href="showHref" class="text-sm text-sand-11 hover:text-sand-12">
+          ← {{ tournament.name }}
+        </Link>
+        <h1 class="mt-1 text-2xl font-bold tracking-tight text-sand-12">Saisie des résultats</h1>
+        <p class="mt-1 text-sand-11">
+          Saisissez les scores au fil des matchs — le classement se met à jour aussitôt.
+        </p>
+      </div>
+      <!-- Lien vers l'écran public (lecture seule) à projeter / partager aux équipes. -->
+      <a
+        :href="`/t/${tournament.publicSlug}`"
+        target="_blank"
+        rel="noopener"
+        class="shrink-0 rounded-lg border border-sand-7 px-3 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
+      >
+        Écran public ↗
+      </a>
     </div>
 
     <!-- Pas de planning : rien à saisir -->
