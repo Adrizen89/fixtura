@@ -59,14 +59,21 @@ function assertValidSchedule(assert: any, params: SchedulerParams, schedule: Sch
     teamsBySlot.set(m.slotIndex, arr)
 
     const terr = terrainsBySlot.get(m.slotIndex) ?? new Set<number>()
-    assert.isFalse(terr.has(m.terrainNumber), `terrain ${m.terrainNumber} utilisé 2x au créneau ${m.slotIndex}`)
+    assert.isFalse(
+      terr.has(m.terrainNumber),
+      `terrain ${m.terrainNumber} utilisé 2x au créneau ${m.slotIndex}`
+    )
     terr.add(m.terrainNumber)
     terrainsBySlot.set(m.slotIndex, terr)
   }
 
   // --- Au plus numTerrains matchs par créneau + pas d'équipe en parallèle ---
   for (const [slot, arr] of teamsBySlot) {
-    assert.isAtMost(arr.length / 2, params.numTerrains, `≤ ${params.numTerrains} matchs au créneau ${slot}`)
+    assert.isAtMost(
+      arr.length / 2,
+      params.numTerrains,
+      `≤ ${params.numTerrains} matchs au créneau ${slot}`
+    )
     assert.equal(new Set(arr).size, arr.length, `aucune équipe en double au créneau ${slot}`)
   }
 
@@ -78,7 +85,10 @@ function assertValidSchedule(assert: any, params: SchedulerParams, schedule: Sch
     const next = teamSetBySlot.get(slot + 1)
     if (!next) continue
     for (const t of cur) {
-      assert.isFalse(next.has(t), `équipe ${t} joue les créneaux consécutifs ${slot} et ${slot + 1}`)
+      assert.isFalse(
+        next.has(t),
+        `équipe ${t} joue les créneaux consécutifs ${slot} et ${slot + 1}`
+      )
     }
   }
 }
@@ -153,7 +163,10 @@ test.group('scheduler · planning complet (contraintes dures)', () => {
 
     const perSlot = new Map<number, number>()
     for (const m of schedule.matches) perSlot.set(m.slotIndex, (perSlot.get(m.slotIndex) ?? 0) + 1)
-    assert.isTrue([...perSlot.values()].some((c) => c > 1), 'au moins un créneau avec 2+ matchs')
+    assert.isTrue(
+      [...perSlot.values()].some((c) => c > 1),
+      'au moins un créneau avec 2+ matchs'
+    )
   })
 })
 

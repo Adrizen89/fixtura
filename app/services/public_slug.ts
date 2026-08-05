@@ -19,6 +19,9 @@ function slugify(input: string): string {
  */
 export function generatePublicSlug(name: string): string {
   const base = slugify(name) || 'tournoi'
-  const suffix = randomBytes(9).toString('base64url').replace(/[^a-zA-Z0-9]/g, '').slice(0, 10)
+  const suffix = randomBytes(9)
+    .toString('base64url')
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .slice(0, 10)
   return `${base}-${suffix}`
 }
