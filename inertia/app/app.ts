@@ -10,7 +10,8 @@ import { resolvePageComponent } from '@adonisjs/inertia/helpers'
 const appName = import.meta.env.VITE_APP_NAME || 'Fixtura'
 
 createInertiaApp({
-  progress: { color: '#5468FF' },
+  // Barre de progression aux couleurs de la marque (vert « terrain »).
+  progress: { color: '#16a34a' },
 
   title: (title) => `${title} - ${appName}`,
 

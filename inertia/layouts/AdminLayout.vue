@@ -14,6 +14,14 @@ function logout() {
 
 <template>
   <div class="min-h-screen bg-sand-2 text-sand-12">
+    <!-- Lien d'évitement : premier élément focusable, visible uniquement au clavier. -->
+    <a
+      href="#content"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:font-semibold focus:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+    >
+      Aller au contenu
+    </a>
+
     <header class="border-b border-sand-6 bg-white">
       <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
         <Link href="/tournaments" class="flex items-center gap-2 font-bold text-sand-12">
@@ -34,8 +42,12 @@ function logout() {
       </div>
     </header>
 
-    <!-- Bannières flash -->
-    <div v-if="flash?.success || flash?.error" class="mx-auto max-w-6xl px-4 pt-4">
+    <!-- Bannières flash (région live pour les lecteurs d'écran). -->
+    <div
+      v-if="flash?.success || flash?.error"
+      class="mx-auto max-w-6xl px-4 pt-4"
+      aria-live="polite"
+    >
       <div
         v-if="flash?.success"
         class="rounded-md border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-primary-800"
@@ -52,7 +64,7 @@ function logout() {
       </div>
     </div>
 
-    <main class="mx-auto max-w-6xl px-4 py-8">
+    <main id="content" class="mx-auto max-w-6xl px-4 py-8">
       <slot />
     </main>
   </div>
