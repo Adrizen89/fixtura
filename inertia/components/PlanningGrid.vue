@@ -16,12 +16,15 @@ function scoreLabel(home: number | null, away: number | null) {
 <template>
   <div class="overflow-x-auto">
     <table class="w-full border-collapse text-sm">
+      <caption class="sr-only">
+        Planning des matchs par créneau horaire, terrain et affiche.
+      </caption>
       <thead>
         <tr class="border-b border-sand-6 text-left text-xs uppercase tracking-wide text-sand-9">
-          <th class="py-2 pr-4 font-medium">Heure</th>
-          <th class="py-2 pr-4 font-medium">Terrain</th>
-          <th class="py-2 pr-4 font-medium">Match</th>
-          <th v-if="showScores" class="py-2 font-medium">Score</th>
+          <th scope="col" class="py-2 pr-4 font-medium">Heure</th>
+          <th scope="col" class="py-2 pr-4 font-medium">Terrain</th>
+          <th scope="col" class="py-2 pr-4 font-medium">Match</th>
+          <th v-if="showScores" scope="col" class="py-2 font-medium">Score</th>
         </tr>
       </thead>
       <tbody>

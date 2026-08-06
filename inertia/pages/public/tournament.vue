@@ -132,16 +132,32 @@ function rowClass(rank: number) {
 
           <div v-if="hasResults" class="overflow-x-auto">
             <table class="w-full border-collapse">
+              <caption class="sr-only">
+                Classement en direct : rang, équipe, matchs joués, gagnés, nuls, perdus, différence
+                de buts et points.
+              </caption>
               <thead>
                 <tr class="border-b-2 border-sand-7 text-left text-xs uppercase tracking-wide text-sand-10 sm:text-sm">
-                  <th class="py-2 pr-2 font-semibold">#</th>
-                  <th class="py-2 pr-3 font-semibold">Équipe</th>
-                  <th class="py-2 px-1.5 text-center font-semibold" title="Joués">J</th>
-                  <th class="hidden py-2 px-1.5 text-center font-semibold sm:table-cell" title="Gagnés">G</th>
-                  <th class="hidden py-2 px-1.5 text-center font-semibold sm:table-cell" title="Nuls">N</th>
-                  <th class="hidden py-2 px-1.5 text-center font-semibold sm:table-cell" title="Perdus">P</th>
-                  <th class="py-2 px-1.5 text-center font-semibold" title="Différence de buts">Diff</th>
-                  <th class="py-2 pl-2 text-center font-bold" title="Points">Pts</th>
+                  <th scope="col" class="py-2 pr-2 font-semibold">#</th>
+                  <th scope="col" class="py-2 pr-3 font-semibold">Équipe</th>
+                  <th scope="col" class="py-2 px-1.5 text-center font-semibold" title="Joués">
+                    J<span class="sr-only"> — matchs joués</span>
+                  </th>
+                  <th scope="col" class="hidden py-2 px-1.5 text-center font-semibold sm:table-cell" title="Gagnés">
+                    G<span class="sr-only"> — gagnés</span>
+                  </th>
+                  <th scope="col" class="hidden py-2 px-1.5 text-center font-semibold sm:table-cell" title="Nuls">
+                    N<span class="sr-only"> — nuls</span>
+                  </th>
+                  <th scope="col" class="hidden py-2 px-1.5 text-center font-semibold sm:table-cell" title="Perdus">
+                    P<span class="sr-only"> — perdus</span>
+                  </th>
+                  <th scope="col" class="py-2 px-1.5 text-center font-semibold" title="Différence de buts">
+                    Diff<span class="sr-only"> — différence de buts</span>
+                  </th>
+                  <th scope="col" class="py-2 pl-2 text-center font-bold" title="Points">
+                    Pts<span class="sr-only"> — points</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -159,7 +175,7 @@ function rowClass(rank: number) {
                       {{ row.rank }}
                     </span>
                   </td>
-                  <td class="py-3 pr-3 font-semibold">{{ row.teamName }}</td>
+                  <th scope="row" class="py-3 pr-3 text-left font-semibold">{{ row.teamName }}</th>
                   <td class="py-3 px-1.5 text-center tabular-nums text-sand-11">{{ row.played }}</td>
                   <td class="hidden py-3 px-1.5 text-center tabular-nums text-sand-11 sm:table-cell">
                     {{ row.won }}
