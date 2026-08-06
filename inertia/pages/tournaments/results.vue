@@ -104,6 +104,7 @@ const live = computed(() => {
                 :key="match.id"
                 :match="match"
                 :tournament-id="tournament.id"
+                :num-terrains="tournament.numTerrains"
               />
             </div>
           </div>

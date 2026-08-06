@@ -72,5 +72,12 @@ router
     router
       .patch('/tournaments/:id/matches/:matchId', [ResultsController, 'update'])
       .as('tournaments.matches.update')
+    // Aléas du jour J : décaler un match, déclarer un forfait (cf. issue #6).
+    router
+      .patch('/tournaments/:id/matches/:matchId/schedule', [ResultsController, 'reschedule'])
+      .as('tournaments.matches.reschedule')
+    router
+      .patch('/tournaments/:id/matches/:matchId/forfeit', [ResultsController, 'forfeit'])
+      .as('tournaments.matches.forfeit')
   })
   .use(middleware.auth())

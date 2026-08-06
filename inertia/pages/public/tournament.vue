@@ -65,6 +65,13 @@ function isFinished(m: ResultMatchRow) {
   return m.homeScore !== null && m.awayScore !== null
 }
 
+/** Nom de l'équipe forfaitaire d'un match, ou null si ce n'est pas un forfait. */
+function forfeitTeamName(m: ResultMatchRow) {
+  if (m.forfeitSide === 'home') return m.homeTeam
+  if (m.forfeitSide === 'away') return m.awayTeam
+  return null
+}
+
 /** Classe de fond du podium (3 premiers) pour la lisibilité de loin. */
 function rowClass(rank: number) {
   if (rank === 1) return 'bg-primary-100'
@@ -191,7 +198,7 @@ function rowClass(rank: number) {
                 <li
                   v-for="m in slot.matches"
                   :key="m.id"
-                  class="flex items-center gap-2 rounded-lg px-3 py-2 text-base sm:text-lg"
+                  class="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg px-3 py-2 text-base sm:text-lg"
                   :class="isFinished(m) ? 'bg-sand-2' : 'bg-sand-1 ring-1 ring-inset ring-sand-4'"
                 >
                   <span class="w-7 shrink-0 text-center text-xs font-medium text-sand-9">
@@ -206,6 +213,12 @@ function rowClass(rank: number) {
                     <template v-else>vs</template>
                   </span>
                   <span class="min-w-0 flex-1 truncate font-medium">{{ m.awayTeam }}</span>
+                  <span
+                    v-if="m.status === 'forfeit'"
+                    class="w-full text-right text-xs font-semibold uppercase tracking-wide text-amber-700"
+                  >
+                    Forfait<span v-if="forfeitTeamName(m)"> — {{ forfeitTeamName(m) }}</span>
+                  </span>
                 </li>
               </ul>
             </div>

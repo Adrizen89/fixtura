@@ -131,7 +131,7 @@ Deux étapes :
 - **Scores toujours corrigeables** (erreur de saisie fréquente le jour J). Historiser `updated_by_user_id` + `updated_at`.
 - **Concurrence** : deux orgas saisissent le même match → « dernier écrit gagne » + affichage de qui a saisi. Pas de verrou complexe en v1.
 - `club_id` présent partout dès maintenant, même avec un seul club.
-- Le **forfait** est un statut de match, pas une suppression : il impacte le classement selon la règle retenue (à confirmer : score forfait type 3-0 ? à documenter au moment du dev).
+- Le **forfait** est un statut de match (`status = 'forfeit'`), pas une suppression. **Règle retenue en v1 (implémentée, issue #6) : défaite 3–0** — l'adversaire gagne 3–0, comptée comme une victoire normale (3 pts). Le score réglementaire est **matérialisé en base** au moment du forfait, si bien que le service de classement (pur, sans notion de forfait) l'intègre naturellement. Reste corrigeable : saisir un score réel termine le match et annule le forfait. Convention isolée dans `app/services/match_incidents.ts` (`FORFEIT_WIN_SCORE` / `FORFEIT_LOSS_SCORE`).
 
 ## 10. Sécurité & RGPD
 
