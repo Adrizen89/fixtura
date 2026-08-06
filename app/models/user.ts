@@ -1,12 +1,23 @@
 import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo, beforeSave } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import Club from '#models/club'
 
 export type UserRole = 'owner' | 'organizer'
+
+/**
+ * Règle unique de normalisation d'email : `trim` + minuscules, points CONSERVÉS.
+ * On ne retire jamais les points (contrairement à `normalizeEmail()` de
+ * validator.js, qui cassait les adresses Gmail « a.b@gmail.com »). Utilisée au
+ * stockage (hook ci-dessous) ; le `loginValidator` applique la même règle côté
+ * connexion, pour une comparaison cohérente et insensible à la casse.
+ */
+export function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase()
+}
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -40,4 +51,15 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @belongsTo(() => Club)
   declare club: BelongsTo<typeof Club>
+
+  /**
+   * Normalise l'email avant chaque écriture (création via seeder, futur
+   * formulaire, mise à jour) : stockage toujours en minuscules, points conservés.
+   */
+  @beforeSave()
+  static async normalizeEmailBeforeSave(user: User) {
+    if (user.email) {
+      user.email = normalizeEmail(user.email)
+    }
+  }
 }
