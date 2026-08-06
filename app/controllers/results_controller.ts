@@ -13,9 +13,9 @@ import { buildResultsData } from '#services/tournament_results'
  * À chaque score, le nouvel état est poussé aux abonnés SSE (temps réel).
  */
 export default class ResultsController {
-  /** Requête scopée au club de l'organisateur connecté (cf. CLAUDE.md §9). */
+  /** Requête scopée au club via le scope réutilisable `Tournament.forClub` (cf. CLAUDE.md §9, §12). */
   private scoped(auth: HttpContext['auth']) {
-    return Tournament.query().where('club_id', auth.user!.clubId)
+    return Tournament.query().withScopes((scopes) => scopes.forClub(auth.user!.clubId))
   }
 
   /** Grille de saisie + classement calculé à la volée. */

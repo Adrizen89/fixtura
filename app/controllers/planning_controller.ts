@@ -10,9 +10,9 @@ import { generateFor, persistSchedule, viewFromSchedule } from '#services/planni
  * La régénération réutilise le même flux et remplace le planning existant.
  */
 export default class PlanningController {
-  /** Requête scopée au club de l'organisateur connecté (cf. CLAUDE.md §9). */
+  /** Requête scopée au club via le scope réutilisable `Tournament.forClub` (cf. CLAUDE.md §9, §12). */
   private scoped(auth: HttpContext['auth']) {
-    return Tournament.query().where('club_id', auth.user!.clubId)
+    return Tournament.query().withScopes((scopes) => scopes.forClub(auth.user!.clubId))
   }
 
   /** Aperçu du planning (sans persistance). */
