@@ -8,11 +8,11 @@ import { viewFromMatches } from '#services/planning'
 
 export default class TournamentsController {
   /**
-   * Requête de base scopée au club de l'organisateur connecté.
-   * (Scoping club_id systématique — cf. CLAUDE.md §9.)
+   * Requête de base scopée au club de l'organisateur connecté, via le scope
+   * réutilisable `Tournament.forClub` (scoping club_id systématique — cf. CLAUDE.md §9, §12).
    */
   private scoped(auth: HttpContext['auth']) {
-    return Tournament.query().where('club_id', auth.user!.clubId)
+    return Tournament.query().withScopes((scopes) => scopes.forClub(auth.user!.clubId))
   }
 
   /** Tableau de bord des tournois du club. */

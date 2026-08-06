@@ -10,12 +10,14 @@ import { teamValidator } from '#validators/team'
  */
 export default class TeamsController {
   /**
-   * Retrouve le tournoi parent, scopé au club de l'organisateur connecté
-   * (scoping `club_id` systématique — cf. CLAUDE.md §9). 404 si hors club.
+   * Retrouve le tournoi parent, scopé au club via le scope réutilisable
+   * `Tournament.forClub` (scoping `club_id` systématique — cf. CLAUDE.md §9, §12).
+   * 404 si hors club. `Team` n'a pas de `club_id` : le cloisonnement passe par ce
+   * tournoi parent, dont l'`id` sert ensuite à filtrer les équipes.
    */
   private findTournament(auth: HttpContext['auth'], tournamentId: number | string) {
     return Tournament.query()
-      .where('club_id', auth.user!.clubId)
+      .withScopes((scopes) => scopes.forClub(auth.user!.clubId))
       .where('id', tournamentId)
       .firstOrFail()
   }
