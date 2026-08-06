@@ -1,10 +1,30 @@
 # CLAUDE.md — Fixtura
 
 > Fichier lu automatiquement par Claude Code à chaque session. Il contient tout le contexte
-> nécessaire pour développer sans re-poser de questions. Cadrage réalisé via le skill
-> `chef-de-projet` (ADBDigital). **Il décrit le projet à construire — rien n'est encore codé.**
+> nécessaire pour développer sans re-poser de questions. Cadrage initial réalisé via le skill
+> `chef-de-projet` (ADBDigital). **Le MVP est désormais construit, testé et déployé en
+> production** — voir l'état d'avancement juste en dessous. Les sections §1–§13 restent la
+> référence d'architecture, de conventions et de contraintes.
 
 ---
+
+## État actuel — MVP livré ✅ (dernière maj : 2026-08-06)
+
+> **Le MVP est construit, testé (46 tests unitaires verts) et déployé en production** sur le
+> VPS Hostinger (`fixtura.fr`), version **0.1.4**. Pipeline CI/CD GitHub Actions (typecheck +
+> lint + tests → build → déploiement SSH automatique sur push `main`) ; versioning via
+> **release-please** (Conventional Commits → tags + CHANGELOG).
+>
+> **Tout le périmètre MVP (§3) est fonctionnel** : CRUD tournois & équipes, génération du
+> planning (module `scheduler` pur, testé), saisie multi-organisateurs + classement en direct
+> (service pur, testé), temps réel **SSE**, écran public `/t/:slug`, gestion des aléas
+> (décalage, forfait _défaite 3–0_, correction de score), scoping `club_id` via le scope
+> réutilisable `Tournament.forClub`, finitions (accessibilité AA, validation FR, fonts
+> self-hostées).
+>
+> Les sections ci-dessous décrivent l'architecture et les conventions **désormais en place** —
+> elles restent la référence. Le **§7** (ordre de développement) est conservé comme
+> **historique** : toutes les étapes sont réalisées.
 
 ## 1. Identité du projet
 
@@ -98,7 +118,10 @@ Deux étapes :
 
 **Tests unitaires obligatoires** couvrant : nombre pair/impair d'équipes, 1 terrain vs plusieurs, contrainte de repos respectée, pause déjeuner, et cas infaisable (doit lever une erreur claire).
 
-## 7. Stratégie de développement (ordre recommandé)
+## 7. Stratégie de développement — réalisée (historique)
+
+> **Toutes les étapes ci-dessous sont livrées.** L'ordre est conservé comme trace du déroulé
+> et repère pour de futures évolutions.
 
 1. Setup : `npm init adonisjs` (starter web + Inertia/Vue), Tailwind, Postgres, config `.env`, git.
 2. Migrations & modèles Lucid : clubs, users, tournaments, teams, matches.
@@ -148,7 +171,7 @@ Deux étapes :
 
 ## 12. Workflow ADBDigital
 
-`chef-de-projet` (✅ fait) → **développement** (cette phase, stack Adonis) → `performance-audit` avant mise en prod → déploiement VPS géré par Adrien.
+`chef-de-projet` (✅) → `développement` (✅ MVP livré, stack Adonis) → **`performance-audit`** (étape recommandée avant d'élargir le périmètre) → déploiement VPS (✅ en place : CI/CD + PM2 + nginx, géré par Adrien).
 Le skill `client-deployer` vise Hostinger **mutualisé** : il ne s'applique pas ici (VPS custom).
 
 ## 13. À NE PAS FAIRE
