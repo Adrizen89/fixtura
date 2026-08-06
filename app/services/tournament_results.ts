@@ -2,6 +2,7 @@ import Match from '#models/match'
 import type Tournament from '#models/tournament'
 import { computeStandings } from '#services/standings'
 import type { StandingRow } from '#services/standings'
+import { forfeitSideOf } from '#services/match_incidents'
 import type { ResultRow } from '#services/realtime'
 
 /**
@@ -24,18 +25,24 @@ export async function buildResultsData(
     .orderBy('scheduled_at')
     .orderBy('terrain_number')
 
-  const rows: ResultRow[] = matches.map((m) => ({
-    id: m.id,
-    time: m.scheduledAt.toUTC().toFormat('HH:mm'),
-    terrainNumber: m.terrainNumber,
-    homeTeam: m.homeTeam.name,
-    awayTeam: m.awayTeam.name,
-    homeScore: m.homeScore,
-    awayScore: m.awayScore,
-    status: m.status,
-    updatedBy: m.updatedByUser ? (m.updatedByUser.fullName ?? m.updatedByUser.email) : null,
-    updatedAt: m.status === 'finished' && m.updatedAt ? m.updatedAt.toISO() : null,
-  }))
+  const rows: ResultRow[] = matches.map((m) => {
+    // Un match « réglé » a un résultat : score saisi (finished) ou forfait.
+    const settled = m.status === 'finished' || m.status === 'forfeit'
+    return {
+      id: m.id,
+      time: m.scheduledAt.toUTC().toFormat('HH:mm'),
+      terrainNumber: m.terrainNumber,
+      homeTeam: m.homeTeam.name,
+      awayTeam: m.awayTeam.name,
+      homeScore: m.homeScore,
+      awayScore: m.awayScore,
+      status: m.status,
+      // Côté forfaitaire (pour marquer l'équipe concernée à l'affichage), ou null.
+      forfeitSide: forfeitSideOf(m.status, m.forfeitTeamId, m.homeTeamId, m.awayTeamId),
+      updatedBy: m.updatedByUser ? (m.updatedByUser.fullName ?? m.updatedByUser.email) : null,
+      updatedAt: settled && m.updatedAt ? m.updatedAt.toISO() : null,
+    }
+  })
 
   const standings = computeStandings(
     tournament.teams.map((t) => ({ id: t.id, name: t.name })),

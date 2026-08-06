@@ -86,6 +86,8 @@ export interface ResultMatchRow {
   homeScore: number | null
   awayScore: number | null
   status: string
+  /** Côté forfaitaire ('home' | 'away') si le match est un forfait, sinon null. */
+  forfeitSide: 'home' | 'away' | null
   updatedBy: string | null
   updatedAt: string | null
 }
