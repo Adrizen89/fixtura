@@ -5,7 +5,9 @@ import type { SchedulerParams, Schedule, ScheduledMatch } from './types.js'
 
 export { SchedulerError, InfeasibleScheduleError } from './errors.js'
 export { generateRoundRobin } from './round_robin.js'
+export { buildKnockout } from './knockout.js'
 export type { SchedulerParams, Schedule, ScheduledMatch, Pairing } from './types.js'
+export type { SlotSource, BracketMatch, Bracket, KnockoutParams } from './types.js'
 
 const TIME_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/
 
