@@ -27,15 +27,17 @@ export const eventValidator = vine.compile(
 /**
  * Ajout d'une catégorie (= un tournoi) à un événement. Une catégorie n'a que son
  * identité propre : nom, libellé de catégorie et format. Les formats supportés dans
- * un événement multi-catégories sont **championnat** et **poules** (round-robin, tous
- * les participants connus) — la cohérence fine (nombre de poules ≤ équipes…) est
- * vérifiée à la génération par le scheduler, qui renvoie une erreur explicite.
+ * un événement multi-catégories sont **championnat**, **poules** et **élimination
+ * directe** — la cohérence fine (nombre de poules ≤ équipes, petite finale
+ * disputable…) est vérifiée à la génération par le scheduler, qui renvoie une erreur
+ * explicite.
  */
 export const eventCategoryValidator = vine.compile(
   vine.object({
     name: vine.string().trim().minLength(1).maxLength(120),
     category: vine.string().trim().minLength(1).maxLength(60),
-    format: vine.enum(['championship', 'pools']),
+    format: vine.enum(['championship', 'pools', 'knockout']),
     numPools: vine.number().min(2).max(64).nullable().optional(),
+    thirdPlace: vine.boolean().optional(),
   })
 )

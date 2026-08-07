@@ -129,8 +129,12 @@ export default class EventsController {
     const event = await this.scoped(auth).where('id', params.id).firstOrFail()
     const data = await request.validateUsing(eventCategoryValidator)
 
-    const formatConfig: TournamentFormatConfig | null =
-      data.format === 'pools' ? { numPools: data.numPools ?? undefined } : null
+    let formatConfig: TournamentFormatConfig | null = null
+    if (data.format === 'pools') {
+      formatConfig = { numPools: data.numPools ?? undefined }
+    } else if (data.format === 'knockout') {
+      formatConfig = { thirdPlace: data.thirdPlace ?? false }
+    }
 
     await Tournament.create({
       clubId: event.clubId,

@@ -201,8 +201,9 @@ export interface EventFormData {
 export interface EventCategoryFormData {
   name: string
   category: string
-  format: 'championship' | 'pools'
+  format: 'championship' | 'pools' | 'knockout'
   numPools: number | null
+  thirdPlace: boolean
 }
 
 export interface TournamentFormData {

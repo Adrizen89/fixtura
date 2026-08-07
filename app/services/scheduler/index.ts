@@ -14,14 +14,10 @@ export type { SlotSource, BracketMatch, Bracket, KnockoutParams } from './types.
 export { splitIntoPools, generatePoolPairings, placePoolMatches, poolLabel } from './pools.js'
 export type { PoolPairing, PlacedPoolMatch, PlacedPoolsResult } from './pools.js'
 
-// Placement inter-catégories sur un pool de terrains partagé (événements v2 — #32).
-export { placeMultiCategory } from './multi_category.js'
-export type {
-  CategoryInput,
-  CategoryPairing,
-  PlacedCategoryMatch,
-  MultiCategoryPlacement,
-} from './multi_category.js'
+// Placement inter-catégories sur un pool de terrains partagé (événements v2 — #32) :
+// solveur de grille unifié (round-robin + élimination directe mélangés).
+export { placeEventGrid } from './event_grid.js'
+export type { EventGridUnit, PlacedEventGridUnit, EventGridPlacement } from './event_grid.js'
 
 const TIME_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/
 
