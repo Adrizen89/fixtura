@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Head, router } from '@inertiajs/vue3'
+import { computed, ref, watch } from 'vue'
+import { Head } from '@inertiajs/vue3'
 import { useLiveTournament } from '~/composables/use_live_tournament'
 import type { ResultMatchRow, StandingRow, TournamentStatus } from '~/app/types'
 
@@ -22,19 +22,36 @@ const props = defineProps<{
 }>()
 
 /**
- * Auto-refresh : à chaque score saisi côté organisateurs, le serveur diffuse sur
- * le canal du tournoi → on recharge scores + classement (événementiel, pas de
- * polling). Sans SSE, la page reste lisible (dégradation gracieuse), simplement
- * figée sur le dernier rendu serveur.
+ * État affiché, initialisé depuis le rendu serveur puis mis à jour en direct par le
+ * payload SSE (scores + classement déjà calculés) — aucun aller-retour serveur par
+ * abonné (cf. audit perf #1). Les props re-seedent l'état sur un nouveau rendu serveur.
  */
-const { state: liveState } = useLiveTournament(props.tournament.publicSlug, () => {
-  router.reload({ only: ['matches', 'standings'], preserveScroll: true })
+const liveMatches = ref<ResultMatchRow[]>(props.matches)
+const liveStandings = ref<StandingRow[]>(props.standings)
+watch(
+  () => props.matches,
+  (v) => (liveMatches.value = v)
+)
+watch(
+  () => props.standings,
+  (v) => (liveStandings.value = v)
+)
+
+/**
+ * Auto-refresh : à chaque score/forfait/décalage, le serveur diffuse le nouvel état
+ * sur le canal du tournoi → on l'applique directement (pas de polling, pas de
+ * rechargement). Sans SSE, la page reste lisible (dégradation gracieuse), figée sur
+ * le dernier rendu serveur.
+ */
+const { state: liveState } = useLiveTournament(props.tournament.publicSlug, (update) => {
+  liveMatches.value = update.matches
+  liveStandings.value = update.standings
 })
 
 /** Matchs regroupés par créneau horaire. */
 const slots = computed(() => {
   const byTime = new Map<string, ResultMatchRow[]>()
-  for (const m of props.matches) {
+  for (const m of liveMatches.value) {
     const bucket = byTime.get(m.time) ?? []
     bucket.push(m)
     byTime.set(m.time, bucket)
@@ -42,7 +59,7 @@ const slots = computed(() => {
   return [...byTime.entries()].map(([time, matches]) => ({ time, matches }))
 })
 
-const hasResults = computed(() => props.standings.some((r) => r.played > 0))
+const hasResults = computed(() => liveStandings.value.some((r) => r.played > 0))
 
 const statusLabel: Record<TournamentStatus, string> = {
   draft: 'À venir',
@@ -162,7 +179,7 @@ function rowClass(rank: number) {
               </thead>
               <tbody>
                 <tr
-                  v-for="row in standings"
+                  v-for="row in liveStandings"
                   :key="row.teamId"
                   class="border-b border-sand-5 text-base sm:text-lg"
                   :class="rowClass(row.rank)"

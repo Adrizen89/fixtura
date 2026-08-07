@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Head, Link, router } from '@inertiajs/vue3'
+import { computed, ref, watch } from 'vue'
+import { Head, Link } from '@inertiajs/vue3'
 import AdminLayout from '~/layouts/AdminLayout.vue'
 import StandingsTable from '~/components/StandingsTable.vue'
 import MatchScoreRow from '~/components/MatchScoreRow.vue'
@@ -15,10 +15,28 @@ const props = defineProps<{
 
 const showHref = `/tournaments/${props.tournament.id}`
 
+/**
+ * État affiché, initialisé depuis le rendu serveur puis mis à jour :
+ *  - en direct par le payload SSE (scores + classement déjà calculés) — aucun
+ *    aller-retour serveur par abonné (cf. audit perf #1) ;
+ *  - par les props quand le serveur renvoie un nouveau rendu (navigation, ou score
+ *    saisi par l'organisateur courant → redirection Inertia).
+ */
+const liveMatches = ref<ResultMatchRow[]>(props.matches)
+const liveStandings = ref<StandingRow[]>(props.standings)
+watch(
+  () => props.matches,
+  (v) => (liveMatches.value = v)
+)
+watch(
+  () => props.standings,
+  (v) => (liveStandings.value = v)
+)
+
 /** Regroupe les matchs par créneau horaire pour la grille. */
 const slots = computed(() => {
   const byTime = new Map<string, ResultMatchRow[]>()
-  for (const m of props.matches) {
+  for (const m of liveMatches.value) {
     const bucket = byTime.get(m.time) ?? []
     bucket.push(m)
     byTime.set(m.time, bucket)
@@ -26,16 +44,18 @@ const slots = computed(() => {
   return [...byTime.entries()].map(([time, matches]) => ({ time, matches }))
 })
 
-const hasResults = computed(() => props.standings.some((r) => r.played > 0))
+const hasResults = computed(() => liveStandings.value.some((r) => r.played > 0))
 
 /**
- * Temps réel : dès qu'un organisateur enregistre un score, on recharge scores +
- * classement depuis le serveur (événementiel, pas de polling). preserveState
- * conserve la saisie en cours de l'utilisateur. Sans SSE, la page reste
- * fonctionnelle (dégradation gracieuse) — seul le rafraîchissement auto est perdu.
+ * Temps réel : à chaque maj poussée par le serveur (score, forfait, décalage), on
+ * applique directement le payload SSE — pas de rechargement, donc pas d'aller-retour
+ * serveur par abonné. Sans SSE, la page reste fonctionnelle (dégradation gracieuse) :
+ * seul le rafraîchissement auto est perdu. La saisie en cours est protégée par le
+ * garde `isDirty` de chaque ligne (MatchScoreRow).
  */
-const { state: liveState } = useLiveTournament(props.tournament.publicSlug, () => {
-  router.reload({ only: ['matches', 'standings'], preserveScroll: true, preserveState: true })
+const { state: liveState } = useLiveTournament(props.tournament.publicSlug, (update) => {
+  liveMatches.value = update.matches
+  liveStandings.value = update.standings
 })
 
 const live = computed(() => {
@@ -77,7 +97,7 @@ const live = computed(() => {
 
     <!-- Pas de planning : rien à saisir -->
     <div
-      v-if="matches.length === 0"
+      v-if="liveMatches.length === 0"
       class="rounded-2xl border border-dashed border-sand-7 bg-white p-12 text-center"
     >
       <p class="text-sand-11">Aucun match : générez d'abord le planning.</p>
@@ -131,7 +151,7 @@ const live = computed(() => {
             {{ live.label }}
           </span>
         </div>
-        <StandingsTable v-if="hasResults" :standings="standings" />
+        <StandingsTable v-if="hasResults" :standings="liveStandings" />
         <p v-else class="rounded-md bg-sand-2 px-3 py-4 text-center text-sm text-sand-11">
           Le classement s'affichera dès le premier score saisi.
         </p>
