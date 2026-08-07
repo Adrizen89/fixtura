@@ -132,4 +132,6 @@ router
       .get('/tournaments/:id/export/standings', [ExportController, 'standings'])
       .as('tournaments.export.standings')
   })
-  .use(middleware.auth())
+  // `auth` charge l'utilisateur, puis `tenant` ouvre le contexte du club courant
+  // (scope global automatique — cf. issue #34). L'ordre est important.
+  .use([middleware.auth(), middleware.tenant()])

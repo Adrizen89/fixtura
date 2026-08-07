@@ -76,13 +76,13 @@ Un club de foot organise plusieurs tournois par an, aujourd'hui gérés dans un 
 
 ## 5. Architecture & modèle de données
 
-Multi-tenant-ready : une colonne `club_id` sur les entités racines **dès le jour 1**, même avec un seul club en base. Ouvrir à d'autres clubs plus tard = ajouter la gestion d'orgs + un scope global, **sans migration douloureuse**.
+Multi-tenant-ready : une colonne `club_id` sur les entités racines **dès le jour 1**, même avec un seul club en base. **Fondation multi-club posée en v2 (issue #34)** : scope global automatique sur `club_id` (`TenantContext` + mixin `withTenantScope`), rôles + policies, contexte du club courant. Il ne reste, pour ouvrir réellement à des clubs tiers, que l'onboarding (inscription de clubs) et l'éventuelle sélection de club multi-adhésion — **sans migration douloureuse**.
 
 Modèle (tables pluriel snake_case / modèles Lucid singulier PascalCase) :
 
 - **clubs** `(id, name, slug, created_at, updated_at)` — racine multi-tenant, **1 seule ligne en v1**.
-- **users** `(id, club_id, full_name, email, password, role[owner|organizer], created_at, updated_at)` — les organisateurs. Se connectent pour saisir.
-- **events** `(id, club_id, name, event_date, start_time, match_duration_min, break_duration_min, lunch_start, lunch_duration_min, num_terrains, status[draft|scheduled|live|finished], public_slug, created_at, updated_at)` — **v2 (#32)** : un événement regroupe plusieurs catégories (tournois) le même jour sur un **pool de terrains partagé** ; il porte les paramètres **communs** (date, rythme, terrains). Scope `Event.forClub` (aligné sur `Tournament.forClub`). Écran public `/e/:public_slug`.
+- **users** `(id, club_id, full_name, email, password, role[owner|organizer], created_at, updated_at)` — les organisateurs. Se connectent pour saisir. Rôle exposé via `User.isOwner` (policies).
+- **events** `(id, club_id, name, event_date, start_time, match_duration_min, break_duration_min, lunch_start, lunch_duration_min, num_terrains, status[draft|scheduled|live|finished], public_slug, created_at, updated_at)` — **v2 (#32)** : un événement regroupe plusieurs catégories (tournois) le même jour sur un **pool de terrains partagé** ; il porte les paramètres **communs** (date, rythme, terrains). Cloisonnement par club **automatique** (mixin `withTenantScope`, issue #34) ; scope nommé `Event.forClub` conservé pour les usages hors requête. Écran public `/e/:public_slug`.
 - **tournaments** `(id, club_id, event_id?, name, category, event_date, start_time, match_duration_min, break_duration_min, lunch_start, lunch_duration_min, num_terrains, status[draft|scheduled|live|finished], public_slug, format, format_config, created_at, updated_at)`. `event_id` **nullable** (v2 #32) : un tournoi autonome (v1) n'a pas d'événement ; une catégorie d'un événement le référence (le pool de terrains + le rythme viennent alors de l'événement). La migration a rétro-converti chaque tournoi v1 en **un événement à une catégorie**.
 - **teams** `(id, tournament_id, name, created_at, updated_at)` — nom uniquement.
 - **matches** `(id, tournament_id, round_number, terrain_number, scheduled_at, home_team_id, away_team_id, home_score, away_score, status[scheduled|live|finished|forfeit], forfeit_team_id?, updated_by_user_id, created_at, updated_at)`.
@@ -155,6 +155,20 @@ Deux étapes :
 - **Scores toujours corrigeables** (erreur de saisie fréquente le jour J). Historiser `updated_by_user_id` + `updated_at`.
 - **Concurrence** : deux orgas saisissent le même match → « dernier écrit gagne » + affichage de qui a saisi. Pas de verrou complexe en v1.
 - `club_id` présent partout dès maintenant, même avec un seul club.
+- **Cloisonnement par club automatique (issue #34)** : le club courant est porté par
+  `TenantContext` (AsyncLocalStorage), ouvert par le `tenant_middleware` juste après
+  `auth`. Le mixin `withTenantScope` (sur `Tournament` et `Event`) filtre alors
+  **toute lecture** sur `club_id` — les contrôleurs n'appliquent **plus** `forClub`
+  (un tournoi/événement d'un autre club → liste filtrée, `firstOrFail` → 404). Hors
+  requête (CLI `club:export`/`club:delete`, seeders, fixtures de test) aucun club
+  courant → pas de filtre : les scopes nommés `forClub` restent utilisés là où l'on
+  cible un club **explicite** (`app/services/club_data.ts`). Les écritures fixent
+  toujours `club_id` explicitement à partir de l'utilisateur connecté.
+- **Rôles & autorisations (issue #34)** : rôles `owner` / `organizer` consolidés
+  (`app/models/user.ts`) ; les policies (`app/policies/*`) gardent les actions
+  destructrices/de gestion du club au responsable (`owner`) : suppression d'un
+  tournoi/événement/catégorie, export RGPD. Le club courant est exposé aux pages
+  Inertia (`currentClub`) et affiché dans l'en-tête admin.
 - Le **forfait** est un statut de match (`status = 'forfeit'`), pas une suppression. **Règle retenue en v1 (implémentée, issue #6) : défaite 3–0** — l'adversaire gagne 3–0, comptée comme une victoire normale (3 pts). Le score réglementaire est **matérialisé en base** au moment du forfait, si bien que le service de classement (pur, sans notion de forfait) l'intègre naturellement. Reste corrigeable : saisir un score réel termine le match et annule le forfait. Convention isolée dans `app/services/match_incidents.ts` (`FORFEIT_WIN_SCORE` / `FORFEIT_LOSS_SCORE`).
 
 ## 10. Sécurité & RGPD
@@ -185,7 +199,7 @@ Le skill `client-deployer` vise Hostinger **mutualisé** : il ne s'applique pas 
 
 ## 13. À NE PAS FAIRE
 
-- ❌ Coder la gestion multi-club / l'inscription de clubs en v1 (juste la colonne `club_id`).
+- ❌ ~~Coder la gestion multi-club / l'inscription de clubs en v1 (juste la colonne `club_id`).~~ **v1 : tenu.** La **fondation** multi-club (scope global, rôles/policies, contexte club) est faite en **v2 (issue #34)**. Reste hors périmètre tant que non demandé : **inscription/onboarding de clubs** et **UI de sélection de club** (multi-adhésion d'un utilisateur).
 - ❌ Retomber sur du polling : on a le VPS → **SSE via transmit**.
 - ❌ Ajouter une lib UI lourde (rester Tailwind + composants maison).
 - ❌ Stocker le classement en base (calcul à la volée dans un service).

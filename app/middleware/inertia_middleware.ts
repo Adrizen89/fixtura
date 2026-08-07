@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
 import BaseInertiaMiddleware from '@adonisjs/inertia/inertia_middleware'
+import Club from '#models/club'
 
 /**
  * Middleware Inertia (AdonisJS 7 / Inertia v4).
@@ -13,6 +14,12 @@ import BaseInertiaMiddleware from '@adonisjs/inertia/inertia_middleware'
  */
 export default class InertiaMiddleware extends BaseInertiaMiddleware {
   async share(ctx: HttpContext) {
+    const user = ctx.auth?.user
+    // Club courant (contexte multi-tenant — issue #34) : exposé à toutes les pages
+    // pour afficher le club actif dans l'en-tête. Chargé une fois par requête
+    // authentifiée (recherche par clé primaire, négligeable).
+    const club = user ? await Club.find(user.clubId) : null
+
     return {
       /**
        * Erreurs de validation (bag `inputErrorsBag`) formatées pour Inertia —
@@ -25,13 +32,22 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
        * rechargements partiels (uniquement quand il y a un utilisateur : en v4,
        * `always(null)` n'est pas sérialisable). Peuplé par le middleware silent_auth.
        */
-      auth: ctx.auth?.user
+      auth: user
         ? ctx.inertia.always({
-            id: ctx.auth.user.id,
-            fullName: ctx.auth.user.fullName,
-            email: ctx.auth.user.email,
-            role: ctx.auth.user.role,
+            id: user.id,
+            fullName: user.fullName,
+            email: user.email,
+            role: user.role,
           })
+        : null,
+
+      /**
+       * Club courant de l'utilisateur connecté (contexte multi-tenant, issue #34).
+       * Présent aussi lors des rechargements partiels (`always`), uniquement quand
+       * il existe (`always(null)` n'est pas sérialisable en v4).
+       */
+      currentClub: club
+        ? ctx.inertia.always({ id: club.id, name: club.name, slug: club.slug })
         : null,
 
       /**

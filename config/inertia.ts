@@ -35,6 +35,12 @@ declare module '@adonisjs/inertia/types' {
       email: string
       role: 'owner' | 'organizer'
     } | null
+    /** Club courant (contexte multi-tenant — issue #34). */
+    currentClub: {
+      id: number
+      name: string
+      slug: string
+    } | null
     flash: {
       success: string | null
       error: string | null

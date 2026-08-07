@@ -1,10 +1,12 @@
 import { DateTime } from 'luxon'
+import { compose } from '@adonisjs/core/helpers'
 import { BaseModel, column, belongsTo, hasMany, scope } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Club from '#models/club'
 import Event from '#models/event'
 import Team from '#models/team'
 import Match from '#models/match'
+import { withTenantScope } from '#models/concerns/tenant_scoped'
 
 export type TournamentStatus = 'draft' | 'scheduled' | 'live' | 'finished'
 
@@ -18,16 +20,20 @@ export interface TournamentFormatConfig {
   thirdPlace?: boolean
 }
 
-export default class Tournament extends BaseModel {
+export default class Tournament extends compose(BaseModel, withTenantScope()) {
   /**
-   * Scope `club_id` global et réutilisable (multi-tenant — cf. CLAUDE.md §5, §9, §12).
+   * Cloisonnement par club (multi-tenant — cf. CLAUDE.md §5, §9, §12).
    *
-   * Source unique de vérité du cloisonnement par club : tous les contrôleurs admin
-   * l'appliquent via `Tournament.query().withScopes((s) => s.forClub(clubId))` plutôt
-   * que de répéter `where('club_id', …)`. `Tournament` est la seule racine portant
-   * `club_id` ; `Team` et `Match` n'en ont pas et ne sont atteints qu'à travers un
-   * tournoi déjà scopé (leur `tournament_id` provient toujours d'un tournoi filtré ici),
-   * ce qui garantit le cloisonnement de bout en bout sans colonne `club_id` dupliquée.
+   * Depuis l'issue #34, le filtrage sur `club_id` est **automatique** : le mixin
+   * `withTenantScope` applique le club courant (`TenantContext`) à toute lecture, si
+   * bien que les contrôleurs n'ont plus à appeler `forClub`. `Tournament` est la
+   * seule racine (avec `Event`) portant `club_id` ; `Team` et `Match` n'en ont pas
+   * et ne sont atteints qu'à travers un tournoi déjà filtré, ce qui garantit le
+   * cloisonnement de bout en bout sans colonne `club_id` dupliquée.
+   *
+   * Le scope nommé `forClub` reste disponible pour les usages **hors requête** (CLI
+   * `club:export` / `club:delete`, services), où aucun club courant n'est défini et
+   * où l'on cible un club explicite.
    */
   static forClub = scope((query, clubId: number) => {
     query.where('club_id', clubId)
