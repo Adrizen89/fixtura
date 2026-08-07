@@ -93,6 +93,9 @@ export interface ResultMatchRow {
   terrainNumber: number
   homeTeam: string
   awayTeam: string
+  /** Id des équipes (null si participant différé). Sert au suivi d'équipe (#39). */
+  homeTeamId: number | null
+  awayTeamId: number | null
   homeScore: number | null
   awayScore: number | null
   status: string

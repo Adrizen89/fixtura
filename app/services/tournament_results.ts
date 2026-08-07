@@ -77,6 +77,8 @@ export async function buildResultsData(
       terrainNumber: m.terrainNumber,
       homeTeam: participantLabel(m, 'home', byId),
       awayTeam: participantLabel(m, 'away', byId),
+      homeTeamId: m.homeTeamId,
+      awayTeamId: m.awayTeamId,
       homeScore: m.homeScore,
       awayScore: m.awayScore,
       status: m.status,

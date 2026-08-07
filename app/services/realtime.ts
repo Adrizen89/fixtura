@@ -24,6 +24,10 @@ export type ResultRow = {
   terrainNumber: number
   homeTeam: string
   awayTeam: string
+  // Id des équipes (null si le participant est encore différé — slot de bracket non
+  // résolu). Permet à l'écran public de suivre une équipe de façon fiable (issue #39).
+  homeTeamId: number | null
+  awayTeamId: number | null
   homeScore: number | null
   awayScore: number | null
   status: string

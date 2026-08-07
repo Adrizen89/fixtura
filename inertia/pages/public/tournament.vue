@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { Head } from '@inertiajs/vue3'
 import Bracket from '~/components/Bracket.vue'
 import PoolStandings from '~/components/PoolStandings.vue'
+import TeamFollow from '~/components/TeamFollow.vue'
 import { useLiveTournament } from '~/composables/use_live_tournament'
 import type {
   ResultMatchRow,
@@ -85,6 +86,15 @@ const slots = computed(() => {
 
 const hasResults = computed(() => liveStandings.value.some((r) => r.played > 0))
 
+/**
+ * Liste des équipes du tournoi (id + nom), pour le sélecteur de suivi d'équipe (#39).
+ * Le classement global inclut **toutes** les équipes (même à 0 match), quel que soit
+ * le format — c'est donc la source fiable pour peupler le sélecteur.
+ */
+const allTeams = computed(() =>
+  liveStandings.value.map((r) => ({ id: r.teamId, name: r.teamName }))
+)
+
 const statusLabel: Record<TournamentStatus, string> = {
   draft: 'À venir',
   scheduled: 'À venir',
@@ -166,6 +176,14 @@ function rowClass(rank: number) {
           </div>
         </div>
       </header>
+
+      <!-- Suivi d'équipe : prochain match + alertes en direct (#39) -->
+      <TeamFollow
+        v-if="allTeams.length"
+        :public-slug="tournament.publicSlug"
+        :teams="allTeams"
+        :matches="liveMatches"
+      />
 
       <!-- Tableau d'élimination (pleine largeur, mis en avant pour l'affichage TV) -->
       <section v-if="showBracket" class="mb-8">
