@@ -16,6 +16,7 @@ const TournamentsController = () => import('#controllers/tournaments_controller'
 const TeamsController = () => import('#controllers/teams_controller')
 const PlanningController = () => import('#controllers/planning_controller')
 const ResultsController = () => import('#controllers/results_controller')
+const ExportController = () => import('#controllers/export_controller')
 const PublicController = () => import('#controllers/public_controller')
 const LegalController = () => import('#controllers/legal_controller')
 const AccountController = () => import('#controllers/account_controller')
@@ -92,5 +93,16 @@ router
     router
       .patch('/tournaments/:id/matches/:matchId/forfeit', [ResultsController, 'forfeit'])
       .as('tournaments.matches.forfeit')
+    // Export / impression PDF (jour J) : planning, feuilles de match, classement
+    // (cf. issue #38). Documents Edge autonomes → impression native « Enregistrer en PDF ».
+    router
+      .get('/tournaments/:id/export/planning', [ExportController, 'planning'])
+      .as('tournaments.export.planning')
+    router
+      .get('/tournaments/:id/export/match-sheets', [ExportController, 'matchSheets'])
+      .as('tournaments.export.matchSheets')
+    router
+      .get('/tournaments/:id/export/standings', [ExportController, 'standings'])
+      .as('tournaments.export.standings')
   })
   .use(middleware.auth())

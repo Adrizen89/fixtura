@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }}</title>
+  @include('exports/partials/styles')
+</head>
+
+<body>
+  @include('exports/partials/toolbar')
+
+  <main class="page">
+    <header class="doc-head">
+      <div>
+        <h1>{{ header.name }}</h1>
+        <div class="doc-sub">{{ header.category }} · {{ header.eventDate }}</div>
+      </div>
+      <div class="doc-meta">
+        <div class="doc-title">Feuilles de match</div>
+        <div style="margin-top:.4rem">{{ sheets.length }} feuille(s)</div>
+      </div>
+    </header>
+
+    @if(sheets.length === 0)
+      <div class="empty">Aucun match planifié.</div>
+    @else
+      <div class="sheets">
+        @each(sheet in sheets)
+          <section class="sheet">
+            <div class="sheet__head">
+              <span class="sheet__phase">{{ sheet.phaseLabel }}</span>
+              <span class="sheet__when">
+                <span class="terrain">Terrain {{ sheet.terrainNumber }}</span>
+                <span class="sheet__time">{{ sheet.time }}</span>
+              </span>
+            </div>
+
+            <div class="sheet__teams">
+              <span class="sheet__team sheet__team--home">{{ sheet.homeTeam }}</span>
+              <span class="score-box" aria-hidden="true"></span>
+              <span class="score-sep">–</span>
+              <span class="score-box" aria-hidden="true"></span>
+              <span class="sheet__team sheet__team--away">{{ sheet.awayTeam }}</span>
+            </div>
+
+            <div class="sheet__foot">
+              <span>Vainqueur :</span>
+              <span>Signature organisateur :</span>
+            </div>
+          </section>
+        @end
+      </div>
+    @end
+  </main>
+</body>
+
+</html>

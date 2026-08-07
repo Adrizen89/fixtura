@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }}</title>
+  @include('exports/partials/styles')
+</head>
+
+<body>
+  @include('exports/partials/toolbar')
+
+  <main class="page">
+    <header class="doc-head">
+      <div>
+        <h1>{{ header.name }}</h1>
+        <div class="doc-sub">{{ header.category }} · {{ header.eventDate }}</div>
+      </div>
+      <div class="doc-meta">
+        <div class="doc-title">Planning</div>
+        <div style="margin-top:.4rem">
+          {{ header.formatLabel }} · {{ header.numTerrains }} terrain(s)<br>
+          {{ planning.matchCount }} matchs · {{ planning.roundsCount }} journées<br>
+          {{ planning.startTime }}–{{ planning.endTime }}
+        </div>
+      </div>
+    </header>
+
+    @if(planning.slots.length === 0)
+      <div class="empty">Aucun match planifié.</div>
+    @else
+      <table>
+        <caption class="sr-only">Planning des matchs par créneau horaire, terrain et affiche.</caption>
+        <thead>
+          <tr>
+            <th style="width:5rem">Heure</th>
+            <th style="width:5rem">Terrain</th>
+            <th>Match</th>
+            <th style="width:6rem" class="center">Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          @each(slot in planning.slots)
+            @each((match, index) in slot.matches)
+              <tr>
+                <td class="tnum strong">{{ index === 0 ? slot.time : '' }}</td>
+                <td><span class="terrain">T{{ match.terrainNumber }}</span></td>
+                <td>
+                  <span class="strong">{{ match.homeTeam }}</span>
+                  <span class="vs">vs</span>
+                  <span class="strong">{{ match.awayTeam }}</span>
+                </td>
+                <td class="center tnum">
+                  @if(match.homeScore !== null && match.awayScore !== null)
+                    {{ match.homeScore }} – {{ match.awayScore }}
+                  @else
+                    —
+                  @end
+                </td>
+              </tr>
+            @end
+          @end
+        </tbody>
+      </table>
+    @end
+  </main>
+</body>
+
+</html>

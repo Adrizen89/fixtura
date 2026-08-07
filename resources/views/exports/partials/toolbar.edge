@@ -1,0 +1,13 @@
+{{--
+  Barre d'actions affichée à l'écran uniquement (classe `no-print`). Elle porte
+  le bouton d'impression / export PDF (impression native du navigateur → « Enregistrer
+  en PDF ») et un retour vers le tournoi. Variables attendues dans la portée :
+  `backHref` (lien retour). CSP désactivée (config/shield.ts) → `onclick` inline OK.
+--}}
+<div class="toolbar no-print">
+  <span class="toolbar__hint">Utilisez « Imprimer » puis « Enregistrer en PDF » pour exporter.</span>
+  <div class="toolbar__actions">
+    <a class="btn btn--ghost" href="{{ backHref }}">← Retour</a>
+    <button type="button" class="btn btn--solid" onclick="window.print()">Imprimer / PDF</button>
+  </div>
+</div>

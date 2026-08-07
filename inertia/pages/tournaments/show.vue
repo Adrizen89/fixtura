@@ -13,6 +13,9 @@ const teams = computed(() => props.tournament.teams ?? [])
 const canGenerate = computed(() => teams.value.length >= 2)
 const planningHref = `/tournaments/${props.tournament.id}/planning`
 const resultsHref = `/tournaments/${props.tournament.id}/results`
+// Exports imprimables (issue #38) — pages autonomes, ouvertes dans un nouvel onglet.
+const planningPdfHref = `/tournaments/${props.tournament.id}/export/planning`
+const matchSheetsPdfHref = `/tournaments/${props.tournament.id}/export/match-sheets`
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('fr-FR', {
@@ -120,6 +123,30 @@ function hhmm(v: string | null) {
             {{ planning ? 'Régénérer le planning' : 'Générer le planning' }}
           </Link>
         </div>
+      </div>
+
+      <!-- Exports imprimables (jour J) : planning + feuilles de match. -->
+      <div
+        v-if="planning"
+        class="mb-4 flex flex-wrap items-center gap-2 border-b border-sand-4 pb-4"
+      >
+        <span class="mr-1 text-xs font-semibold uppercase tracking-wide text-sand-9">Imprimer</span>
+        <a
+          :href="planningPdfHref"
+          target="_blank"
+          rel="noopener"
+          class="rounded-lg border border-sand-7 px-3 py-1.5 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
+        >
+          Planning (PDF) ↗
+        </a>
+        <a
+          :href="matchSheetsPdfHref"
+          target="_blank"
+          rel="noopener"
+          class="rounded-lg border border-sand-7 px-3 py-1.5 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
+        >
+          Feuilles de match (PDF) ↗
+        </a>
       </div>
 
       <!-- Planning persisté -->

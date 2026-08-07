@@ -1,0 +1,37 @@
+{{--
+  Table de classement réutilisable (classement global ou d'une poule). Attend `rows`
+  (StandingRow[]) dans l'état passé via `@component`. Abréviations : J joués, G gagnés,
+  N nuls, P perdus, BP buts pour, BC buts contre, Diff différence, Pts points.
+--}}
+<table>
+  <thead>
+    <tr>
+      <th style="width:2.5rem">#</th>
+      <th>Équipe</th>
+      <th class="center" title="Joués">J</th>
+      <th class="center" title="Gagnés">G</th>
+      <th class="center" title="Nuls">N</th>
+      <th class="center" title="Perdus">P</th>
+      <th class="center" title="Buts pour">BP</th>
+      <th class="center" title="Buts contre">BC</th>
+      <th class="center" title="Différence de buts">Diff</th>
+      <th class="center" title="Points">Pts</th>
+    </tr>
+  </thead>
+  <tbody>
+    @each(row in rows)
+      <tr>
+        <td class="tnum">{{ row.rank }}</td>
+        <td class="strong">{{ row.teamName }}</td>
+        <td class="center tnum">{{ row.played }}</td>
+        <td class="center tnum">{{ row.won }}</td>
+        <td class="center tnum">{{ row.drawn }}</td>
+        <td class="center tnum">{{ row.lost }}</td>
+        <td class="center tnum">{{ row.goalsFor }}</td>
+        <td class="center tnum">{{ row.goalsAgainst }}</td>
+        <td class="center tnum">{{ row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference }}</td>
+        <td class="center tnum strong">{{ row.points }}</td>
+      </tr>
+    @end
+  </tbody>
+</table>
