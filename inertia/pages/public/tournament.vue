@@ -330,8 +330,20 @@ function rowClass(rank: number) {
         </section>
       </div>
 
-      <footer class="mt-10 border-t border-sand-6 pt-4 text-center text-xs text-sand-9">
-        Fixtura · résultats en direct
+      <footer
+        class="mt-10 flex flex-col items-center gap-2 border-t border-sand-6 pt-4 text-center text-xs text-sand-9"
+      >
+        <span>Fixtura · résultats en direct</span>
+        <nav
+          aria-label="Liens légaux"
+          class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1"
+        >
+          <a href="/mentions-legales" class="hover:text-sand-12 hover:underline"
+            >Mentions légales</a
+          >
+          <a href="/cgu" class="hover:text-sand-12 hover:underline">CGU</a>
+          <a href="/confidentialite" class="hover:text-sand-12 hover:underline">Confidentialité</a>
+        </nav>
       </footer>
     </div>
   </div>

@@ -160,8 +160,15 @@ Deux étapes :
 
 - Auth session Adonis, mots de passe hashés (scrypt par défaut). Pas de secret en dur, tout en `.env`.
 - Écran public strictement **lecture seule**, accessible par `public_slug` non devinable.
-- Données minimales (nom d'équipe, email organisateur) → RGPD léger, mais prévoir mentions/CGU si ouverture publique du produit.
+- Données minimales (nom d'équipe, email organisateur) → RGPD léger.
 - Fonts self-hostées (woff2), pas de CDN tiers traçant.
+- **Conformité RGPD implémentée (issue #36)** : pages publiques `/mentions-legales`,
+  `/cgu`, `/confidentialite` ; mention de consentement à la connexion ; portabilité
+  (export JSON du club en libre-service pour l'`owner` via `/compte/export`, ou CLI
+  `node ace club:export`) et effacement (`node ace club:delete`) — logique isolée
+  dans `app/services/club_data.ts`. Registre + procédures : **`docs/rgpd.md`**.
+  Confirmé : **aucune ressource tierce traçante** (fonts self-hostées, ni analytics
+  ni CDN externe ; cookies strictement nécessaires session + anti-CSRF).
 
 ## 11. Déploiement
 
