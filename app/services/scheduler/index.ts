@@ -9,6 +9,11 @@ export { buildKnockout } from './knockout.js'
 export type { SchedulerParams, Schedule, ScheduledMatch, Pairing } from './types.js'
 export type { SlotSource, BracketMatch, Bracket, KnockoutParams } from './types.js'
 
+// Phase de poules (formats v2 — cf. issue #43 / #31). Moteur pur, réutilise le
+// round-robin et le solveur de placement existants.
+export { splitIntoPools, generatePoolPairings, placePoolMatches, poolLabel } from './pools.js'
+export type { PoolPairing, PlacedPoolMatch, PlacedPoolsResult } from './pools.js'
+
 const TIME_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/
 
 function parseTimeToMinutes(t: string): number {
