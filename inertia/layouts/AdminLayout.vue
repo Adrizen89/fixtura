@@ -25,10 +25,20 @@ function logout() {
 
     <header class="border-b border-sand-6 bg-white">
       <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-        <Link href="/tournaments" class="flex items-center gap-2 font-bold text-sand-12">
-          <span class="grid h-8 w-8 place-items-center rounded-lg bg-primary text-white">F</span>
-          <span class="text-lg tracking-tight">Fixtura</span>
-        </Link>
+        <div class="flex items-center gap-6">
+          <Link href="/tournaments" class="flex items-center gap-2 font-bold text-sand-12">
+            <span class="grid h-8 w-8 place-items-center rounded-lg bg-primary text-white">F</span>
+            <span class="text-lg tracking-tight">Fixtura</span>
+          </Link>
+          <nav v-if="user" class="flex items-center gap-4 text-sm font-medium">
+            <Link href="/events" class="text-sand-11 transition hover:text-sand-12"
+              >Événements</Link
+            >
+            <Link href="/tournaments" class="text-sand-11 transition hover:text-sand-12"
+              >Tournois</Link
+            >
+          </nav>
+        </div>
 
         <div v-if="user" class="flex items-center gap-3 text-sm">
           <span class="hidden text-sand-11 sm:inline">{{ user.email }}</span>

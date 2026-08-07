@@ -18,6 +18,9 @@ const PlanningController = () => import('#controllers/planning_controller')
 const ResultsController = () => import('#controllers/results_controller')
 const ExportController = () => import('#controllers/export_controller')
 const PublicController = () => import('#controllers/public_controller')
+const EventsController = () => import('#controllers/events_controller')
+const EventPlanningController = () => import('#controllers/event_planning_controller')
+const PublicEventController = () => import('#controllers/public_event_controller')
 const LegalController = () => import('#controllers/legal_controller')
 const AccountController = () => import('#controllers/account_controller')
 
@@ -44,6 +47,14 @@ router.on('/').redirect('tournaments.index')
 router.get('/t/:slug', [PublicController, 'show']).as('public.tournament')
 
 /**
+ * Écran public d'un **événement** multi-catégories (#32) — sans auth, via le
+ * `public_slug`. Agrège les catégories de l'événement et permet de naviguer entre
+ * elles (planning + classement en direct de chacune). Lecture seule, mobile-first
+ * et lisible de loin, rafraîchi via SSE (un canal par catégorie).
+ */
+router.get('/e/:slug', [PublicEventController, 'show']).as('public.event')
+
+/**
  * Pages légales — publiques, sans auth (information des personnes exigée par le
  * RGPD, cf. CLAUDE.md §10 · issue #36). Mentions légales, CGU, confidentialité.
  */
@@ -68,6 +79,22 @@ router.post('/logout', [AuthController, 'logout']).as('logout').use(middleware.a
  */
 router
   .group(() => {
+    // Événements multi-catégories (#32) : CRUD, gestion des catégories et
+    // génération du planning combiné sur le pool de terrains partagé.
+    router.resource('events', EventsController)
+    router
+      .post('/events/:id/categories', [EventsController, 'storeCategory'])
+      .as('events.categories.store')
+    router
+      .delete('/events/:id/categories/:categoryId', [EventsController, 'destroyCategory'])
+      .as('events.categories.destroy')
+    router
+      .get('/events/:id/planning', [EventPlanningController, 'preview'])
+      .as('events.planning.preview')
+    router
+      .post('/events/:id/planning', [EventPlanningController, 'store'])
+      .as('events.planning.store')
+
     // Portabilité RGPD : l'organisateur `owner` télécharge les données de son club.
     router.get('/compte/export', [AccountController, 'exportData']).as('account.export')
 
