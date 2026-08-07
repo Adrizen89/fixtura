@@ -1,5 +1,6 @@
 import { test } from '@japa/runner'
 import Tournament from '#models/tournament'
+import Event from '#models/event'
 
 /**
  * Verrouille le scope multi-tenant réutilisable `Tournament.forClub`
@@ -41,5 +42,32 @@ test.group('multi-tenant · Tournament.forClub', () => {
 
     assert.equal(clubA.calls[0].value, 1)
     assert.equal(clubB.calls[0].value, 7)
+  })
+})
+
+/**
+ * Même garantie de cloisonnement pour la nouvelle entité `Event` (#32) : son scope
+ * `forClub` est la source unique du filtrage par club appliqué par les contrôleurs
+ * d'événements (cf. critère « club_id respecté sur la nouvelle entité »).
+ */
+test.group('multi-tenant · Event.forClub', () => {
+  function queryStub() {
+    const calls: Array<{ column: string; value: unknown }> = []
+    const builder = {
+      calls,
+      where(column: string, value: unknown) {
+        calls.push({ column, value })
+        return this
+      },
+    }
+    return builder
+  }
+
+  test('applique une contrainte where club_id et rien d’autre', ({ assert }) => {
+    const query = queryStub()
+
+    Event.forClub(query as never, 42)
+
+    assert.deepEqual(query.calls, [{ column: 'club_id', value: 42 }])
   })
 })

@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo, hasMany, scope } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Club from '#models/club'
+import Event from '#models/event'
 import Team from '#models/team'
 import Match from '#models/match'
 
@@ -37,6 +38,15 @@ export default class Tournament extends BaseModel {
 
   @column()
   declare clubId: number
+
+  /**
+   * Événement de rattachement (v2 — issue #32). Nullable : un tournoi « autonome »
+   * (flux MVP) peut exister sans événement ; une catégorie d'un événement multi-
+   * catégories le référence. Le pool de terrains et le rythme de la journée
+   * proviennent alors de l'événement, pas des colonnes horaires du tournoi.
+   */
+  @column()
+  declare eventId: number | null
 
   @column()
   declare name: string
@@ -97,6 +107,9 @@ export default class Tournament extends BaseModel {
 
   @belongsTo(() => Club)
   declare club: BelongsTo<typeof Club>
+
+  @belongsTo(() => Event)
+  declare event: BelongsTo<typeof Event>
 
   @hasMany(() => Team)
   declare teams: HasMany<typeof Team>

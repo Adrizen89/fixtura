@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import User from '#models/user'
+import Event from '#models/event'
 import Tournament from '#models/tournament'
 
 export default class Club extends BaseModel {
@@ -22,6 +23,9 @@ export default class Club extends BaseModel {
 
   @hasMany(() => User)
   declare users: HasMany<typeof User>
+
+  @hasMany(() => Event)
+  declare events: HasMany<typeof Event>
 
   @hasMany(() => Tournament)
   declare tournaments: HasMany<typeof Tournament>

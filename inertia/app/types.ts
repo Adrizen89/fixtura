@@ -122,6 +122,89 @@ export interface ResultsLiveUpdate {
   pools: PoolStanding[]
 }
 
+// --- Événements multi-catégories (#32) ---
+
+export type EventStatus = TournamentStatus
+
+/** Un événement tel qu'affiché dans la liste / le détail. */
+export interface EventItem {
+  id: number
+  name: string
+  eventDate: string
+  startTime: string
+  matchDurationMin: number
+  breakDurationMin: number
+  lunchStart: string | null
+  lunchDurationMin: number
+  numTerrains: number
+  status: EventStatus
+  publicSlug: string
+  categoriesCount?: number
+}
+
+/** Une catégorie (tournoi) listée dans le détail d'un événement. */
+export interface EventCategory {
+  id: number
+  name: string
+  category: string
+  format: TournamentFormat
+  status: TournamentStatus
+  publicSlug: string
+  formatConfig: TournamentFormatConfig | null
+  teamsCount?: number
+}
+
+/** Planning d'une catégorie au sein de la vue d'événement. */
+export interface EventCategoryPlanning {
+  categoryId: number
+  name: string
+  category: string
+  format: string
+  publicSlug: string
+  planning: PlanningView
+}
+
+/** Vue du planning combiné d'un événement (aperçu ou persisté). */
+export interface EventPlanningView {
+  categories: EventCategoryPlanning[]
+  numTerrains: number
+  matchCount: number
+  slotsCount: number
+  startTime: string
+  endTime: string
+}
+
+/** Une catégorie de l'écran public d'événement (données live incluses). */
+export interface PublicEventCategory {
+  id: number
+  name: string
+  category: string
+  status: TournamentStatus
+  publicSlug: string
+  format: TournamentFormat
+  matches: ResultMatchRow[]
+  standings: StandingRow[]
+  pools: PoolStanding[]
+}
+
+export interface EventFormData {
+  name: string
+  eventDate: string
+  startTime: string
+  matchDurationMin: number
+  breakDurationMin: number
+  lunchStart: string
+  lunchDurationMin: number
+  numTerrains: number
+}
+
+export interface EventCategoryFormData {
+  name: string
+  category: string
+  format: 'championship' | 'pools'
+  numPools: number | null
+}
+
 export interface TournamentFormData {
   name: string
   category: string

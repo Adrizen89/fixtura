@@ -82,7 +82,8 @@ Modèle (tables pluriel snake_case / modèles Lucid singulier PascalCase) :
 
 - **clubs** `(id, name, slug, created_at, updated_at)` — racine multi-tenant, **1 seule ligne en v1**.
 - **users** `(id, club_id, full_name, email, password, role[owner|organizer], created_at, updated_at)` — les organisateurs. Se connectent pour saisir.
-- **tournaments** `(id, club_id, name, category, event_date, start_time, match_duration_min, break_duration_min, lunch_start, lunch_duration_min, num_terrains, status[draft|scheduled|live|finished], public_slug, created_at, updated_at)`.
+- **events** `(id, club_id, name, event_date, start_time, match_duration_min, break_duration_min, lunch_start, lunch_duration_min, num_terrains, status[draft|scheduled|live|finished], public_slug, created_at, updated_at)` — **v2 (#32)** : un événement regroupe plusieurs catégories (tournois) le même jour sur un **pool de terrains partagé** ; il porte les paramètres **communs** (date, rythme, terrains). Scope `Event.forClub` (aligné sur `Tournament.forClub`). Écran public `/e/:public_slug`.
+- **tournaments** `(id, club_id, event_id?, name, category, event_date, start_time, match_duration_min, break_duration_min, lunch_start, lunch_duration_min, num_terrains, status[draft|scheduled|live|finished], public_slug, format, format_config, created_at, updated_at)`. `event_id` **nullable** (v2 #32) : un tournoi autonome (v1) n'a pas d'événement ; une catégorie d'un événement le référence (le pool de terrains + le rythme viennent alors de l'événement). La migration a rétro-converti chaque tournoi v1 en **un événement à une catégorie**.
 - **teams** `(id, tournament_id, name, created_at, updated_at)` — nom uniquement.
 - **matches** `(id, tournament_id, round_number, terrain_number, scheduled_at, home_team_id, away_team_id, home_score, away_score, status[scheduled|live|finished|forfeit], forfeit_team_id?, updated_by_user_id, created_at, updated_at)`.
 
