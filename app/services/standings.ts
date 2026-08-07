@@ -4,8 +4,13 @@
  * Le classement n'est JAMAIS stocké en base (cf. CLAUDE.md §5) : il est recalculé à
  * la volée à partir des matchs terminés. Règles football :
  *   victoire = 3 pts, nul = 1, défaite = 0.
- * Départage v1 : points → différence de buts → buts marqués (puis nom, pour un ordre
- * stable et déterministe).
+ * Départage (issue #33) : points → confrontation directe → différence de buts →
+ * buts marqués (puis nom, pour un ordre stable et déterministe).
+ *
+ * La « confrontation directe » est un mini-classement calculé sur les SEULS matchs
+ * joués entre les équipes encore à égalité (points identiques). Il gère nativement
+ * les égalités à 3+ équipes : le mini-classement est réappliqué récursivement au
+ * sous-groupe qui reste à égalité, avant de retomber sur les critères généraux.
  */
 
 /** Une équipe du tournoi. */
@@ -105,26 +110,132 @@ export function computeStandings(
     row.goalDifference = row.goalsFor - row.goalsAgainst
   }
 
-  // Tri : points ↓, diff. de buts ↓, buts marqués ↓, puis nom ↑ (déterministe).
-  const sorted = [...rows.values()].sort(
+  // Regroupe par points (↓), puis départage chaque groupe d'ex æquo par la
+  // confrontation directe. Chaque « bucket » retourné réunit des équipes réellement
+  // indissociables (elles partageront le même rang).
+  const byPoints = [...rows.values()].sort((a, b) => b.points - a.points)
+  const buckets = groupByAdjacent(byPoints, (a, b) => a.points === b.points).flatMap((group) =>
+    resolveTiedGroup(group, matches)
+  )
+
+  // Aplatit les buckets en attribuant les rangs (classement standard « 1-1-3 ») :
+  // le rang d'un bucket est la position absolue de sa première équipe.
+  const sorted: StandingRow[] = []
+  for (const bucket of buckets) {
+    const rank = sorted.length + 1
+    for (const row of bucket) {
+      row.rank = rank
+      sorted.push(row)
+    }
+  }
+
+  return sorted
+}
+
+/** Agrégats de confrontation directe d'une équipe, restreints à un sous-groupe. */
+interface HeadToHeadStat {
+  points: number
+  goalDifference: number
+  goalsFor: number
+}
+
+/**
+ * Mini-classement : agrège points / diff. de buts / buts marqués en ne comptant QUE
+ * les matchs joués entre les équipes du sous-groupe `groupIds` (confrontation directe).
+ * Les matchs impliquant une équipe hors du groupe sont ignorés.
+ */
+function headToHeadStats(
+  groupIds: Set<number>,
+  matches: StandingsMatchInput[]
+): Map<number, HeadToHeadStat> {
+  const stats = new Map<number, HeadToHeadStat>()
+  for (const id of groupIds) {
+    stats.set(id, { points: 0, goalDifference: 0, goalsFor: 0 })
+  }
+
+  for (const match of matches) {
+    if (!groupIds.has(match.homeTeamId) || !groupIds.has(match.awayTeamId)) continue
+    const home = stats.get(match.homeTeamId)!
+    const away = stats.get(match.awayTeamId)!
+
+    home.goalsFor += match.homeScore
+    home.goalDifference += match.homeScore - match.awayScore
+    away.goalsFor += match.awayScore
+    away.goalDifference += match.awayScore - match.homeScore
+
+    if (match.homeScore > match.awayScore) {
+      home.points += WIN_POINTS
+    } else if (match.homeScore < match.awayScore) {
+      away.points += WIN_POINTS
+    } else {
+      home.points += DRAW_POINTS
+      away.points += DRAW_POINTS
+    }
+  }
+
+  return stats
+}
+
+/**
+ * Départage un groupe d'équipes à égalité de points, en le découpant en buckets
+ * ordonnés (chaque bucket = équipes indissociables, même rang).
+ *
+ * 1. Confrontation directe : mini-classement (points → diff. → BP) sur les seuls
+ *    matchs entre les équipes du groupe. Si elle sépare le groupe, on récurse dans
+ *    chaque sous-groupe encore à égalité (le mini-classement est alors recalculé sur
+ *    le sous-groupe réduit — cas des égalités à 3+ équipes).
+ * 2. Repli : lorsque la confrontation directe ne départage plus (aucun match commun,
+ *    ou égalité circulaire), on retombe sur les critères généraux : différence de
+ *    buts → buts marqués → nom (déterministe).
+ */
+function resolveTiedGroup(group: StandingRow[], matches: StandingsMatchInput[]): StandingRow[][] {
+  if (group.length <= 1) return [group]
+
+  const groupIds = new Set(group.map((r) => r.teamId))
+  const h2h = headToHeadStats(groupIds, matches)
+  const stat = (row: StandingRow) => h2h.get(row.teamId)!
+
+  const byHeadToHead = [...group].sort(
     (a, b) =>
-      b.points - a.points ||
+      stat(b).points - stat(a).points ||
+      stat(b).goalDifference - stat(a).goalDifference ||
+      stat(b).goalsFor - stat(a).goalsFor
+  )
+  const h2hClasses = groupByAdjacent(
+    byHeadToHead,
+    (a, b) =>
+      stat(a).points === stat(b).points &&
+      stat(a).goalDifference === stat(b).goalDifference &&
+      stat(a).goalsFor === stat(b).goalsFor
+  )
+
+  // La confrontation directe a séparé le groupe → on affine chaque sous-groupe
+  // (strictement plus petit ⇒ récursion garantie de terminer).
+  if (h2hClasses.length > 1) {
+    return h2hClasses.flatMap((cls) => resolveTiedGroup(cls, matches))
+  }
+
+  // Confrontation directe indécise → critères généraux ; les équipes encore égales
+  // (même diff. ET mêmes BP) sont indissociables et partagent un bucket.
+  const byOverall = [...group].sort(
+    (a, b) =>
       b.goalDifference - a.goalDifference ||
       b.goalsFor - a.goalsFor ||
       a.teamName.localeCompare(b.teamName)
   )
+  return groupByAdjacent(
+    byOverall,
+    (a, b) => a.goalDifference === b.goalDifference && a.goalsFor === b.goalsFor
+  )
+}
 
-  // Rangs : deux équipes départagées de façon identique (points, diff, BP) partagent
-  // le même rang ; le rang suivant reprend la position absolue (classement standard).
-  sorted.forEach((row, index) => {
-    const prev = sorted[index - 1]
-    const tiedWithPrev =
-      prev &&
-      prev.points === row.points &&
-      prev.goalDifference === row.goalDifference &&
-      prev.goalsFor === row.goalsFor
-    row.rank = tiedWithPrev ? prev.rank : index + 1
-  })
-
-  return sorted
+/** Regroupe les éléments adjacents consécutifs d'une liste triée vérifiant `equal`. */
+function groupByAdjacent<T>(items: T[], equal: (a: T, b: T) => boolean): T[][] {
+  const groups: T[][] = []
+  for (const item of items) {
+    const last = groups[groups.length - 1]
+    if (last && equal(last[last.length - 1], item)) last.push(item)
+    else groups.push([item])
+  }
+  return groups
 }

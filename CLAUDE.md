@@ -64,7 +64,7 @@ Un club de foot organise plusieurs tournois par an, aujourd'hui gérés dans un 
 |---|---|---|
 | Backend | **AdonisJS 6** (TypeScript, ESM) | Framework MVC structuré « à la Laravel » : Lucid ORM, migrations, auth first-party, validators. Idéal produit maintenable/évolutif. Choix d'Adrien. |
 | Rendu / front | **Inertia + Vue 3** (monolithe) | Un repo, un déploiement, pas d'API REST + JWT/CORS à gérer. Support Inertia officiel Adonis. SSR possible pour l'écran public. |
-| Temps réel | **`@adonisjs/transmit`** (SSE) + `@adonisjs/transmit-client` | Push serveur→client natif Adonis. Le VPS le permet → **vrai live**, pas de polling. |
+| Temps réel | **`@adonisjs/transmit`** (SSE) + `@adonisjs/transmit-client` | Push serveur→client natif Adonis. Le VPS le permet → **vrai live**, pas de polling. Transport en mémoire en v1 (instance unique) ; **transport Redis** activable (`REDIS_HOST`) pour le fan-out multi-instances — prérequis de scaling, cf. §11. |
 | ORM / DB | **Lucid + PostgreSQL** | Meilleur choix produit (contraintes, futur multi-club). Migrations versionnées. |
 | Auth | **`@adonisjs/auth`** — guard **session** (web) | Parfait pour une app Inertia. Hash scrypt par défaut. |
 | Validation | **VineJS** (`@vinejs/vine`) | Validator natif Adonis 6. |
@@ -88,7 +88,7 @@ Modèle (tables pluriel snake_case / modèles Lucid singulier PascalCase) :
 - **matches** `(id, tournament_id, round_number, terrain_number, scheduled_at, home_team_id, away_team_id, home_score, away_score, status[scheduled|live|finished|forfeit], forfeit_team_id?, updated_by_user_id, created_at, updated_at)`.
 
 **Classement : jamais stocké en base.** Calculé à la volée par un service pur à partir des `matches` terminés.
-Règles foot : victoire = 3 pts, nul = 1, défaite = 0. Départage v1 : points → différence de buts → buts marqués. (Confrontation directe = évolution possible, documentée non implémentée.)
+Règles foot : victoire = 3 pts, nul = 1, défaite = 0. Départage (issue #33, implémenté) : points → **confrontation directe** → différence de buts → buts marqués (puis nom, pour un ordre déterministe). La confrontation directe est un mini-classement calculé sur les seuls matchs entre les équipes à égalité, réappliqué récursivement pour les égalités à 3+ équipes (`app/services/standings.ts`).
 
 ### Écrans / routes
 
@@ -161,14 +161,22 @@ Deux étapes :
 
 - Auth session Adonis, mots de passe hashés (scrypt par défaut). Pas de secret en dur, tout en `.env`.
 - Écran public strictement **lecture seule**, accessible par `public_slug` non devinable.
-- Données minimales (nom d'équipe, email organisateur) → RGPD léger, mais prévoir mentions/CGU si ouverture publique du produit.
+- Données minimales (nom d'équipe, email organisateur) → RGPD léger.
 - Fonts self-hostées (woff2), pas de CDN tiers traçant.
+- **Conformité RGPD implémentée (issue #36)** : pages publiques `/mentions-legales`,
+  `/cgu`, `/confidentialite` ; mention de consentement à la connexion ; portabilité
+  (export JSON du club en libre-service pour l'`owner` via `/compte/export`, ou CLI
+  `node ace club:export`) et effacement (`node ace club:delete`) — logique isolée
+  dans `app/services/club_data.ts`. Registre + procédures : **`docs/rgpd.md`**.
+  Confirmé : **aucune ressource tierce traçante** (fonts self-hostées, ni analytics
+  ni CDN externe ; cookies strictement nécessaires session + anti-CSRF).
 
 ## 11. Déploiement
 
 - **Cible : Hostinger VPS** (Node LTS, PostgreSQL, PM2, nginx reverse proxy, SSL Let's Encrypt).
 - Build Adonis : `node ace build` → dossier `build/`, puis `node ace migration:run --force` en prod.
 - **Le déploiement est géré par Adrien lui-même.** Ne pas rédiger de procédure pas-à-pas VPS/SFTP ni de `DEPLOY.md` (préférence ADBDigital). Se limiter à lister les pré-requis techniques si on en manque.
+- **Scaling multi-instances (prérequis) — transport Redis pour transmit** (issue #37) : en instance unique (PM2 mode fork, v1), transmit garde les abonnements SSE en mémoire — aucun service externe requis. Pour passer **PM2 en cluster** (plusieurs instances, montée en charge / multi-club), il faut d'abord un **transport partagé** sinon les broadcasts SSE ne se diffusent pas entre instances. Activation : renseigner `REDIS_HOST` (+ `REDIS_PORT`/`REDIS_PASSWORD`) dans `build/.env` → `config/transmit.ts` bascule automatiquement sur le driver Redis (`@adonisjs/transmit/transports`, via `ioredis`) ; puis démarrer PM2 avec `PM2_INSTANCES=max` (cf. `ecosystem.config.cjs`). Redis reste **optionnel en local** (absent → repli en mémoire). Pré-requis VPS supplémentaire dans ce cas : un serveur Redis (local, non exposé).
 
 ## 12. Workflow ADBDigital
 

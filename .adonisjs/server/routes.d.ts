@@ -9,6 +9,9 @@ export type ScannedRoutes = {
     'unsubscribe': { paramsTuple?: []; params?: {} }
     'public.tournament': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'public.event': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'legal.mentions': { paramsTuple?: []; params?: {} }
+    'legal.terms': { paramsTuple?: []; params?: {} }
+    'legal.privacy': { paramsTuple?: []; params?: {} }
     'login.show': { paramsTuple?: []; params?: {} }
     'login': { paramsTuple?: []; params?: {} }
     'logout': { paramsTuple?: []; params?: {} }
@@ -23,6 +26,7 @@ export type ScannedRoutes = {
     'events.categories.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'categoryId': ParamValue} }
     'events.planning.preview': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'events.planning.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'account.export': { paramsTuple?: []; params?: {} }
     'tournaments.index': { paramsTuple?: []; params?: {} }
     'tournaments.create': { paramsTuple?: []; params?: {} }
     'tournaments.store': { paramsTuple?: []; params?: {} }
@@ -44,12 +48,16 @@ export type ScannedRoutes = {
     'event_stream': { paramsTuple?: []; params?: {} }
     'public.tournament': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'public.event': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'legal.mentions': { paramsTuple?: []; params?: {} }
+    'legal.terms': { paramsTuple?: []; params?: {} }
+    'legal.privacy': { paramsTuple?: []; params?: {} }
     'login.show': { paramsTuple?: []; params?: {} }
     'events.index': { paramsTuple?: []; params?: {} }
     'events.create': { paramsTuple?: []; params?: {} }
     'events.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'events.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'events.planning.preview': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'account.export': { paramsTuple?: []; params?: {} }
     'tournaments.index': { paramsTuple?: []; params?: {} }
     'tournaments.create': { paramsTuple?: []; params?: {} }
     'tournaments.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -61,12 +69,16 @@ export type ScannedRoutes = {
     'event_stream': { paramsTuple?: []; params?: {} }
     'public.tournament': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'public.event': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'legal.mentions': { paramsTuple?: []; params?: {} }
+    'legal.terms': { paramsTuple?: []; params?: {} }
+    'legal.privacy': { paramsTuple?: []; params?: {} }
     'login.show': { paramsTuple?: []; params?: {} }
     'events.index': { paramsTuple?: []; params?: {} }
     'events.create': { paramsTuple?: []; params?: {} }
     'events.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'events.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'events.planning.preview': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'account.export': { paramsTuple?: []; params?: {} }
     'tournaments.index': { paramsTuple?: []; params?: {} }
     'tournaments.create': { paramsTuple?: []; params?: {} }
     'tournaments.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

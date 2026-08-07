@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Link, usePage, router } from '@inertiajs/vue3'
+import SiteFooter from '~/components/SiteFooter.vue'
 import type { AuthUser, FlashMessages } from '~/app/types'
 
 const page = usePage()
@@ -13,7 +14,7 @@ function logout() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-sand-2 text-sand-12">
+  <div class="flex min-h-screen flex-col bg-sand-2 text-sand-12">
     <!-- Lien d'évitement : premier élément focusable, visible uniquement au clavier. -->
     <a
       href="#content"
@@ -74,8 +75,10 @@ function logout() {
       </div>
     </div>
 
-    <main id="content" class="mx-auto max-w-6xl px-4 py-8">
+    <main id="content" class="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
       <slot />
     </main>
+
+    <SiteFooter />
   </div>
 </template>

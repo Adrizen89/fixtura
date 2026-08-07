@@ -35,4 +35,18 @@ export default await Env.create(new URL('../', import.meta.url), {
   DB_USER: Env.schema.string(),
   DB_PASSWORD: Env.schema.string.optional(),
   DB_DATABASE: Env.schema.string(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring the transmit Redis transport
+  |----------------------------------------------------------
+  |
+  | Optionnelles : présentes, elles activent le fan-out SSE
+  | inter-instances (prérequis au scaling / PM2 cluster — cf.
+  | config/transmit.ts et CLAUDE.md §4, §11). Absentes (dev,
+  | instance unique), transmit reste en mémoire.
+  */
+  REDIS_HOST: Env.schema.string.optional({ format: 'host' }),
+  REDIS_PORT: Env.schema.number.optional(),
+  REDIS_PASSWORD: Env.schema.string.optional(),
 })
