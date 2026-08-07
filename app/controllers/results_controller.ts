@@ -53,24 +53,26 @@ export default class ResultsController {
    * rechargement Inertia (dégradation gracieuse — cf. CLAUDE.md §9).
    */
   private async pushLiveState(tournament: Tournament, matchId: number) {
-    const { matches, standings } = await buildResultsData(tournament)
+    const { matches, standings, pools } = await buildResultsData(tournament)
     broadcastResults(tournament.publicSlug, {
       type: 'results:updated',
       matchId,
       matches,
       standings,
+      pools,
     })
   }
 
   /** Grille de saisie + classement calculé à la volée. */
   async index({ inertia, params, auth }: HttpContext) {
     const tournament = await this.findTournament(auth, params.id)
-    const { matches, standings } = await buildResultsData(tournament)
+    const { matches, standings, pools } = await buildResultsData(tournament)
 
     return inertia.render('tournaments/results', {
       tournament: tournament.serialize(),
       matches,
       standings,
+      pools,
     })
   }
 

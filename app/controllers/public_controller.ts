@@ -20,7 +20,7 @@ export default class PublicController {
       .preload('teams', (q) => q.orderBy('name'))
       .firstOrFail()
 
-    const { matches, standings } = await buildResultsData(tournament)
+    const { matches, standings, pools } = await buildResultsData(tournament)
 
     return inertia.render('public/tournament', {
       tournament: {
@@ -29,9 +29,11 @@ export default class PublicController {
         eventDate: tournament.eventDate.toISODate(),
         status: tournament.status,
         publicSlug: tournament.publicSlug,
+        format: tournament.format,
       },
       matches,
       standings,
+      pools,
     })
   }
 }

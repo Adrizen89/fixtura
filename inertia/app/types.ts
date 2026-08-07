@@ -100,6 +100,17 @@ export interface ResultMatchRow {
   forfeitSide: 'home' | 'away' | null
   updatedBy: string | null
   updatedAt: string | null
+  /** Phase du match (formats v2) : 'main' | 'pool' | 'knockout'. */
+  stage: string
+  bracketRound: string | null
+  bracketSlot: number | null
+  groupLabel: string | null
+}
+
+/** Classement d'une poule (formats poules / hybride). */
+export interface PoolStanding {
+  label: string
+  standings: StandingRow[]
 }
 
 /** Événement reçu sur le canal SSE d'un tournoi (miroir de #services/realtime). */
@@ -108,6 +119,7 @@ export interface ResultsLiveUpdate {
   matchId: number
   matches: ResultMatchRow[]
   standings: StandingRow[]
+  pools: PoolStanding[]
 }
 
 export interface TournamentFormData {

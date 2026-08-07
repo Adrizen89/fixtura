@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { Head } from '@inertiajs/vue3'
+import Bracket from '~/components/Bracket.vue'
+import PoolStandings from '~/components/PoolStandings.vue'
 import { useLiveTournament } from '~/composables/use_live_tournament'
-import type { ResultMatchRow, StandingRow, TournamentStatus } from '~/app/types'
+import type {
+  ResultMatchRow,
+  StandingRow,
+  PoolStanding,
+  TournamentStatus,
+  TournamentFormat,
+} from '~/app/types'
 
 /**
  * Écran public d'un tournoi (cf. CLAUDE.md §5) — double contexte : projeté sur
@@ -16,10 +24,20 @@ const props = defineProps<{
     eventDate: string | null
     status: TournamentStatus
     publicSlug: string
+    format: TournamentFormat
   }
   matches: ResultMatchRow[]
   standings: StandingRow[]
+  pools: PoolStanding[]
 }>()
+
+const showBracket = computed(
+  () => props.tournament.format === 'knockout' || props.tournament.format === 'hybrid'
+)
+const showPools = computed(
+  () => props.tournament.format === 'pools' || props.tournament.format === 'hybrid'
+)
+const sideTitle = computed(() => (showPools.value ? 'Classements par poule' : 'Classement'))
 
 /**
  * État affiché, initialisé depuis le rendu serveur puis mis à jour en direct par le
@@ -28,6 +46,7 @@ const props = defineProps<{
  */
 const liveMatches = ref<ResultMatchRow[]>(props.matches)
 const liveStandings = ref<StandingRow[]>(props.standings)
+const livePools = ref<PoolStanding[]>(props.pools)
 watch(
   () => props.matches,
   (v) => (liveMatches.value = v)
@@ -35,6 +54,10 @@ watch(
 watch(
   () => props.standings,
   (v) => (liveStandings.value = v)
+)
+watch(
+  () => props.pools,
+  (v) => (livePools.value = v)
 )
 
 /**
@@ -46,6 +69,7 @@ watch(
 const { state: liveState } = useLiveTournament(props.tournament.publicSlug, (update) => {
   liveMatches.value = update.matches
   liveStandings.value = update.standings
+  livePools.value = update.pools
 })
 
 /** Matchs regroupés par créneau horaire. */
@@ -142,12 +166,25 @@ function rowClass(rank: number) {
         </div>
       </header>
 
+      <!-- Tableau d'élimination (pleine largeur, mis en avant pour l'affichage TV) -->
+      <section v-if="showBracket" class="mb-8">
+        <h2 class="mb-4 text-xl font-bold sm:text-2xl">Tableau final</h2>
+        <Bracket :matches="liveMatches" />
+      </section>
+
       <div class="grid grid-cols-1 gap-8 lg:grid-cols-5">
         <!-- Classement (mis en avant) -->
         <section class="lg:col-span-3">
-          <h2 class="mb-4 text-xl font-bold sm:text-2xl">Classement</h2>
+          <h2 class="mb-4 text-xl font-bold sm:text-2xl">{{ sideTitle }}</h2>
 
-          <div v-if="hasResults" class="overflow-x-auto">
+          <PoolStandings v-if="showPools" :pools="livePools" />
+          <p
+            v-else-if="showBracket"
+            class="rounded-xl bg-sand-2 px-4 py-8 text-center text-base text-sand-11"
+          >
+            Le tableau final est affiché ci-dessus.
+          </p>
+          <div v-else-if="hasResults" class="overflow-x-auto">
             <table class="w-full border-collapse">
               <caption class="sr-only">
                 Classement en direct : rang, équipe, matchs joués, gagnés, nuls, perdus, différence
