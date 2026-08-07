@@ -18,6 +18,14 @@ export interface FlashMessages {
 
 export type TournamentStatus = 'draft' | 'scheduled' | 'live' | 'finished'
 
+export type TournamentFormat = 'championship' | 'pools' | 'knockout' | 'hybrid'
+
+export interface TournamentFormatConfig {
+  numPools?: number | null
+  qualifiersPerPool?: number | null
+  thirdPlace?: boolean
+}
+
 export interface Team {
   id: number
   name: string
@@ -36,6 +44,8 @@ export interface Tournament {
   numTerrains: number
   status: TournamentStatus
   publicSlug: string
+  format: TournamentFormat
+  formatConfig: TournamentFormatConfig | null
   teams?: Team[]
   teamsCount?: number
 }
@@ -110,4 +120,8 @@ export interface TournamentFormData {
   lunchStart: string
   lunchDurationMin: number
   numTerrains: number
+  format: TournamentFormat
+  numPools: number | null
+  qualifiersPerPool: number | null
+  thirdPlace: boolean
 }

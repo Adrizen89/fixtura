@@ -1,10 +1,34 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import Tournament from '#models/tournament'
+import type { TournamentFormat, TournamentFormatConfig } from '#models/tournament'
 import Match from '#models/match'
 import { tournamentValidator } from '#validators/tournament'
 import { generatePublicSlug } from '#services/public_slug'
 import { viewFromMatches } from '#services/planning'
+
+/** Config de format à stocker (`format_config`) selon le format choisi ; null en championnat. */
+function formatConfigOf(data: {
+  format: TournamentFormat
+  numPools?: number | null
+  qualifiersPerPool?: number | null
+  thirdPlace?: boolean
+}): TournamentFormatConfig | null {
+  switch (data.format) {
+    case 'pools':
+      return { numPools: data.numPools ?? undefined }
+    case 'knockout':
+      return { thirdPlace: data.thirdPlace ?? false }
+    case 'hybrid':
+      return {
+        numPools: data.numPools ?? undefined,
+        qualifiersPerPool: data.qualifiersPerPool ?? undefined,
+        thirdPlace: data.thirdPlace ?? false,
+      }
+    default:
+      return null // championnat : aucun paramètre de format
+  }
+}
 
 export default class TournamentsController {
   /**
@@ -52,6 +76,8 @@ export default class TournamentsController {
       numTerrains: data.numTerrains,
       status: 'draft',
       publicSlug: generatePublicSlug(data.name),
+      format: data.format,
+      formatConfig: formatConfigOf(data),
     })
 
     session.flash('success', 'Tournoi créé.')
@@ -101,6 +127,8 @@ export default class TournamentsController {
       lunchStart: data.lunchStart ?? null,
       lunchDurationMin: data.lunchDurationMin,
       numTerrains: data.numTerrains,
+      format: data.format,
+      formatConfig: formatConfigOf(data),
     })
     await tournament.save()
 
