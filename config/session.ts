@@ -34,7 +34,9 @@ const sessionConfig = defineConfig({
    * variable in order to infer the store name without any
    * errors.
    */
-  store: env.get('SESSION_DRIVER'),
+  // En test, le store `memory` (côté serveur) permet aux tests fonctionnels
+  // d'établir une session (loginAs) sans dépendre du round-trip cookie chiffré.
+  store: app.inTest ? 'memory' : env.get('SESSION_DRIVER'),
 
   /**
    * List of configured stores. Refer documentation to see

@@ -22,18 +22,17 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
 
       /**
        * Organisateur connecté (ou null). `always` => présent aussi lors des
-       * rechargements partiels. Peuplé par le middleware silent_auth.
+       * rechargements partiels (uniquement quand il y a un utilisateur : en v4,
+       * `always(null)` n'est pas sérialisable). Peuplé par le middleware silent_auth.
        */
-      auth: ctx.inertia.always(
-        ctx.auth?.user
-          ? {
-              id: ctx.auth.user.id,
-              fullName: ctx.auth.user.fullName,
-              email: ctx.auth.user.email,
-              role: ctx.auth.user.role,
-            }
-          : null
-      ),
+      auth: ctx.auth?.user
+        ? ctx.inertia.always({
+            id: ctx.auth.user.id,
+            fullName: ctx.auth.user.fullName,
+            email: ctx.auth.user.email,
+            role: ctx.auth.user.role,
+          })
+        : null,
 
       /**
        * Messages flash (bannières succès / erreur).

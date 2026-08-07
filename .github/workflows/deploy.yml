@@ -5,8 +5,9 @@ on:
     branches: [main]
   pull_request:
 
-# Env commun aux jobs qui démarrent l'app (tests, build).
-# Valeurs factices : les tests unitaires ne se connectent pas à la base.
+# Env commun aux jobs qui démarrent l'app (tests, build). Les DB_* pointent vers
+# le service PostgreSQL du job « quality » (tests fonctionnels) ; en prod, le
+# déploiement lit le vrai .env du VPS.
 env:
   TZ: UTC
   HOST: localhost
@@ -26,6 +27,22 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_ENV: test
+    # Les tests fonctionnels (tests/functional) démarrent l'app et frappent la
+    # base : on fournit un PostgreSQL éphémère et on migre avant de lancer la suite.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: fixtura
+          POSTGRES_PASSWORD: fixtura
+          POSTGRES_DB: fixtura
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fixtura"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -35,7 +52,8 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
-      - run: node ace test unit
+      - run: node ace migration:run --force
+      - run: node ace test
 
   build:
     name: Construire l'app

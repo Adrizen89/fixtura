@@ -1,4 +1,5 @@
 import { defineConfig } from '@adonisjs/shield'
+import app from '@adonisjs/core/services/app'
 
 const shieldConfig = defineConfig({
   /**
@@ -16,7 +17,9 @@ const shieldConfig = defineConfig({
    * to learn more
    */
   csrf: {
-    enabled: true,
+    // Protection active en dev/prod ; désactivée sous les tests (`node ace test`)
+    // pour permettre les tests fonctionnels de formulaires sans jeton CSRF.
+    enabled: !app.inTest,
     // Les endpoints SSE de transmit (`/__transmit/*`) sont exemptés : ils gèrent
     // uniquement des abonnements à un flux public en lecture seule et sont
     // appelés par `@adonisjs/transmit-client` (sans jeton CSRF de formulaire).
