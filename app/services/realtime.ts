@@ -31,6 +31,17 @@ export type ResultRow = {
   forfeitSide: 'home' | 'away' | null
   updatedBy: string | null
   updatedAt: string | null
+  // Métadonnées de phase (formats v2) — pour l'écran bracket / poules.
+  stage: string
+  bracketRound: string | null
+  bracketSlot: number | null
+  groupLabel: string | null
+}
+
+/** Classement d'une poule (formats poules / hybride). */
+export type PoolStanding = {
+  label: string
+  standings: StandingRow[]
 }
 
 /** État live d'un tournoi, poussé aux abonnés à chaque score enregistré. */
@@ -39,6 +50,7 @@ export type ResultsLiveUpdate = {
   matchId: number
   matches: ResultRow[]
   standings: StandingRow[]
+  pools: PoolStanding[]
 }
 
 /**

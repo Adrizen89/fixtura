@@ -3,15 +3,28 @@ import { computed, ref, watch } from 'vue'
 import { Head, Link } from '@inertiajs/vue3'
 import AdminLayout from '~/layouts/AdminLayout.vue'
 import StandingsTable from '~/components/StandingsTable.vue'
+import PoolStandings from '~/components/PoolStandings.vue'
+import Bracket from '~/components/Bracket.vue'
 import MatchScoreRow from '~/components/MatchScoreRow.vue'
 import { useLiveTournament } from '~/composables/use_live_tournament'
-import type { ResultMatchRow, StandingRow, Tournament } from '~/app/types'
+import type { ResultMatchRow, StandingRow, PoolStanding, Tournament } from '~/app/types'
 
 const props = defineProps<{
   tournament: Tournament
   matches: ResultMatchRow[]
   standings: StandingRow[]
+  pools: PoolStanding[]
 }>()
+
+const showBracket = computed(
+  () => props.tournament.format === 'knockout' || props.tournament.format === 'hybrid'
+)
+const showPools = computed(
+  () => props.tournament.format === 'pools' || props.tournament.format === 'hybrid'
+)
+const sideTitle = computed(() =>
+  showPools.value ? 'Classements par poule' : showBracket.value ? 'Tableau' : 'Classement'
+)
 
 const showHref = `/tournaments/${props.tournament.id}`
 
@@ -24,6 +37,7 @@ const showHref = `/tournaments/${props.tournament.id}`
  */
 const liveMatches = ref<ResultMatchRow[]>(props.matches)
 const liveStandings = ref<StandingRow[]>(props.standings)
+const livePools = ref<PoolStanding[]>(props.pools)
 watch(
   () => props.matches,
   (v) => (liveMatches.value = v)
@@ -31,6 +45,10 @@ watch(
 watch(
   () => props.standings,
   (v) => (liveStandings.value = v)
+)
+watch(
+  () => props.pools,
+  (v) => (livePools.value = v)
 )
 
 /** Regroupe les matchs par créneau horaire pour la grille. */
@@ -56,6 +74,7 @@ const hasResults = computed(() => liveStandings.value.some((r) => r.played > 0))
 const { state: liveState } = useLiveTournament(props.tournament.publicSlug, (update) => {
   liveMatches.value = update.matches
   liveStandings.value = update.standings
+  livePools.value = update.pools
 })
 
 const live = computed(() => {
@@ -136,7 +155,7 @@ const live = computed(() => {
         class="rounded-2xl border border-sand-6 bg-white p-6 lg:sticky lg:top-6 lg:self-start"
       >
         <div class="mb-4 flex items-center justify-between gap-3">
-          <h2 class="text-base font-semibold text-sand-12">Classement</h2>
+          <h2 class="text-base font-semibold text-sand-12">{{ sideTitle }}</h2>
           <!-- Indicateur temps réel : visualise aussi la dégradation gracieuse. -->
           <span
             class="inline-flex items-center gap-1.5 text-xs font-medium"
@@ -151,11 +170,30 @@ const live = computed(() => {
             {{ live.label }}
           </span>
         </div>
-        <StandingsTable v-if="hasResults" :standings="liveStandings" />
+        <!-- Poules / hybride : classements par poule. -->
+        <PoolStandings v-if="showPools" :pools="livePools" />
+        <!-- Élimination directe : le tableau est affiché en pleine largeur ci-dessous. -->
+        <p
+          v-else-if="showBracket"
+          class="rounded-md bg-sand-2 px-3 py-4 text-center text-sm text-sand-11"
+        >
+          Le tableau final est affiché ci-dessous ↓
+        </p>
+        <!-- Championnat : classement global. -->
+        <StandingsTable v-else-if="hasResults" :standings="liveStandings" />
         <p v-else class="rounded-md bg-sand-2 px-3 py-4 text-center text-sm text-sand-11">
           Le classement s'affichera dès le premier score saisi.
         </p>
       </section>
     </div>
+
+    <!-- Tableau d'élimination (pleine largeur) -->
+    <section
+      v-if="showBracket && liveMatches.length"
+      class="mt-6 rounded-2xl border border-sand-6 bg-white p-6"
+    >
+      <h2 class="mb-4 text-base font-semibold text-sand-12">Tableau final</h2>
+      <Bracket :matches="liveMatches" />
+    </section>
   </AdminLayout>
 </template>
