@@ -6,23 +6,29 @@ import type { TournamentFormatConfig } from '#models/tournament'
 import { eventValidator, eventCategoryValidator } from '#validators/event'
 import { generatePublicSlug } from '#services/public_slug'
 import { buildPersistedEventPlanning } from '#services/event_planning'
+import { EventPolicy } from '#policies/event_policy'
+import { deny } from '#policies/authorize'
 
 /**
  * Événements multi-catégories (#32) — CRUD + gestion des catégories.
  *
  * Un événement regroupe plusieurs tournois (catégories) partageant un pool de
- * terrains et le rythme de la journée. Le cloisonnement par club passe par le scope
- * réutilisable `Event.forClub` (aligné sur `Tournament.forClub` — cf. CLAUDE.md §9, §12).
+ * terrains et le rythme de la journée. Le cloisonnement par club est automatique
+ * (scope global `TenantContext` — issue #34, cf. CLAUDE.md §9, §12).
  */
 export default class EventsController {
-  /** Requête événements scopée au club de l'organisateur connecté. */
-  private scoped(auth: HttpContext['auth']) {
-    return Event.query().withScopes((scopes) => scopes.forClub(auth.user!.clubId))
+  /**
+   * Requête de base sur les événements. Cloisonnement par club **automatique**
+   * (scope global `TenantContext`, cf. issue #34) : plus de `forClub` manuel ; un
+   * événement d'un autre club est invisible (liste filtrée, `firstOrFail` → 404).
+   */
+  private query() {
+    return Event.query()
   }
 
   /** Tableau de bord des événements du club. */
-  async index({ inertia, auth }: HttpContext) {
-    const events = await this.scoped(auth)
+  async index({ inertia }: HttpContext) {
+    const events = await this.query()
       .withCount('tournaments')
       .orderBy('event_date', 'desc')
       .orderBy('created_at', 'desc')
@@ -63,8 +69,8 @@ export default class EventsController {
   }
 
   /** Détail d'un événement : paramètres, catégories, planning combiné persisté. */
-  async show({ inertia, params, auth }: HttpContext) {
-    const event = await this.scoped(auth).where('id', params.id).firstOrFail()
+  async show({ inertia, params }: HttpContext) {
+    const event = await this.query().where('id', params.id).firstOrFail()
 
     const categories = await Tournament.query()
       .where('event_id', event.id)
@@ -84,14 +90,14 @@ export default class EventsController {
   }
 
   /** Formulaire d'édition. */
-  async edit({ inertia, params, auth }: HttpContext) {
-    const event = await this.scoped(auth).where('id', params.id).firstOrFail()
+  async edit({ inertia, params }: HttpContext) {
+    const event = await this.query().where('id', params.id).firstOrFail()
     return inertia.render('events/edit', { event: event.serialize() })
   }
 
   /** Met à jour un événement. */
-  async update({ request, response, params, auth, session }: HttpContext) {
-    const event = await this.scoped(auth).where('id', params.id).firstOrFail()
+  async update({ request, response, params, session }: HttpContext) {
+    const event = await this.query().where('id', params.id).firstOrFail()
     const data = await request.validateUsing(eventValidator)
 
     event.merge({
@@ -110,9 +116,16 @@ export default class EventsController {
     return response.redirect().toRoute('events.show', { id: event.id })
   }
 
-  /** Supprime un événement (ses catégories sont détachées, jamais supprimées). */
+  /**
+   * Supprime un événement (ses catégories sont détachées, jamais supprimées).
+   * Réservé au responsable du club (owner).
+   */
   async destroy({ response, params, auth, session }: HttpContext) {
-    const event = await this.scoped(auth).where('id', params.id).firstOrFail()
+    if (!EventPolicy.delete(auth.user!)) {
+      return deny({ session, response })
+    }
+
+    const event = await this.query().where('id', params.id).firstOrFail()
     await event.delete()
 
     session.flash('success', 'Événement supprimé. Les catégories restent accessibles en tournois.')
@@ -125,8 +138,8 @@ export default class EventsController {
    * compatibles avec les écrans de tournoi existants ; la génération du planning de
    * l'événement fait autorité sur la grille partagée).
    */
-  async storeCategory({ request, response, params, auth, session }: HttpContext) {
-    const event = await this.scoped(auth).where('id', params.id).firstOrFail()
+  async storeCategory({ request, response, params, session }: HttpContext) {
+    const event = await this.query().where('id', params.id).firstOrFail()
     const data = await request.validateUsing(eventCategoryValidator)
 
     let formatConfig: TournamentFormatConfig | null = null
@@ -158,9 +171,16 @@ export default class EventsController {
     return response.redirect().toRoute('events.show', { id: event.id })
   }
 
-  /** Détache et supprime une catégorie de l'événement (cascade équipes + matchs). */
+  /**
+   * Détache et supprime une catégorie de l'événement (cascade équipes + matchs).
+   * Réservé au responsable du club (owner).
+   */
   async destroyCategory({ response, params, auth, session }: HttpContext) {
-    const event = await this.scoped(auth).where('id', params.id).firstOrFail()
+    if (!EventPolicy.deleteCategory(auth.user!)) {
+      return deny({ session, response })
+    }
+
+    const event = await this.query().where('id', params.id).firstOrFail()
     const category = await Tournament.query()
       .where('id', params.categoryId)
       .where('event_id', event.id)

@@ -24,14 +24,13 @@ import { progressBracket, ProgressionConflictError } from '#services/bracket_pro
  * Le classement n'est jamais stocké : recalculé à la volée par un service pur.
  */
 export default class ResultsController {
-  /** Requête scopée au club via le scope réutilisable `Tournament.forClub` (cf. CLAUDE.md §9, §12). */
-  private scoped(auth: HttpContext['auth']) {
-    return Tournament.query().withScopes((scopes) => scopes.forClub(auth.user!.clubId))
-  }
-
-  /** Tournoi du club (équipes préchargées, requises pour le classement). 404 hors club. */
-  private findTournament(auth: HttpContext['auth'], id: number | string) {
-    return this.scoped(auth)
+  /**
+   * Tournoi du club (équipes préchargées, requises pour le classement). Le
+   * cloisonnement par club est **automatique** (scope global `TenantContext`,
+   * cf. issue #34) : 404 hors club, sans `forClub` explicite.
+   */
+  private findTournament(id: number | string) {
+    return Tournament.query()
       .where('id', id)
       .preload('teams', (q) => q.orderBy('name'))
       .firstOrFail()
@@ -64,8 +63,8 @@ export default class ResultsController {
   }
 
   /** Grille de saisie + classement calculé à la volée. */
-  async index({ inertia, params, auth }: HttpContext) {
-    const tournament = await this.findTournament(auth, params.id)
+  async index({ inertia, params }: HttpContext) {
+    const tournament = await this.findTournament(params.id)
     const { matches, standings, pools } = await buildResultsData(tournament)
 
     return inertia.render('tournaments/results', {
@@ -81,7 +80,7 @@ export default class ResultsController {
    * moment. Un score réel termine le match et annule un éventuel forfait antérieur.
    */
   async update({ request, response, params, auth, session }: HttpContext) {
-    const tournament = await this.findTournament(auth, params.id)
+    const tournament = await this.findTournament(params.id)
     const match = await this.findMatch(tournament, params.matchId)
 
     const { homeScore, awayScore } = await request.validateUsing(matchScoreValidator)
@@ -121,7 +120,7 @@ export default class ResultsController {
    * persistance du planning). Ne touche ni au score ni au statut.
    */
   async reschedule({ request, response, params, auth, session }: HttpContext) {
-    const tournament = await this.findTournament(auth, params.id)
+    const tournament = await this.findTournament(params.id)
     const match = await this.findMatch(tournament, params.matchId)
 
     const { time, terrainNumber } = await request.validateUsing(matchScheduleValidator)
@@ -154,7 +153,7 @@ export default class ResultsController {
    * victoire normale. Reste corrigeable ensuite via la saisie d'un score réel.
    */
   async forfeit({ request, response, params, auth, session }: HttpContext) {
-    const tournament = await this.findTournament(auth, params.id)
+    const tournament = await this.findTournament(params.id)
     const match = await this.findMatch(tournament, params.matchId)
 
     const { side } = await request.validateUsing(matchForfeitValidator)

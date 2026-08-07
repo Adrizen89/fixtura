@@ -6,6 +6,8 @@ import Match from '#models/match'
 import { tournamentValidator } from '#validators/tournament'
 import { generatePublicSlug } from '#services/public_slug'
 import { viewFromMatches } from '#services/planning'
+import { TournamentPolicy } from '#policies/tournament_policy'
+import { deny } from '#policies/authorize'
 
 /** Config de format à stocker (`format_config`) selon le format choisi ; null en championnat. */
 function formatConfigOf(data: {
@@ -32,16 +34,18 @@ function formatConfigOf(data: {
 
 export default class TournamentsController {
   /**
-   * Requête de base scopée au club de l'organisateur connecté, via le scope
-   * réutilisable `Tournament.forClub` (scoping club_id systématique — cf. CLAUDE.md §9, §12).
+   * Requête de base sur les tournois. Le cloisonnement par club est désormais
+   * **automatique** (scope global `TenantContext` — cf. issue #34) : plus besoin
+   * d'appliquer `forClub` ici. Un tournoi d'un autre club est invisible (liste
+   * filtrée, `firstOrFail` → 404).
    */
-  private scoped(auth: HttpContext['auth']) {
-    return Tournament.query().withScopes((scopes) => scopes.forClub(auth.user!.clubId))
+  private query() {
+    return Tournament.query()
   }
 
   /** Tableau de bord des tournois du club. */
-  async index({ inertia, auth }: HttpContext) {
-    const tournaments = await this.scoped(auth)
+  async index({ inertia }: HttpContext) {
+    const tournaments = await this.query()
       .withCount('teams')
       .orderBy('event_date', 'desc')
       .orderBy('created_at', 'desc')
@@ -85,8 +89,8 @@ export default class TournamentsController {
   }
 
   /** Détail d'un tournoi (+ équipes + planning persisté le cas échéant). */
-  async show({ inertia, params, auth }: HttpContext) {
-    const tournament = await this.scoped(auth)
+  async show({ inertia, params }: HttpContext) {
+    const tournament = await this.query()
       .where('id', params.id)
       .preload('teams', (q) => q.orderBy('name'))
       .firstOrFail()
@@ -107,14 +111,14 @@ export default class TournamentsController {
   }
 
   /** Formulaire d'édition. */
-  async edit({ inertia, params, auth }: HttpContext) {
-    const tournament = await this.scoped(auth).where('id', params.id).firstOrFail()
+  async edit({ inertia, params }: HttpContext) {
+    const tournament = await this.query().where('id', params.id).firstOrFail()
     return inertia.render('tournaments/edit', { tournament: tournament.serialize() })
   }
 
   /** Met à jour un tournoi. */
-  async update({ request, response, params, auth, session }: HttpContext) {
-    const tournament = await this.scoped(auth).where('id', params.id).firstOrFail()
+  async update({ request, response, params, session }: HttpContext) {
+    const tournament = await this.query().where('id', params.id).firstOrFail()
     const data = await request.validateUsing(tournamentValidator)
 
     tournament.merge({
@@ -136,9 +140,13 @@ export default class TournamentsController {
     return response.redirect().toRoute('tournaments.show', { id: tournament.id })
   }
 
-  /** Supprime un tournoi (cascade équipes + matchs). */
+  /** Supprime un tournoi (cascade équipes + matchs). Réservé au responsable (owner). */
   async destroy({ response, params, auth, session }: HttpContext) {
-    const tournament = await this.scoped(auth).where('id', params.id).firstOrFail()
+    if (!TournamentPolicy.delete(auth.user!)) {
+      return deny({ session, response })
+    }
+
+    const tournament = await this.query().where('id', params.id).firstOrFail()
     await tournament.delete()
 
     session.flash('success', 'Tournoi supprimé.')

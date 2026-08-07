@@ -10,16 +10,13 @@ import { teamValidator } from '#validators/team'
  */
 export default class TeamsController {
   /**
-   * Retrouve le tournoi parent, scopé au club via le scope réutilisable
-   * `Tournament.forClub` (scoping `club_id` systématique — cf. CLAUDE.md §9, §12).
-   * 404 si hors club. `Team` n'a pas de `club_id` : le cloisonnement passe par ce
-   * tournoi parent, dont l'`id` sert ensuite à filtrer les équipes.
+   * Retrouve le tournoi parent — cloisonnement par club **automatique** (scope
+   * global `TenantContext`, cf. issue #34) : 404 si hors club. `Team` n'a pas de
+   * `club_id` ; le cloisonnement passe par ce tournoi parent, dont l'`id` sert
+   * ensuite à filtrer les équipes.
    */
-  private findTournament(auth: HttpContext['auth'], tournamentId: number | string) {
-    return Tournament.query()
-      .withScopes((scopes) => scopes.forClub(auth.user!.clubId))
-      .where('id', tournamentId)
-      .firstOrFail()
+  private findTournament(tournamentId: number | string) {
+    return Tournament.query().where('id', tournamentId).firstOrFail()
   }
 
   /** Retrouve une équipe rattachée au tournoi (404 sinon). */
@@ -28,8 +25,8 @@ export default class TeamsController {
   }
 
   /** Ajoute une équipe au tournoi. */
-  async store({ request, response, params, auth, session }: HttpContext) {
-    const tournament = await this.findTournament(auth, params.tournament_id)
+  async store({ request, response, params, session }: HttpContext) {
+    const tournament = await this.findTournament(params.tournament_id)
 
     const { name } = await request.validateUsing(teamValidator, {
       meta: { tournamentId: tournament.id },
@@ -42,8 +39,8 @@ export default class TeamsController {
   }
 
   /** Renomme une équipe. */
-  async update({ request, response, params, auth, session }: HttpContext) {
-    const tournament = await this.findTournament(auth, params.tournament_id)
+  async update({ request, response, params, session }: HttpContext) {
+    const tournament = await this.findTournament(params.tournament_id)
     const team = await this.findTeam(tournament.id, params.id)
 
     const { name } = await request.validateUsing(teamValidator, {
@@ -58,8 +55,8 @@ export default class TeamsController {
   }
 
   /** Supprime une équipe. */
-  async destroy({ response, params, auth, session }: HttpContext) {
-    const tournament = await this.findTournament(auth, params.tournament_id)
+  async destroy({ response, params, session }: HttpContext) {
+    const tournament = await this.findTournament(params.tournament_id)
     const team = await this.findTeam(tournament.id, params.id)
 
     await team.delete()

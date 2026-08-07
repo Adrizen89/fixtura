@@ -2,11 +2,15 @@
 import { computed } from 'vue'
 import { Link, usePage, router } from '@inertiajs/vue3'
 import SiteFooter from '~/components/SiteFooter.vue'
-import type { AuthUser, FlashMessages } from '~/app/types'
+import type { AuthUser, CurrentClub, FlashMessages } from '~/app/types'
 
 const page = usePage()
 const user = computed(() => page.props.auth as AuthUser | null)
+const currentClub = computed(() => page.props.currentClub as CurrentClub | null)
 const flash = computed(() => page.props.flash as FlashMessages | undefined)
+
+/** Libellé lisible du rôle (contexte multi-tenant — issue #34). */
+const roleLabel = computed(() => (user.value?.role === 'owner' ? 'Responsable' : 'Organisateur'))
 
 function logout() {
   router.post('/logout')
@@ -41,7 +45,19 @@ function logout() {
         </div>
 
         <div v-if="user" class="flex items-center gap-3 text-sm">
-          <span class="hidden text-sand-11 sm:inline">{{ user.email }}</span>
+          <!-- Club courant (contexte multi-tenant — issue #34). -->
+          <span
+            v-if="currentClub"
+            class="hidden items-center gap-1.5 rounded-full bg-sand-3 px-2.5 py-1 font-medium text-sand-12 md:inline-flex"
+            :aria-label="`Club courant : ${currentClub.name}`"
+          >
+            <span class="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
+            {{ currentClub.name }}
+          </span>
+          <span class="hidden text-right leading-tight text-sand-11 sm:block">
+            <span class="block">{{ user.email }}</span>
+            <span class="block text-xs text-sand-9">{{ roleLabel }}</span>
+          </span>
           <button
             type="button"
             class="rounded-md border border-sand-7 px-3 py-1.5 font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"

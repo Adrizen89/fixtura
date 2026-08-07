@@ -17,17 +17,17 @@ import {
  * côté serveur (§13 : pas de lib lourde).
  *
  * Contrôleur mince (§8) : toute la mise en forme est déléguée au service
- * `tournament_export`. Scoping club systématique via `Tournament.forClub` (§9, §12).
+ * `tournament_export`. Cloisonnement par club automatique (scope global
+ * `TenantContext` — issue #34, cf. §9, §12).
  */
 export default class ExportController {
-  /** Requête scopée au club de l'organisateur connecté. */
-  private scoped(auth: HttpContext['auth']) {
-    return Tournament.query().withScopes((scopes) => scopes.forClub(auth.user!.clubId))
-  }
-
-  /** Tournoi du club (équipes préchargées, requises pour le classement). 404 hors club. */
-  private findTournament(auth: HttpContext['auth'], id: number | string) {
-    return this.scoped(auth)
+  /**
+   * Tournoi du club (équipes préchargées, requises pour le classement). Le
+   * cloisonnement par club est **automatique** (scope global `TenantContext`,
+   * cf. issue #34) : 404 hors club, sans `forClub` explicite.
+   */
+  private findTournament(id: number | string) {
+    return Tournament.query()
       .where('id', id)
       .preload('teams', (q) => q.orderBy('name'))
       .firstOrFail()
@@ -49,8 +49,8 @@ export default class ExportController {
   }
 
   /** Planning imprimable (grille créneaux × terrains). */
-  async planning({ view, params, auth, response, session }: HttpContext) {
-    const tournament = await this.findTournament(auth, params.id)
+  async planning({ view, params, response, session }: HttpContext) {
+    const tournament = await this.findTournament(params.id)
     const matches = await this.matchesOf(tournament)
 
     if (matches.length === 0) {
@@ -66,8 +66,8 @@ export default class ExportController {
   }
 
   /** Feuilles de match imprimables (une par match, score à remplir). */
-  async matchSheets({ view, params, auth, response, session }: HttpContext) {
-    const tournament = await this.findTournament(auth, params.id)
+  async matchSheets({ view, params, response, session }: HttpContext) {
+    const tournament = await this.findTournament(params.id)
     const matches = await this.matchesOf(tournament)
 
     if (matches.length === 0) {
@@ -83,8 +83,8 @@ export default class ExportController {
   }
 
   /** Classement final imprimable (global ou par poule selon le format). */
-  async standings({ view, params, auth }: HttpContext) {
-    const tournament = await this.findTournament(auth, params.id)
+  async standings({ view, params }: HttpContext) {
+    const tournament = await this.findTournament(params.id)
 
     return view.render('exports/standings', {
       title: `Classement — ${tournament.name}`,

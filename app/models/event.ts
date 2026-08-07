@@ -1,8 +1,10 @@
 import { DateTime } from 'luxon'
+import { compose } from '@adonisjs/core/helpers'
 import { BaseModel, column, belongsTo, hasMany, scope } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Club from '#models/club'
 import Tournament from '#models/tournament'
+import { withTenantScope } from '#models/concerns/tenant_scoped'
 
 export type EventStatus = 'draft' | 'scheduled' | 'live' | 'finished'
 
@@ -12,11 +14,13 @@ export type EventStatus = 'draft' | 'scheduled' | 'live' | 'finished'
  * paramètres communs (date, terrains, rythme de la journée) ; chaque catégorie ne
  * conserve que son identité propre (nom, format, équipes).
  */
-export default class Event extends BaseModel {
+export default class Event extends compose(BaseModel, withTenantScope()) {
   /**
-   * Scope `club_id` réutilisable (multi-tenant — cf. CLAUDE.md §5, §9, §12), aligné
-   * sur `Tournament.forClub`. Source unique du cloisonnement par club : les
-   * contrôleurs l'appliquent via `Event.query().withScopes((s) => s.forClub(clubId))`.
+   * Cloisonnement par club (multi-tenant — cf. CLAUDE.md §5, §9, §12), aligné sur
+   * `Tournament`. Depuis l'issue #34, le filtrage sur `club_id` est **automatique**
+   * (mixin `withTenantScope` + `TenantContext`) : les contrôleurs n'appellent plus
+   * `forClub`. Le scope nommé reste utile hors requête (CLI, services) où l'on cible
+   * un club explicite.
    */
   static forClub = scope((query, clubId: number) => {
     query.where('club_id', clubId)

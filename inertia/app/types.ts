@@ -11,6 +11,13 @@ export interface AuthUser {
   role: UserRole
 }
 
+/** Club courant de l'utilisateur connecté (contexte multi-tenant — issue #34). */
+export interface CurrentClub {
+  id: number
+  name: string
+  slug: string
+}
+
 export interface FlashMessages {
   success: string | null
   error: string | null

@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import { exportClubData, exportFileName } from '#services/club_data'
+import { ClubPolicy } from '#policies/club_policy'
 
 /**
  * Espace compte de l'organisateur connecté — actions RGPD en libre-service.
@@ -17,7 +18,7 @@ export default class AccountController {
    */
   async exportData({ auth, response }: HttpContext) {
     const user = auth.user!
-    if (user.role !== 'owner') {
+    if (!ClubPolicy.exportData(user)) {
       return response.forbidden({ message: 'Réservé au responsable du club.' })
     }
 

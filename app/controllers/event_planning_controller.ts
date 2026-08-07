@@ -15,14 +15,13 @@ import {
  * terrains partagé de l'événement, sans collision de créneau entre catégories.
  */
 export default class EventPlanningController {
-  /** Requête événements scopée au club (cf. CLAUDE.md §9, §12). */
-  private scoped(auth: HttpContext['auth']) {
-    return Event.query().withScopes((scopes) => scopes.forClub(auth.user!.clubId))
-  }
-
-  /** Événement + ses catégories (équipes préchargées, requises pour la génération). */
-  private async load(auth: HttpContext['auth'], id: number | string) {
-    const event = await this.scoped(auth).where('id', id).firstOrFail()
+  /**
+   * Événement + ses catégories (équipes préchargées, requises pour la génération).
+   * Cloisonnement par club **automatique** (scope global `TenantContext`, issue #34) :
+   * 404 hors club, sans `forClub` explicite.
+   */
+  private async load(id: number | string) {
+    const event = await Event.query().where('id', id).firstOrFail()
     const categories = await Tournament.query()
       .where('event_id', event.id)
       .preload('teams', (q) => q.orderBy('name'))
@@ -31,8 +30,8 @@ export default class EventPlanningController {
   }
 
   /** Aperçu du planning combiné (sans persistance). */
-  async preview({ inertia, response, params, auth, session }: HttpContext) {
-    const { event, categories } = await this.load(auth, params.id)
+  async preview({ inertia, response, params, session }: HttpContext) {
+    const { event, categories } = await this.load(params.id)
 
     if (categories.length === 0) {
       session.flash('error', 'Ajoutez au moins une catégorie avant de générer le planning.')
@@ -59,8 +58,8 @@ export default class EventPlanningController {
   }
 
   /** Valide l'aperçu : génère puis persiste le planning combiné (draft → scheduled). */
-  async store({ response, params, auth, session }: HttpContext) {
-    const { event, categories } = await this.load(auth, params.id)
+  async store({ response, params, session }: HttpContext) {
+    const { event, categories } = await this.load(params.id)
 
     if (categories.length === 0) {
       session.flash('error', 'Ajoutez au moins une catégorie avant de générer le planning.')

@@ -17,14 +17,14 @@ import {
  * La régénération réutilise le même flux et remplace le planning existant.
  */
 export default class PlanningController {
-  /** Requête scopée au club via le scope réutilisable `Tournament.forClub` (cf. CLAUDE.md §9, §12). */
-  private scoped(auth: HttpContext['auth']) {
-    return Tournament.query().withScopes((scopes) => scopes.forClub(auth.user!.clubId))
+  /** Cloisonnement par club **automatique** (scope global `TenantContext`, issue #34) : 404 hors club. */
+  private query() {
+    return Tournament.query()
   }
 
   /** Aperçu du planning (sans persistance). */
-  async preview({ inertia, response, params, auth, session }: HttpContext) {
-    const tournament = await this.scoped(auth)
+  async preview({ inertia, response, params, session }: HttpContext) {
+    const tournament = await this.query()
       .where('id', params.id)
       .preload('teams', (q) => q.orderBy('name'))
       .firstOrFail()
@@ -60,8 +60,8 @@ export default class PlanningController {
   }
 
   /** Valide l'aperçu : génère puis persiste le planning (draft → scheduled). */
-  async store({ response, params, auth, session }: HttpContext) {
-    const tournament = await this.scoped(auth)
+  async store({ response, params, session }: HttpContext) {
+    const tournament = await this.query()
       .where('id', params.id)
       .preload('teams', (q) => q.orderBy('name'))
       .firstOrFail()
