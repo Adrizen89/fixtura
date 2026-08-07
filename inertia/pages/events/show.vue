@@ -41,11 +41,17 @@ const form = useForm<EventCategoryFormData>({
   category: '',
   format: 'championship',
   numPools: null,
+  thirdPlace: false,
 })
 const needsPools = computed(() => form.format === 'pools')
+const allowsThird = computed(() => form.format === 'knockout')
 
 function addCategory() {
-  form.transform((data) => ({ ...data, numPools: data.format === 'pools' ? data.numPools : null }))
+  form.transform((data) => ({
+    ...data,
+    numPools: data.format === 'pools' ? data.numPools : null,
+    thirdPlace: data.format === 'knockout' ? data.thirdPlace : false,
+  }))
   form.post(`/events/${props.event.id}/categories`, {
     onSuccess: () => form.reset(),
   })
@@ -180,8 +186,22 @@ function hhmm(v: string | null) {
             >
               <option value="championship">Championnat</option>
               <option value="pools">Poules</option>
+              <option value="knockout">Élimination directe</option>
             </select>
           </div>
+          <label
+            v-if="allowsThird"
+            for="cat-third"
+            class="flex items-center gap-2 text-sm text-sand-12"
+          >
+            <input
+              id="cat-third"
+              v-model="form.thirdPlace"
+              type="checkbox"
+              class="h-4 w-4 rounded border-sand-7 text-primary focus:ring-2 focus:ring-primary/30"
+            />
+            Disputer la petite finale (3<sup>e</sup> place)
+          </label>
           <div v-if="needsPools">
             <label for="cat-pools" class="mb-1 block text-sm font-medium text-sand-12">
               Nombre de poules

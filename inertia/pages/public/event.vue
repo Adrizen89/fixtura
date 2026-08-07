@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { Head } from '@inertiajs/vue3'
 import StandingsTable from '~/components/StandingsTable.vue'
 import PoolStandings from '~/components/PoolStandings.vue'
+import Bracket from '~/components/Bracket.vue'
 import { useLiveEvent } from '~/composables/use_live_event'
 import type { PublicEventCategory, TournamentStatus } from '~/app/types'
 
@@ -34,6 +35,9 @@ const active = computed(() => liveCategories.value.find((c) => c.id === activeId
 
 const showPools = computed(
   () => active.value?.format === 'pools' || active.value?.format === 'hybrid'
+)
+const showBracket = computed(
+  () => active.value?.format === 'knockout' || active.value?.format === 'hybrid'
 )
 
 /** Route chaque mise à jour SSE vers la catégorie correspondant à son canal. */
@@ -172,6 +176,12 @@ function forfeitTeamName(m: PublicEventCategory['matches'][number]) {
             </a>
           </div>
 
+          <!-- Tableau d'élimination (pleine largeur, mis en avant pour l'affichage TV) -->
+          <section v-if="showBracket" class="mb-8">
+            <h3 class="mb-4 text-xl font-bold sm:text-2xl">Tableau final</h3>
+            <Bracket :matches="active.matches" />
+          </section>
+
           <div class="grid grid-cols-1 gap-8 lg:grid-cols-5">
             <!-- Classement -->
             <section class="lg:col-span-3">
@@ -179,6 +189,12 @@ function forfeitTeamName(m: PublicEventCategory['matches'][number]) {
                 {{ showPools ? 'Classements par poule' : 'Classement' }}
               </h3>
               <PoolStandings v-if="showPools" :pools="active.pools" />
+              <p
+                v-else-if="showBracket"
+                class="rounded-xl bg-sand-2 px-4 py-8 text-center text-base text-sand-11"
+              >
+                Le tableau final est affiché ci-dessus.
+              </p>
               <StandingsTable v-else-if="hasResults" :standings="active.standings" />
               <p v-else class="rounded-xl bg-sand-2 px-4 py-8 text-center text-base text-sand-11">
                 Le classement s'affichera dès le premier score.
