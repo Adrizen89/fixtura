@@ -1,0 +1,38 @@
+name: Lint du titre de PR
+
+# Les PR sont mergées en squash → le TITRE de la PR devient le message de commit
+# sur main. release-please en dépend : un titre non conforme aux Conventional
+# Commits serait ignoré (pas de bump de version, absent du CHANGELOG). On lint
+# donc le titre pour bloquer le merge tant qu'il n'est pas conforme.
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  lint:
+    name: Titre Conventional Commits
+    runs-on: ubuntu-latest
+    steps:
+      # N'accède qu'au titre de la PR via l'API (aucun checkout du code de la PR)
+      # → l'usage de pull_request_target reste sûr.
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Types alignés sur release-please-config.json (changelog-sections).
+          types: |
+            feat
+            fix
+            perf
+            refactor
+            docs
+            test
+            build
+            ci
+            chore
+            revert
+          # Le scope est libre et facultatif (ex. feat(realtime), chore(deps)).
+          requireScope: false
