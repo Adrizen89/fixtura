@@ -123,6 +123,13 @@ export interface PoolStanding {
   standings: StandingRow[]
 }
 
+/** Personnalisation publique du club (logo + couleur d'accent) — écran public (#40). */
+export interface PublicClub {
+  name: string
+  logo: string | null
+  primaryColor: string | null
+}
+
 /** Événement reçu sur le canal SSE d'un tournoi (miroir de #services/realtime). */
 export interface ResultsLiveUpdate {
   type: 'results:updated'

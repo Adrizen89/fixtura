@@ -1,0 +1,20 @@
+{
+  "name": "Fixtura — résultats en direct",
+  "short_name": "Fixtura",
+  "description": "Planning, résultats et classements de tournois en direct.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fdfdfc",
+  "theme_color": "#16a34a",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
