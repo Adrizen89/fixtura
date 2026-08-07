@@ -40,7 +40,9 @@ function submit() {
       <h2 class="mb-4 text-base font-semibold text-sand-12">Général</h2>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div class="sm:col-span-2">
-          <label for="name" class="mb-1 block text-sm font-medium text-sand-12">Nom du tournoi</label>
+          <label for="name" class="mb-1 block text-sm font-medium text-sand-12"
+            >Nom du tournoi</label
+          >
           <input
             id="name"
             v-model="form.name"
@@ -54,7 +56,9 @@ function submit() {
         </div>
 
         <div>
-          <label for="category" class="mb-1 block text-sm font-medium text-sand-12">Catégorie</label>
+          <label for="category" class="mb-1 block text-sm font-medium text-sand-12"
+            >Catégorie</label
+          >
           <input
             id="category"
             v-model="form.category"
@@ -106,7 +110,9 @@ function submit() {
             <option value="knockout">Élimination directe</option>
             <option value="hybrid">Hybride — poules puis phase finale</option>
           </select>
-          <p v-if="form.errors.format" class="mt-1 text-sm text-red-700">{{ form.errors.format }}</p>
+          <p v-if="form.errors.format" class="mt-1 text-sm text-red-700">
+            {{ form.errors.format }}
+          </p>
         </div>
 
         <div v-if="needsPools">

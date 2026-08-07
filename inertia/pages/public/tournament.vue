@@ -134,7 +134,8 @@ function rowClass(rank: number) {
               {{ tournament.name }}
             </h1>
             <p class="mt-1 text-base text-sand-11 sm:text-lg">
-              {{ tournament.category }}<span v-if="tournament.eventDate"> · {{ formatDate(tournament.eventDate) }}</span>
+              {{ tournament.category
+              }}<span v-if="tournament.eventDate"> · {{ formatDate(tournament.eventDate) }}</span>
             </p>
           </div>
           <div class="flex flex-col items-end gap-2">
@@ -191,22 +192,40 @@ function rowClass(rank: number) {
                 de buts et points.
               </caption>
               <thead>
-                <tr class="border-b-2 border-sand-7 text-left text-xs uppercase tracking-wide text-sand-10 sm:text-sm">
+                <tr
+                  class="border-b-2 border-sand-7 text-left text-xs uppercase tracking-wide text-sand-10 sm:text-sm"
+                >
                   <th scope="col" class="py-2 pr-2 font-semibold">#</th>
                   <th scope="col" class="py-2 pr-3 font-semibold">Équipe</th>
                   <th scope="col" class="py-2 px-1.5 text-center font-semibold" title="Joués">
                     J<span class="sr-only"> — matchs joués</span>
                   </th>
-                  <th scope="col" class="hidden py-2 px-1.5 text-center font-semibold sm:table-cell" title="Gagnés">
+                  <th
+                    scope="col"
+                    class="hidden py-2 px-1.5 text-center font-semibold sm:table-cell"
+                    title="Gagnés"
+                  >
                     G<span class="sr-only"> — gagnés</span>
                   </th>
-                  <th scope="col" class="hidden py-2 px-1.5 text-center font-semibold sm:table-cell" title="Nuls">
+                  <th
+                    scope="col"
+                    class="hidden py-2 px-1.5 text-center font-semibold sm:table-cell"
+                    title="Nuls"
+                  >
                     N<span class="sr-only"> — nuls</span>
                   </th>
-                  <th scope="col" class="hidden py-2 px-1.5 text-center font-semibold sm:table-cell" title="Perdus">
+                  <th
+                    scope="col"
+                    class="hidden py-2 px-1.5 text-center font-semibold sm:table-cell"
+                    title="Perdus"
+                  >
                     P<span class="sr-only"> — perdus</span>
                   </th>
-                  <th scope="col" class="py-2 px-1.5 text-center font-semibold" title="Différence de buts">
+                  <th
+                    scope="col"
+                    class="py-2 px-1.5 text-center font-semibold"
+                    title="Différence de buts"
+                  >
                     Diff<span class="sr-only"> — différence de buts</span>
                   </th>
                   <th scope="col" class="py-2 pl-2 text-center font-bold" title="Points">
@@ -230,20 +249,30 @@ function rowClass(rank: number) {
                     </span>
                   </td>
                   <th scope="row" class="py-3 pr-3 text-left font-semibold">{{ row.teamName }}</th>
-                  <td class="py-3 px-1.5 text-center tabular-nums text-sand-11">{{ row.played }}</td>
-                  <td class="hidden py-3 px-1.5 text-center tabular-nums text-sand-11 sm:table-cell">
+                  <td class="py-3 px-1.5 text-center tabular-nums text-sand-11">
+                    {{ row.played }}
+                  </td>
+                  <td
+                    class="hidden py-3 px-1.5 text-center tabular-nums text-sand-11 sm:table-cell"
+                  >
                     {{ row.won }}
                   </td>
-                  <td class="hidden py-3 px-1.5 text-center tabular-nums text-sand-11 sm:table-cell">
+                  <td
+                    class="hidden py-3 px-1.5 text-center tabular-nums text-sand-11 sm:table-cell"
+                  >
                     {{ row.drawn }}
                   </td>
-                  <td class="hidden py-3 px-1.5 text-center tabular-nums text-sand-11 sm:table-cell">
+                  <td
+                    class="hidden py-3 px-1.5 text-center tabular-nums text-sand-11 sm:table-cell"
+                  >
                     {{ row.lost }}
                   </td>
                   <td class="py-3 px-1.5 text-center tabular-nums text-sand-11">
                     {{ row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference }}
                   </td>
-                  <td class="py-3 pl-2 text-center text-xl font-extrabold tabular-nums text-primary-800 sm:text-2xl">
+                  <td
+                    class="py-3 pl-2 text-center text-xl font-extrabold tabular-nums text-primary-800 sm:text-2xl"
+                  >
                     {{ row.points }}
                   </td>
                 </tr>
@@ -274,7 +303,9 @@ function rowClass(rank: number) {
                   <span class="w-7 shrink-0 text-center text-xs font-medium text-sand-9">
                     T{{ m.terrainNumber }}
                   </span>
-                  <span class="min-w-0 flex-1 truncate text-right font-medium">{{ m.homeTeam }}</span>
+                  <span class="min-w-0 flex-1 truncate text-right font-medium">{{
+                    m.homeTeam
+                  }}</span>
                   <span
                     class="shrink-0 rounded-md px-2 py-0.5 text-center font-bold tabular-nums"
                     :class="isFinished(m) ? 'bg-sand-12 text-sand-1' : 'text-sand-9'"

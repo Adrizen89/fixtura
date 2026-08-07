@@ -44,7 +44,9 @@ defineProps<{ standings: StandingRow[] }>()
       <tbody>
         <tr v-for="row in standings" :key="row.teamId" class="border-b border-sand-4 last:border-0">
           <td class="py-2 pr-2 text-left tabular-nums text-sand-11">{{ row.rank }}</td>
-          <th scope="row" class="py-2 pr-4 text-left font-medium text-sand-12">{{ row.teamName }}</th>
+          <th scope="row" class="py-2 pr-4 text-left font-medium text-sand-12">
+            {{ row.teamName }}
+          </th>
           <td class="py-2 px-2 text-center tabular-nums text-sand-11">{{ row.played }}</td>
           <td class="py-2 px-2 text-center tabular-nums text-sand-11">{{ row.won }}</td>
           <td class="py-2 px-2 text-center tabular-nums text-sand-11">{{ row.drawn }}</td>

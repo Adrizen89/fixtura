@@ -1,44 +1,20 @@
 import { defineConfig } from '@adonisjs/inertia'
-import type { InferSharedProps } from '@adonisjs/inertia/types'
 
+/**
+ * Configuration Inertia (AdonisJS 7 / Inertia v4).
+ *
+ * En v4, les **données partagées** ne se déclarent plus ici : elles vivent dans
+ * `app/middleware/inertia_middleware.ts` (méthode `share`). Ce fichier ne porte
+ * plus que le `rootView` et le rendu côté serveur (SSR).
+ */
 const inertiaConfig = defineConfig({
   /**
-   * Path to the Edge view that will be used as the root view for Inertia responses
+   * Vue Edge servant de racine aux réponses Inertia.
    */
   rootView: 'inertia_layout',
 
   /**
-   * Data that should be shared with all rendered pages
-   */
-  sharedData: {
-    /**
-     * Organisateur connecté (ou null). `always` => présent aussi lors des
-     * rechargements partiels. Peuplé par le middleware silent_auth.
-     */
-    auth: (ctx) =>
-      ctx.inertia.always(() =>
-        ctx.auth?.user
-          ? {
-              id: ctx.auth.user.id,
-              fullName: ctx.auth.user.fullName,
-              email: ctx.auth.user.email,
-              role: ctx.auth.user.role,
-            }
-          : null
-      ),
-
-    /**
-     * Messages flash (bannières succès / erreur). Les erreurs de validation
-     * VineJS sont, elles, partagées automatiquement via la prop `errors`.
-     */
-    flash: (ctx) => ({
-      success: ctx.session?.flashMessages.get('success') ?? null,
-      error: ctx.session?.flashMessages.get('error') ?? null,
-    }),
-  },
-
-  /**
-   * Options for the server-side rendering
+   * Rendu côté serveur (écran public lisible de loin + SEO léger).
    */
   ssr: {
     enabled: true,
@@ -49,5 +25,28 @@ const inertiaConfig = defineConfig({
 export default inertiaConfig
 
 declare module '@adonisjs/inertia/types' {
-  export interface SharedProps extends InferSharedProps<typeof inertiaConfig> {}
+  /**
+   * Props partagées avec toutes les pages — peuplées par `InertiaMiddleware.share`.
+   */
+  export interface SharedProps {
+    auth: {
+      id: number
+      fullName: string | null
+      email: string
+      role: 'owner' | 'organizer'
+    } | null
+    flash: {
+      success: string | null
+      error: string | null
+    }
+  }
+
+  /**
+   * Pages Inertia. Augmentation **permissive** : on conserve l'ergonomie de la v3
+   * (`inertia.render('page', props)` sans typage page par page). Un typage strict
+   * par page (une entrée par page + ses props) pourra être ajouté ultérieurement.
+   */
+  export interface InertiaPages {
+    [page: string]: Record<string, any>
+  }
 }

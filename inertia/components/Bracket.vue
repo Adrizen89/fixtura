@@ -83,7 +83,9 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
                 ]"
               >
                 <span class="min-w-0 truncate">{{ teamName(m, side) }}</span>
-                <span v-if="isPlayed(m)" class="shrink-0 tabular-nums">{{ teamScore(m, side) }}</span>
+                <span v-if="isPlayed(m)" class="shrink-0 tabular-nums">{{
+                  teamScore(m, side)
+                }}</span>
               </div>
             </div>
           </div>
