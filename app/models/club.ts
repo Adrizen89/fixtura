@@ -15,6 +15,18 @@ export default class Club extends BaseModel {
   @column()
   declare slug: string
 
+  /**
+   * Logo du club sous forme de **data-URI** (ex. `data:image/png;base64,…`), affiché
+   * sur l'écran public. Stocké en base pour rester self-hébergé (RGPD, cf. §10). Null
+   * → pas de logo. Cf. issue #40.
+   */
+  @column()
+  declare logo: string | null
+
+  /** Couleur d'accent du club au format hex "#rrggbb" (null → vert par défaut). */
+  @column()
+  declare primaryColor: string | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

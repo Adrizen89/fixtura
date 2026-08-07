@@ -37,6 +37,12 @@ function logout() {
             <Link href="/tournaments" class="text-sand-11 transition hover:text-sand-12"
               >Tournois</Link
             >
+            <Link
+              v-if="user.role === 'owner'"
+              href="/club/apparence"
+              class="text-sand-11 transition hover:text-sand-12"
+              >Apparence</Link
+            >
           </nav>
         </div>
 

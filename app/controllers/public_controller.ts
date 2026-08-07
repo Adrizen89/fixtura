@@ -14,13 +14,17 @@ import { buildResultsData } from '#services/tournament_results'
  * l'`id` de club, l'organisateur, etc.
  */
 export default class PublicController {
-  async show({ inertia, params }: HttpContext) {
+  async show({ inertia, params, request }: HttpContext) {
     const tournament = await Tournament.query()
       .where('public_slug', params.slug)
       .preload('teams', (q) => q.orderBy('name'))
+      .preload('club')
       .firstOrFail()
 
     const { matches, standings, pools } = await buildResultsData(tournament)
+
+    // Mode TV (?tv=1) : affichage plein écran en rotation planning ↔ classement (#40).
+    const tv = ['1', 'true'].includes(String(request.qs().tv ?? ''))
 
     return inertia.render('public/tournament', {
       tournament: {
@@ -31,6 +35,13 @@ export default class PublicController {
         publicSlug: tournament.publicSlug,
         format: tournament.format,
       },
+      // Personnalisation du club (logo + couleur) — données publiques uniquement (#40).
+      club: {
+        name: tournament.club.name,
+        logo: tournament.club.logo,
+        primaryColor: tournament.club.primaryColor,
+      },
+      tv,
       matches,
       standings,
       pools,

@@ -16,6 +16,10 @@ const resultsHref = `/tournaments/${props.tournament.id}/results`
 // Exports imprimables (issue #38) — pages autonomes, ouvertes dans un nouvel onglet.
 const planningPdfHref = `/tournaments/${props.tournament.id}/export/planning`
 const matchSheetsPdfHref = `/tournaments/${props.tournament.id}/export/match-sheets`
+// Écran public + QR code (issue #40).
+const publicHref = `/t/${props.tournament.publicSlug}`
+const tvHref = `/t/${props.tournament.publicSlug}?tv=1`
+const qrHref = `/tournaments/${props.tournament.id}/qrcode`
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('fr-FR', {
@@ -92,6 +96,54 @@ function hhmm(v: string | null) {
       <!-- Équipes -->
       <TeamsManager :tournament-id="tournament.id" :teams="teams" />
     </div>
+
+    <!-- Écran public : lien, mode TV et QR code à afficher au bord des terrains (#40) -->
+    <section class="mt-6 rounded-2xl border border-sand-6 bg-white p-6">
+      <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
+        <div class="flex shrink-0 justify-center">
+          <img
+            :src="qrHref"
+            alt="QR code vers l'écran public du tournoi"
+            width="150"
+            height="150"
+            class="h-[150px] w-[150px] rounded-lg border border-sand-6"
+          />
+        </div>
+        <div class="min-w-0 flex-1">
+          <h2 class="text-base font-semibold text-sand-12">Écran public</h2>
+          <p class="mt-0.5 text-sm text-sand-11">
+            Partagez ce QR code aux équipes ou affichez-le au bord des terrains : il ouvre le
+            classement et le planning en direct, en lecture seule.
+          </p>
+          <div class="mt-3 flex flex-wrap items-center gap-2">
+            <a
+              :href="publicHref"
+              target="_blank"
+              rel="noopener"
+              class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700"
+            >
+              Ouvrir l'écran public ↗
+            </a>
+            <a
+              :href="tvHref"
+              target="_blank"
+              rel="noopener"
+              class="rounded-lg border border-sand-7 px-4 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
+            >
+              Mode TV ↗
+            </a>
+            <a
+              :href="qrHref"
+              target="_blank"
+              rel="noopener"
+              class="rounded-lg border border-sand-7 px-4 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
+            >
+              QR code (SVG) ↗
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- Planning -->
     <section class="mt-6 rounded-2xl border border-sand-6 bg-white p-6">
