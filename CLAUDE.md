@@ -87,7 +87,7 @@ Modèle (tables pluriel snake_case / modèles Lucid singulier PascalCase) :
 - **matches** `(id, tournament_id, round_number, terrain_number, scheduled_at, home_team_id, away_team_id, home_score, away_score, status[scheduled|live|finished|forfeit], forfeit_team_id?, updated_by_user_id, created_at, updated_at)`.
 
 **Classement : jamais stocké en base.** Calculé à la volée par un service pur à partir des `matches` terminés.
-Règles foot : victoire = 3 pts, nul = 1, défaite = 0. Départage v1 : points → différence de buts → buts marqués. (Confrontation directe = évolution possible, documentée non implémentée.)
+Règles foot : victoire = 3 pts, nul = 1, défaite = 0. Départage (issue #33, implémenté) : points → **confrontation directe** → différence de buts → buts marqués (puis nom, pour un ordre déterministe). La confrontation directe est un mini-classement calculé sur les seuls matchs entre les équipes à égalité, réappliqué récursivement pour les égalités à 3+ équipes (`app/services/standings.ts`).
 
 ### Écrans / routes
 
