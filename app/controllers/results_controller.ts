@@ -7,6 +7,9 @@ import { matchScheduleValidator, matchForfeitValidator } from '#validators/match
 import { scoreFields, forfeitFields, timeToMinutes } from '#services/match_incidents'
 import { broadcastResults } from '#services/realtime'
 import { buildResultsData } from '#services/tournament_results'
+import db from '@adonisjs/lucid/services/db'
+import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
+import { progressBracket, ProgressionConflictError } from '#services/bracket_progression'
 
 /**
  * Saisie des résultats le jour J + classement en direct + gestion des aléas
@@ -81,13 +84,28 @@ export default class ResultsController {
 
     const { homeScore, awayScore } = await request.validateUsing(matchScoreValidator)
 
-    match.merge({
-      ...scoreFields(homeScore, awayScore),
-      updatedByUserId: auth.user!.id, // traçabilité : qui a saisi en dernier
-    })
-    await match.save()
+    try {
+      await db.transaction(async (trx) => {
+        match.useTransaction(trx)
+        match.merge({
+          ...scoreFields(homeScore, awayScore),
+          updatedByUserId: auth.user!.id, // traçabilité : qui a saisi en dernier
+        })
+        await match.save()
+        // Progression des brackets APRÈS la saisie, AVANT la diffusion : propage
+        // le vainqueur et seed les poules (formats v2). Un conflit de correction
+        // annule la transaction (score non modifié) et remonte un message clair.
+        await this.progress(tournament, trx)
+        await this.syncTournamentStatus(tournament, trx)
+      })
+    } catch (error) {
+      if (error instanceof ProgressionConflictError) {
+        session.flash('error', error.message)
+        return response.redirect().toRoute('tournaments.results', { id: tournament.id })
+      }
+      throw error
+    }
 
-    await this.syncTournamentStatus(tournament)
     await this.pushLiveState(tournament, match.id)
 
     session.flash('success', 'Score enregistré.')
@@ -147,13 +165,25 @@ export default class ResultsController {
       return response.redirect().toRoute('tournaments.results', { id: tournament.id })
     }
 
-    match.merge({
-      ...forfeitFields(side, homeTeamId, awayTeamId),
-      updatedByUserId: auth.user!.id,
-    })
-    await match.save()
+    try {
+      await db.transaction(async (trx) => {
+        match.useTransaction(trx)
+        match.merge({
+          ...forfeitFields(side, homeTeamId, awayTeamId),
+          updatedByUserId: auth.user!.id,
+        })
+        await match.save()
+        await this.progress(tournament, trx)
+        await this.syncTournamentStatus(tournament, trx)
+      })
+    } catch (error) {
+      if (error instanceof ProgressionConflictError) {
+        session.flash('error', error.message)
+        return response.redirect().toRoute('tournaments.results', { id: tournament.id })
+      }
+      throw error
+    }
 
-    await this.syncTournamentStatus(tournament)
     await this.pushLiveState(tournament, match.id)
 
     const forfeited = side === 'home' ? match.homeTeam.name : match.awayTeam.name
@@ -162,13 +192,27 @@ export default class ResultsController {
   }
 
   /**
+   * Progression des brackets (formats v2). No-op en championnat (aucun slot
+   * différé). Le tournoi doit avoir ses `teams` préchargées. Peut lever une
+   * `ProgressionConflictError` (correction impactant un match aval déjà joué).
+   */
+  private async progress(tournament: Tournament, trx: TransactionClientContract) {
+    if (tournament.format === 'championship') return
+    const teamsById = new Map(tournament.teams.map((t) => [t.id, t.name]))
+    await progressBracket(tournament.id, teamsById, trx)
+  }
+
+  /**
    * Fait avancer le statut du tournoi selon l'avancement des matchs réglés
    * (score saisi **ou** forfait) : un premier match réglé → `live`, tous réglés →
-   * `finished`. Ne redescend jamais en deçà de `scheduled`.
+   * `finished`. Ne redescend jamais en deçà de `scheduled`. Pour les brackets,
+   * « tous réglés » revient à « finale (+ petite finale) réglée » (dernière bande).
    */
-  private async syncTournamentStatus(tournament: Tournament) {
-    const total = await Match.query().where('tournament_id', tournament.id).count('* as total')
-    const settled = await Match.query()
+  private async syncTournamentStatus(tournament: Tournament, trx: TransactionClientContract) {
+    const total = await Match.query({ client: trx })
+      .where('tournament_id', tournament.id)
+      .count('* as total')
+    const settled = await Match.query({ client: trx })
       .where('tournament_id', tournament.id)
       .whereIn('status', ['finished', 'forfeit'])
       .count('* as total')
@@ -185,6 +229,7 @@ export default class ResultsController {
 
     if (next !== tournament.status) {
       tournament.status = next
+      tournament.useTransaction(trx)
       await tournament.save()
     }
   }
