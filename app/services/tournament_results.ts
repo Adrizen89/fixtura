@@ -38,7 +38,11 @@ export async function buildResultsData(
       awayScore: m.awayScore,
       status: m.status,
       // Côté forfaitaire (pour marquer l'équipe concernée à l'affichage), ou null.
-      forfeitSide: forfeitSideOf(m.status, m.forfeitTeamId, m.homeTeamId, m.awayTeamId),
+      // Sans équipes connues (slot bracket non résolu), pas de côté forfaitaire.
+      forfeitSide:
+        m.homeTeamId !== null && m.awayTeamId !== null
+          ? forfeitSideOf(m.status, m.forfeitTeamId, m.homeTeamId, m.awayTeamId)
+          : null,
       updatedBy: m.updatedByUser ? (m.updatedByUser.fullName ?? m.updatedByUser.email) : null,
       updatedAt: settled && m.updatedAt ? m.updatedAt.toISO() : null,
     }
@@ -47,10 +51,16 @@ export async function buildResultsData(
   const standings = computeStandings(
     tournament.teams.map((t) => ({ id: t.id, name: t.name })),
     matches
-      .filter((m) => m.homeScore !== null && m.awayScore !== null)
+      .filter(
+        (m) =>
+          m.homeTeamId !== null &&
+          m.awayTeamId !== null &&
+          m.homeScore !== null &&
+          m.awayScore !== null
+      )
       .map((m) => ({
-        homeTeamId: m.homeTeamId,
-        awayTeamId: m.awayTeamId,
+        homeTeamId: m.homeTeamId!,
+        awayTeamId: m.awayTeamId!,
         homeScore: m.homeScore!,
         awayScore: m.awayScore!,
       }))

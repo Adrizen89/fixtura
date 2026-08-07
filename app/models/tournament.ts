@@ -7,6 +7,16 @@ import Match from '#models/match'
 
 export type TournamentStatus = 'draft' | 'scheduled' | 'live' | 'finished'
 
+/** Format de compétition (cf. #42 — championnat par défaut en v1). */
+export type TournamentFormat = 'championship' | 'pools' | 'knockout' | 'hybrid'
+
+/** Paramètres propres au format, stockés en JSON (`format_config`). */
+export interface TournamentFormatConfig {
+  numPools?: number
+  qualifiersPerPool?: number
+  thirdPlace?: boolean
+}
+
 export default class Tournament extends BaseModel {
   /**
    * Scope `club_id` global et réutilisable (multi-tenant — cf. CLAUDE.md §5, §9, §12).
@@ -62,6 +72,22 @@ export default class Tournament extends BaseModel {
 
   @column()
   declare publicSlug: string
+
+  @column()
+  declare format: TournamentFormat
+
+  /** Config sérialisée en JSONB ; le driver pg peut rendre un objet ou une chaîne. */
+  @column({
+    prepare: (value: TournamentFormatConfig | null) =>
+      value === null || value === undefined ? null : JSON.stringify(value),
+    consume: (value: string | TournamentFormatConfig | null) =>
+      value === null || value === undefined
+        ? null
+        : typeof value === 'string'
+          ? (JSON.parse(value) as TournamentFormatConfig)
+          : value,
+  })
+  declare formatConfig: TournamentFormatConfig | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
