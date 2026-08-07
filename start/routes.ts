@@ -17,6 +17,8 @@ const TeamsController = () => import('#controllers/teams_controller')
 const PlanningController = () => import('#controllers/planning_controller')
 const ResultsController = () => import('#controllers/results_controller')
 const PublicController = () => import('#controllers/public_controller')
+const LegalController = () => import('#controllers/legal_controller')
+const AccountController = () => import('#controllers/account_controller')
 
 /**
  * Routes du temps réel (SSE) : `__transmit/events` (flux), `__transmit/subscribe`
@@ -41,6 +43,14 @@ router.on('/').redirect('tournaments.index')
 router.get('/t/:slug', [PublicController, 'show']).as('public.tournament')
 
 /**
+ * Pages légales — publiques, sans auth (information des personnes exigée par le
+ * RGPD, cf. CLAUDE.md §10 · issue #36). Mentions légales, CGU, confidentialité.
+ */
+router.get('/mentions-legales', [LegalController, 'mentions']).as('legal.mentions')
+router.get('/cgu', [LegalController, 'terms']).as('legal.terms')
+router.get('/confidentialite', [LegalController, 'privacy']).as('legal.privacy')
+
+/**
  * Authentification — accessible aux invités uniquement.
  */
 router
@@ -57,6 +67,9 @@ router.post('/logout', [AuthController, 'logout']).as('logout').use(middleware.a
  */
 router
   .group(() => {
+    // Portabilité RGPD : l'organisateur `owner` télécharge les données de son club.
+    router.get('/compte/export', [AccountController, 'exportData']).as('account.export')
+
     router.resource('tournaments', TournamentsController)
     // Équipes gérées depuis la page du tournoi (ajout / renommage / suppression).
     router.resource('tournaments.teams', TeamsController).only(['store', 'update', 'destroy'])
