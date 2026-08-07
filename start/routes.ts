@@ -31,7 +31,7 @@ transmit.registerRoutes()
  * Racine → liste des tournois. Si non connecté, le middleware `auth` renverra
  * automatiquement vers /login.
  */
-router.on('/').redirect('/tournaments')
+router.on('/').redirect('tournaments.index')
 
 /**
  * Écran public d'un tournoi — sans auth, via le `public_slug` non devinable.

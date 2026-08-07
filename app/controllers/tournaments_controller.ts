@@ -56,7 +56,7 @@ export default class TournamentsController {
 
   /** Formulaire de création. */
   async create({ inertia }: HttpContext) {
-    return inertia.render('tournaments/create')
+    return inertia.render('tournaments/create', {})
   }
 
   /** Persiste un nouveau tournoi. */

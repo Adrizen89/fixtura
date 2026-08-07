@@ -7,7 +7,7 @@ export default class AuthController {
    * Affiche le formulaire de connexion.
    */
   async showLogin({ inertia }: HttpContext) {
-    return inertia.render('auth/login')
+    return inertia.render('auth/login', {})
   }
 
   /**
