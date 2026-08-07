@@ -139,8 +139,16 @@ export default class ResultsController {
 
     const { side } = await request.validateUsing(matchForfeitValidator)
 
+    // Un forfait ne peut viser qu'un match aux équipes connues (pas un slot bracket
+    // non encore résolu).
+    const { homeTeamId, awayTeamId } = match
+    if (homeTeamId === null || awayTeamId === null) {
+      session.flash('error', "Ce match n'a pas encore d'équipes définies.")
+      return response.redirect().toRoute('tournaments.results', { id: tournament.id })
+    }
+
     match.merge({
-      ...forfeitFields(side, match.homeTeamId, match.awayTeamId),
+      ...forfeitFields(side, homeTeamId, awayTeamId),
       updatedByUserId: auth.user!.id,
     })
     await match.save()
