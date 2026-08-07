@@ -2,7 +2,14 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Tournament from '#models/tournament'
 import Match from '#models/match'
 import { SchedulerError } from '#services/scheduler/index'
-import { generateFor, persistSchedule, viewFromSchedule } from '#services/planning'
+import {
+  generateFor,
+  persistSchedule,
+  viewFromSchedule,
+  generatePhasedFor,
+  persistPhasedSchedule,
+  viewFromPhased,
+} from '#services/planning'
 
 /**
  * Génération du planning d'un tournoi (cf. CLAUDE.md §6).
@@ -28,13 +35,19 @@ export default class PlanningController {
     }
 
     try {
-      const schedule = generateFor(tournament)
       const names = new Map(tournament.teams.map((t) => [t.id, t.name]))
       const hasExistingPlanning = await Match.query().where('tournament_id', tournament.id).first()
 
+      // Championnat : chemin v1 intact. Autres formats (poules / élimination /
+      // hybride) : planning multi-phases (participants éventuellement différés).
+      const preview =
+        tournament.format === 'championship'
+          ? viewFromSchedule(generateFor(tournament), names)
+          : viewFromPhased(generatePhasedFor(tournament), names)
+
       return inertia.render('tournaments/planning', {
         tournament: tournament.serialize(),
-        preview: viewFromSchedule(schedule, names),
+        preview,
         hasExistingPlanning: hasExistingPlanning !== null,
       })
     } catch (error) {
@@ -59,8 +72,11 @@ export default class PlanningController {
     }
 
     try {
-      const schedule = generateFor(tournament)
-      await persistSchedule(tournament, schedule)
+      if (tournament.format === 'championship') {
+        await persistSchedule(tournament, generateFor(tournament))
+      } else {
+        await persistPhasedSchedule(tournament, generatePhasedFor(tournament))
+      }
       session.flash('success', 'Planning généré et enregistré.')
     } catch (error) {
       if (error instanceof SchedulerError) {
