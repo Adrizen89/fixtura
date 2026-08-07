@@ -5,6 +5,10 @@ node_modules
 build
 tmp
 
+# Fichier de classes de schéma généré par Lucid 22 (régénéré à chaque
+# `node ace migration:run`) — non utilisé par l'app, inutile de le versionner.
+database/schema.ts
+
 # Frontend compiled assets
 public/assets
 
