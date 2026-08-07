@@ -20,6 +20,10 @@ const initial: TournamentFormData = {
   lunchStart: hhmm(props.tournament.lunchStart),
   lunchDurationMin: props.tournament.lunchDurationMin,
   numTerrains: props.tournament.numTerrains,
+  format: props.tournament.format,
+  numPools: props.tournament.formatConfig?.numPools ?? null,
+  qualifiersPerPool: props.tournament.formatConfig?.qualifiersPerPool ?? null,
+  thirdPlace: props.tournament.formatConfig?.thirdPlace ?? false,
 }
 </script>
 

@@ -20,5 +20,13 @@ export const tournamentValidator = vine.compile(
     lunchStart: vine.string().trim().regex(TIME_REGEX).nullable().optional(),
     lunchDurationMin: vine.number().min(0).max(180),
     numTerrains: vine.number().min(1).max(20),
+
+    // Format v2 (défaut championnat). La cohérence fine (numPools requis en
+    // poules/hybride, qualifiés ≤ taille de poule…) est vérifiée à la génération
+    // du planning par le scheduler, qui renvoie une erreur explicite.
+    format: vine.enum(['championship', 'pools', 'knockout', 'hybrid']),
+    numPools: vine.number().min(2).max(64).nullable().optional(),
+    qualifiersPerPool: vine.number().min(1).max(32).nullable().optional(),
+    thirdPlace: vine.boolean().optional(),
   })
 )

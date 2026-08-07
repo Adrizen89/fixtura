@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { Link, useForm } from '@inertiajs/vue3'
 import type { TournamentFormData } from '~/app/types'
 
@@ -11,6 +12,11 @@ const props = defineProps<{
 }>()
 
 const form = useForm<TournamentFormData>({ ...props.initial })
+
+// Champs de format conditionnels au type choisi.
+const needsPools = computed(() => form.format === 'pools' || form.format === 'hybrid')
+const needsQualifiers = computed(() => form.format === 'hybrid')
+const allowsThird = computed(() => form.format === 'knockout' || form.format === 'hybrid')
 
 function submit() {
   form.transform((data) => ({
@@ -77,6 +83,83 @@ function submit() {
             {{ form.errors.eventDate }}
           </p>
         </div>
+      </div>
+    </section>
+
+    <!-- Format -->
+    <section class="rounded-2xl border border-sand-6 bg-white p-6">
+      <h2 class="mb-1 text-base font-semibold text-sand-12">Format</h2>
+      <p class="mb-4 text-sm text-sand-11">Détermine comment le planning est généré.</p>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div :class="{ 'sm:col-span-2': !needsPools }">
+          <label for="format" class="mb-1 block text-sm font-medium text-sand-12">
+            Type de compétition
+          </label>
+          <select
+            id="format"
+            v-model="form.format"
+            class="w-full rounded-lg border border-sand-7 bg-white px-3 py-2 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+            :class="{ 'border-red-400': form.errors.format }"
+          >
+            <option value="championship">Championnat — toutes les équipes se rencontrent</option>
+            <option value="pools">Poules</option>
+            <option value="knockout">Élimination directe</option>
+            <option value="hybrid">Hybride — poules puis phase finale</option>
+          </select>
+          <p v-if="form.errors.format" class="mt-1 text-sm text-red-700">{{ form.errors.format }}</p>
+        </div>
+
+        <div v-if="needsPools">
+          <label for="numPools" class="mb-1 block text-sm font-medium text-sand-12">
+            Nombre de poules
+          </label>
+          <input
+            id="numPools"
+            v-model.number="form.numPools"
+            type="number"
+            min="2"
+            max="64"
+            required
+            class="w-full rounded-lg border border-sand-7 px-3 py-2 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+            :class="{ 'border-red-400': form.errors.numPools }"
+          />
+          <p v-if="form.errors.numPools" class="mt-1 text-sm text-red-700">
+            {{ form.errors.numPools }}
+          </p>
+        </div>
+
+        <div v-if="needsQualifiers">
+          <label for="qualifiersPerPool" class="mb-1 block text-sm font-medium text-sand-12">
+            Qualifiés par poule
+          </label>
+          <input
+            id="qualifiersPerPool"
+            v-model.number="form.qualifiersPerPool"
+            type="number"
+            min="1"
+            max="32"
+            required
+            class="w-full rounded-lg border border-sand-7 px-3 py-2 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+            :class="{ 'border-red-400': form.errors.qualifiersPerPool }"
+          />
+          <p v-if="form.errors.qualifiersPerPool" class="mt-1 text-sm text-red-700">
+            {{ form.errors.qualifiersPerPool }}
+          </p>
+        </div>
+
+        <label
+          v-if="allowsThird"
+          for="thirdPlace"
+          class="flex items-center gap-2 sm:col-span-2 text-sm text-sand-12"
+        >
+          <input
+            id="thirdPlace"
+            v-model="form.thirdPlace"
+            type="checkbox"
+            class="h-4 w-4 rounded border-sand-7 text-primary focus:ring-2 focus:ring-primary/30"
+          />
+          Disputer la petite finale (3<sup>e</sup> place)
+        </label>
       </div>
     </section>
 

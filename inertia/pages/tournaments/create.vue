@@ -14,6 +14,10 @@ const initial: TournamentFormData = {
   lunchStart: '',
   lunchDurationMin: 0,
   numTerrains: 2,
+  format: 'championship',
+  numPools: null,
+  qualifiersPerPool: null,
+  thirdPlace: false,
 }
 </script>
 
