@@ -1,5 +1,41 @@
 # Changelog
 
+## [0.1.5](https://github.com/Adrizen89/fixtura/compare/v0.1.4...v0.1.5) (2026-08-07)
+
+
+### ✨ Fonctionnalités
+
+* **brackets:** écran bracket + classements par poule ([#75](https://github.com/Adrizen89/fixtura/issues/75)) ([6d87842](https://github.com/Adrizen89/fixtura/commit/6d87842e6e8de2bda1f644ddbcce9ec96c7e29b1)), closes [#47](https://github.com/Adrizen89/fixtura/issues/47)
+* **brackets:** persistance multi-phases + dispatch de format ([#72](https://github.com/Adrizen89/fixtura/issues/72)) ([203937f](https://github.com/Adrizen89/fixtura/commit/203937f396deb4385734b2f0253f5518d4a685aa)), closes [#46](https://github.com/Adrizen89/fixtura/issues/46)
+* **brackets:** schéma des formats de tournoi (fondations [#42](https://github.com/Adrizen89/fixtura/issues/42)) ([#69](https://github.com/Adrizen89/fixtura/issues/69)) ([91d4a05](https://github.com/Adrizen89/fixtura/commit/91d4a054be189ea7c73a2bcb7c0f2ceb2e6a8b5d))
+* **brackets:** sélecteur de format à la création/édition ([#74](https://github.com/Adrizen89/fixtura/issues/74)) ([b4e396d](https://github.com/Adrizen89/fixtura/commit/b4e396d7c20ae351e1f3f91a57394c9fe3b671de)), closes [#47](https://github.com/Adrizen89/fixtura/issues/47)
+* **brackets:** service de progression du bracket ([#73](https://github.com/Adrizen89/fixtura/issues/73)) ([f2d559c](https://github.com/Adrizen89/fixtura/commit/f2d559cda271283f15ce1acac90a1976e386a490)), closes [#45](https://github.com/Adrizen89/fixtura/issues/45)
+* **deps:** migration AdonisJS 6 → 7 + Inertia v4 ([#82](https://github.com/Adrizen89/fixtura/issues/82)) ([0cb082d](https://github.com/Adrizen89/fixtura/commit/0cb082d70d0fabcc66f094023570cb4487ead825)), closes [#76](https://github.com/Adrizen89/fixtura/issues/76)
+* **results:** gestion des aléas du jour J (décalage, forfait, correction) ([#25](https://github.com/Adrizen89/fixtura/issues/25)) ([42bb1fc](https://github.com/Adrizen89/fixtura/commit/42bb1fc5a911fbe991265e858634953938ca298e)), closes [#6](https://github.com/Adrizen89/fixtura/issues/6)
+* **scheduler:** moteur pur d'élimination directe (arbre + byes) ([#71](https://github.com/Adrizen89/fixtura/issues/71)) ([2658c00](https://github.com/Adrizen89/fixtura/commit/2658c006ef212ed0ebee1afd534d3590ee501bde)), closes [#44](https://github.com/Adrizen89/fixtura/issues/44)
+* **scheduler:** moteur pur de la phase de poules (formats v2) ([#70](https://github.com/Adrizen89/fixtura/issues/70)) ([b3867c8](https://github.com/Adrizen89/fixtura/commit/b3867c8e9e02ad3f4d20c7f97310a813bbeced21)), closes [#43](https://github.com/Adrizen89/fixtura/issues/43)
+* **ui:** finitions avant prod (validation FR, fonts self-hostées, a11y AA) ([#26](https://github.com/Adrizen89/fixtura/issues/26)) ([cf06272](https://github.com/Adrizen89/fixtura/commit/cf06272b52a5363b7d98568b2e30b932dad7f57e)), closes [#8](https://github.com/Adrizen89/fixtura/issues/8)
+
+
+### 🐛 Corrections
+
+* **auth:** normalisation d'email cohérente à la connexion (points Gmail) ([#27](https://github.com/Adrizen89/fixtura/issues/27)) ([cb962ee](https://github.com/Adrizen89/fixtura/commit/cb962ee49a5aa7e6a320704dbd14130fb9a982e6)), closes [#11](https://github.com/Adrizen89/fixtura/issues/11)
+
+
+### ⚡ Performances
+
+* temps réel sans rechargement + cache assets + gzip nginx ([#29](https://github.com/Adrizen89/fixtura/issues/29)) ([9f96707](https://github.com/Adrizen89/fixtura/commit/9f967070c88161288e344c2b43648edc786d9f3e))
+
+
+### ♻️ Refactorisations
+
+* **multi-tenant:** scope club_id réutilisable via Tournament.forClub ([#23](https://github.com/Adrizen89/fixtura/issues/23)) ([de45c08](https://github.com/Adrizen89/fixtura/commit/de45c08aef74bfd4b8f1b5752efda6d24edb66be)), closes [#7](https://github.com/Adrizen89/fixtura/issues/7)
+
+
+### 📝 Documentation
+
+* **claude:** actualise le cadrage — MVP construit, testé et déployé ([#28](https://github.com/Adrizen89/fixtura/issues/28)) ([f12d21b](https://github.com/Adrizen89/fixtura/commit/f12d21b300cb8f4911f90e5f5d979748cbec3bbc))
+
 ## [0.1.4](https://github.com/Adrizen89/fixtura/compare/v0.1.3...v0.1.4) (2026-08-05)
 
 
