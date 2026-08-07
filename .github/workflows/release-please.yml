@@ -18,4 +18,9 @@ jobs:
       # La config est lue depuis release-please-config.json + le manifest.
       - uses: googleapis/release-please-action@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # Un PAT / token de GitHub App (secret RELEASE_PLEASE_TOKEN) permet aux
+          # autres workflows (CI de deploy.yml) de s'exécuter sur la PR de release :
+          # le GITHUB_TOKEN par défaut ne déclenche jamais d'autre workflow
+          # (anti-récursion), d'où le statut « action_required » observé sinon.
+          # Repli sur GITHUB_TOKEN tant que le secret n'est pas configuré.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}

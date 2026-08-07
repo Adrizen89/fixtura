@@ -77,8 +77,35 @@ jobs:
             npm ci
             node ace build
             cp .env build/.env
+
+            # Sauvegarde de la base AVANT la migration (rollback possible).
+            # Prérequis VPS : pg_dump (paquet postgresql-client). Le .env de prod
+            # doit rester « source-able » (lignes KEY=value standard).
+            set -a; . ./.env; set +a
+            BACKUP_DIR="${FIXTURA_BACKUP_DIR:-$HOME/fixtura-backups}"
+            mkdir -p "$BACKUP_DIR"
+            PGPASSWORD="$DB_PASSWORD" pg_dump \
+              -h "${DB_HOST:-127.0.0.1}" -p "${DB_PORT:-5432}" \
+              -U "$DB_USER" "$DB_DATABASE" \
+              > "$BACKUP_DIR/fixtura-$(date -u +%Y%m%d-%H%M%S).sql"
+            # Rotation : ne conserver que les 10 dumps les plus récents.
+            ls -1t "$BACKUP_DIR"/fixtura-*.sql | tail -n +11 | xargs -r rm --
+
             cd build && npm ci --omit=dev
             node ace migration:run --force
             cd ..
             pm2 reload ecosystem.config.cjs
             pm2 save
+
+            # Health check : l'app doit répondre après le reload, sinon on échoue
+            # le déploiement (plutôt que de le découvrir via les utilisateurs).
+            for i in $(seq 1 10); do
+              if curl -fsS "http://127.0.0.1:${PORT:-3333}/" -o /dev/null; then
+                echo "Health check OK (tentative $i)"
+                exit 0
+              fi
+              echo "En attente de l'app… ($i/10)"
+              sleep 2
+            done
+            echo "Health check échoué : l'app ne répond pas après le reload" >&2
+            exit 1
