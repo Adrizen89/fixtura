@@ -64,7 +64,7 @@ Un club de foot organise plusieurs tournois par an, aujourd'hui gérés dans un 
 |---|---|---|
 | Backend | **AdonisJS 6** (TypeScript, ESM) | Framework MVC structuré « à la Laravel » : Lucid ORM, migrations, auth first-party, validators. Idéal produit maintenable/évolutif. Choix d'Adrien. |
 | Rendu / front | **Inertia + Vue 3** (monolithe) | Un repo, un déploiement, pas d'API REST + JWT/CORS à gérer. Support Inertia officiel Adonis. SSR possible pour l'écran public. |
-| Temps réel | **`@adonisjs/transmit`** (SSE) + `@adonisjs/transmit-client` | Push serveur→client natif Adonis. Le VPS le permet → **vrai live**, pas de polling. |
+| Temps réel | **`@adonisjs/transmit`** (SSE) + `@adonisjs/transmit-client` | Push serveur→client natif Adonis. Le VPS le permet → **vrai live**, pas de polling. Transport en mémoire en v1 (instance unique) ; **transport Redis** activable (`REDIS_HOST`) pour le fan-out multi-instances — prérequis de scaling, cf. §11. |
 | ORM / DB | **Lucid + PostgreSQL** | Meilleur choix produit (contraintes, futur multi-club). Migrations versionnées. |
 | Auth | **`@adonisjs/auth`** — guard **session** (web) | Parfait pour une app Inertia. Hash scrypt par défaut. |
 | Validation | **VineJS** (`@vinejs/vine`) | Validator natif Adonis 6. |
@@ -168,6 +168,7 @@ Deux étapes :
 - **Cible : Hostinger VPS** (Node LTS, PostgreSQL, PM2, nginx reverse proxy, SSL Let's Encrypt).
 - Build Adonis : `node ace build` → dossier `build/`, puis `node ace migration:run --force` en prod.
 - **Le déploiement est géré par Adrien lui-même.** Ne pas rédiger de procédure pas-à-pas VPS/SFTP ni de `DEPLOY.md` (préférence ADBDigital). Se limiter à lister les pré-requis techniques si on en manque.
+- **Scaling multi-instances (prérequis) — transport Redis pour transmit** (issue #37) : en instance unique (PM2 mode fork, v1), transmit garde les abonnements SSE en mémoire — aucun service externe requis. Pour passer **PM2 en cluster** (plusieurs instances, montée en charge / multi-club), il faut d'abord un **transport partagé** sinon les broadcasts SSE ne se diffusent pas entre instances. Activation : renseigner `REDIS_HOST` (+ `REDIS_PORT`/`REDIS_PASSWORD`) dans `build/.env` → `config/transmit.ts` bascule automatiquement sur le driver Redis (`@adonisjs/transmit/transports`, via `ioredis`) ; puis démarrer PM2 avec `PM2_INSTANCES=max` (cf. `ecosystem.config.cjs`). Redis reste **optionnel en local** (absent → repli en mémoire). Pré-requis VPS supplémentaire dans ce cas : un serveur Redis (local, non exposé).
 
 ## 12. Workflow ADBDigital
 
