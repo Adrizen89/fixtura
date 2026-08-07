@@ -41,6 +41,13 @@ function logout() {
             <Link href="/tournaments" class="text-sand-11 transition hover:text-sand-12"
               >Tournois</Link
             >
+            <!-- Gestion des membres — réservée au responsable (issue #35). -->
+            <Link
+              v-if="user.role === 'owner'"
+              href="/membres"
+              class="text-sand-11 transition hover:text-sand-12"
+              >Membres</Link
+            >
           </nav>
         </div>
 

@@ -23,6 +23,9 @@ const EventPlanningController = () => import('#controllers/event_planning_contro
 const PublicEventController = () => import('#controllers/public_event_controller')
 const LegalController = () => import('#controllers/legal_controller')
 const AccountController = () => import('#controllers/account_controller')
+const RegistrationController = () => import('#controllers/registration_controller')
+const InvitationsController = () => import('#controllers/invitations_controller')
+const MembersController = () => import('#controllers/members_controller')
 
 /**
  * Routes du temps réel (SSE) : `__transmit/events` (flux), `__transmit/subscribe`
@@ -69,6 +72,14 @@ router
   .group(() => {
     router.get('/login', [AuthController, 'showLogin']).as('login.show')
     router.post('/login', [AuthController, 'login']).as('login')
+
+    // Onboarding (issue #35) : inscription d'un club (crée club + owner).
+    router.get('/register', [RegistrationController, 'show']).as('register.show')
+    router.post('/register', [RegistrationController, 'register']).as('register')
+
+    // Acceptation d'une invitation d'organisateur via jeton non devinable.
+    router.get('/invitations/:token', [InvitationsController, 'show']).as('invitations.show')
+    router.post('/invitations/:token', [InvitationsController, 'accept']).as('invitations.accept')
   })
   .use(middleware.guest())
 
@@ -97,6 +108,15 @@ router
 
     // Portabilité RGPD : l'organisateur `owner` télécharge les données de son club.
     router.get('/compte/export', [AccountController, 'exportData']).as('account.export')
+
+    // Gestion des membres du club (issue #35) — réservé au responsable (owner).
+    router.get('/membres', [MembersController, 'index']).as('members.index')
+    router.post('/membres/invitations', [MembersController, 'invite']).as('members.invite')
+    router
+      .delete('/membres/invitations/:id', [MembersController, 'revokeInvitation'])
+      .as('members.invitations.revoke')
+    router.patch('/membres/:id/role', [MembersController, 'updateRole']).as('members.role')
+    router.delete('/membres/:id', [MembersController, 'remove']).as('members.remove')
 
     router.resource('tournaments', TournamentsController)
     // Équipes gérées depuis la page du tournoi (ajout / renommage / suppression).
