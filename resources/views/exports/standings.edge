@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }}</title>
+  @include('exports/partials/styles')
+</head>
+
+<body>
+  @include('exports/partials/toolbar')
+
+  <main class="page">
+    <header class="doc-head">
+      <div>
+        <h1>{{ header.name }}</h1>
+        <div class="doc-sub">{{ header.category }} · {{ header.eventDate }}</div>
+      </div>
+      <div class="doc-meta">
+        <div class="doc-title">Classement</div>
+        <div style="margin-top:.4rem">{{ header.formatLabel }}</div>
+      </div>
+    </header>
+
+    @if(!hasResults)
+      <div class="empty">Aucun résultat saisi pour l'instant.</div>
+    @elseif(pools.length > 0)
+      @each(pool in pools)
+        <h2 class="section-title">Poule {{ pool.label }}</h2>
+        @component('exports/partials/standings_table', { rows: pool.standings })
+        @end
+      @end
+    @else
+      @component('exports/partials/standings_table', { rows: standings })
+      @end
+    @end
+  </main>
+</body>
+
+</html>

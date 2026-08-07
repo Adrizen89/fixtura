@@ -27,6 +27,8 @@ const sideTitle = computed(() =>
 )
 
 const showHref = `/tournaments/${props.tournament.id}`
+// Export imprimable du classement final (issue #38) — page autonome, nouvel onglet.
+const standingsPdfHref = `/tournaments/${props.tournament.id}/export/standings`
 
 /**
  * État affiché, initialisé depuis le rendu serveur puis mis à jour :
@@ -103,15 +105,26 @@ const live = computed(() => {
           Saisissez les scores au fil des matchs — le classement se met à jour aussitôt.
         </p>
       </div>
-      <!-- Lien vers l'écran public (lecture seule) à projeter / partager aux équipes. -->
-      <a
-        :href="`/t/${tournament.publicSlug}`"
-        target="_blank"
-        rel="noopener"
-        class="shrink-0 rounded-lg border border-sand-7 px-3 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
-      >
-        Écran public ↗
-      </a>
+      <div class="flex shrink-0 items-center gap-2">
+        <!-- Export imprimable du classement final (jour J). -->
+        <a
+          :href="standingsPdfHref"
+          target="_blank"
+          rel="noopener"
+          class="rounded-lg border border-sand-7 px-3 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
+        >
+          Classement (PDF) ↗
+        </a>
+        <!-- Lien vers l'écran public (lecture seule) à projeter / partager aux équipes. -->
+        <a
+          :href="`/t/${tournament.publicSlug}`"
+          target="_blank"
+          rel="noopener"
+          class="rounded-lg border border-sand-7 px-3 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
+        >
+          Écran public ↗
+        </a>
+      </div>
     </div>
 
     <!-- Pas de planning : rien à saisir -->
