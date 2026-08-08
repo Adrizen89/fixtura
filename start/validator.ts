@@ -28,6 +28,7 @@ vine.messagesProvider = new SimpleMessagesProvider(
     'min': 'Le champ {{ field }} doit être au moins {{ min }}.',
     'max': 'Le champ {{ field }} ne doit pas dépasser {{ max }}.',
     'regex': 'Le champ {{ field }} n’est pas au bon format.',
+    'confirmed': 'La confirmation du champ {{ field }} ne correspond pas.',
 
     // Messages ciblés (formats précis)
     'eventDate.regex': 'La date doit être au format AAAA-MM-JJ.',
@@ -48,6 +49,10 @@ vine.messagesProvider = new SimpleMessagesProvider(
     numTerrains: 'nombre de terrains',
     email: 'adresse e-mail',
     password: 'mot de passe',
+    passwordConfirmation: 'confirmation du mot de passe',
+    clubName: 'nom du club',
+    fullName: 'nom complet',
+    role: 'rôle',
     homeScore: 'score domicile',
     awayScore: 'score extérieur',
     time: 'heure',

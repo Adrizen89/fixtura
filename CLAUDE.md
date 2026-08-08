@@ -76,7 +76,7 @@ Un club de foot organise plusieurs tournois par an, aujourd'hui gérés dans un 
 
 ## 5. Architecture & modèle de données
 
-Multi-tenant-ready : une colonne `club_id` sur les entités racines **dès le jour 1**, même avec un seul club en base. **Fondation multi-club posée en v2 (issue #34)** : scope global automatique sur `club_id` (`TenantContext` + mixin `withTenantScope`), rôles + policies, contexte du club courant. Il ne reste, pour ouvrir réellement à des clubs tiers, que l'onboarding (inscription de clubs) et l'éventuelle sélection de club multi-adhésion — **sans migration douloureuse**.
+Multi-tenant-ready : une colonne `club_id` sur les entités racines **dès le jour 1**, même avec un seul club en base. **Fondation multi-club posée en v2 (issue #34)** : scope global automatique sur `club_id` (`TenantContext` + mixin `withTenantScope`), rôles + policies, contexte du club courant. **Onboarding livré en v2 (issue #35)** : inscription publique d'un club (`/register` → club + premier `owner`), invitations d'organisateurs par **lien + jeton + expiration** (`/invitations/:token`), gestion des membres (`/membres`, owner). Reste éventuellement, plus tard : la sélection de club multi-adhésion — **sans migration douloureuse**.
 
 Modèle (tables pluriel snake_case / modèles Lucid singulier PascalCase) :
 
@@ -86,6 +86,7 @@ Modèle (tables pluriel snake_case / modèles Lucid singulier PascalCase) :
 - **tournaments** `(id, club_id, event_id?, name, category, event_date, start_time, match_duration_min, break_duration_min, lunch_start, lunch_duration_min, num_terrains, status[draft|scheduled|live|finished], public_slug, format, format_config, created_at, updated_at)`. `event_id` **nullable** (v2 #32) : un tournoi autonome (v1) n'a pas d'événement ; une catégorie d'un événement le référence (le pool de terrains + le rythme viennent alors de l'événement). La migration a rétro-converti chaque tournoi v1 en **un événement à une catégorie**.
 - **teams** `(id, tournament_id, name, created_at, updated_at)` — nom uniquement.
 - **matches** `(id, tournament_id, round_number, terrain_number, scheduled_at, home_team_id, away_team_id, home_score, away_score, status[scheduled|live|finished|forfeit], forfeit_team_id?, updated_by_user_id, created_at, updated_at)`.
+- **invitations** `(id, club_id, email, role[owner|organizer], token, invited_by_user_id?, expires_at, accepted_at?, created_at, updated_at)` — **v2 (#35)** : invitation d'un organisateur par lien non devinable (jeton + expiration). Tenant-scopé (mixin `withTenantScope`) ; l'acceptation publique (`/invitations/:token`, hors contexte tenant) crée l'utilisateur dans le club avec le rôle prévu. Logique isolée : `app/services/invitations.ts` + `app/services/invitation_delivery.ts` (envoi email branchable, log du lien en v2).
 
 **Classement : jamais stocké en base.** Calculé à la volée par un service pur à partir des `matches` terminés.
 Règles foot : victoire = 3 pts, nul = 1, défaite = 0. Départage (issue #33, implémenté) : points → **confrontation directe** → différence de buts → buts marqués (puis nom, pour un ordre déterministe). La confrontation directe est un mini-classement calculé sur les seuls matchs entre les équipes à égalité, réappliqué récursivement pour les égalités à 3+ équipes (`app/services/standings.ts`).
@@ -99,9 +100,10 @@ Règles foot : victoire = 3 pts, nul = 1, défaite = 0. Départage (issue #33, i
   - Génération du planning : aperçu → validation → régénération.
   - Grille de saisie des résultats (live).
   - Gestion des aléas : décaler un match, forfait, corriger un score.
-- **Public (sans auth, via `/t/:public_slug`)** :
-  - Planning, résultats, classement en direct.
-  - **Mobile-first** (c'est le « lien mobile lecture seule ») **et** lisible de loin (affichage sur TV / vidéoprojecteur). Auto-refresh via SSE, aucune interaction requise.
+  - **Gestion des membres** (`/membres`, **owner** — #35) : inviter (lien + jeton), révoquer, changer un rôle, retirer.
+- **Public (sans auth)** :
+  - Écran d'un tournoi via `/t/:public_slug` : planning, résultats, classement en direct. **Mobile-first** (le « lien mobile lecture seule ») **et** lisible de loin (TV / vidéoprojecteur). Auto-refresh via SSE, aucune interaction requise.
+  - **Onboarding (invités — #35)** : inscription d'un club (`/register`), acceptation d'une invitation (`/invitations/:token`), pages légales (`/mentions-legales`, `/cgu`, `/confidentialite`).
 
 ## 6. Module critique — Génération du planning
 
@@ -199,7 +201,7 @@ Le skill `client-deployer` vise Hostinger **mutualisé** : il ne s'applique pas 
 
 ## 13. À NE PAS FAIRE
 
-- ❌ ~~Coder la gestion multi-club / l'inscription de clubs en v1 (juste la colonne `club_id`).~~ **v1 : tenu.** La **fondation** multi-club (scope global, rôles/policies, contexte club) est faite en **v2 (issue #34)**. Reste hors périmètre tant que non demandé : **inscription/onboarding de clubs** et **UI de sélection de club** (multi-adhésion d'un utilisateur).
+- ❌ ~~Coder la gestion multi-club / l'inscription de clubs en v1 (juste la colonne `club_id`).~~ **v1 : tenu.** Fondation multi-club en **v2 (#34)** ; **onboarding + invitations + gestion des membres en v2 (#35)**. Reste hors périmètre tant que non demandé : **UI de sélection de club** (multi-adhésion d'un utilisateur à plusieurs clubs) et l'**envoi email SMTP réel** des invitations (aujourd'hui : lien partageable + seam d'envoi).
 - ❌ Retomber sur du polling : on a le VPS → **SSE via transmit**.
 - ❌ Ajouter une lib UI lourde (rester Tailwind + composants maison).
 - ❌ Stocker le classement en base (calcul à la volée dans un service).
