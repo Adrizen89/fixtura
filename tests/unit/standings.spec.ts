@@ -50,6 +50,67 @@ test.group('standings · points', () => {
   })
 })
 
+test.group('standings · barème configurable', () => {
+  test('barème non-standard 2/1/0 : la victoire vaut 2 points (issue #104)', ({ assert }) => {
+    const [a, b, c] = teams('A', 'B', 'C')
+    const table = computeStandings(
+      [a, b, c],
+      [
+        match(1, 2, 0, 2), // A bat B
+        match(2, 1, 1, 3), // B et C nul
+      ],
+      { win: 2, draw: 1, loss: 0 }
+    )
+
+    const byId = new Map(table.map((r) => [r.teamId, r]))
+    assert.equal(byId.get(1)!.points, 2) // A : 1 victoire × 2
+    assert.equal(byId.get(2)!.points, 1) // B : 1 défaite + 1 nul
+    assert.equal(byId.get(3)!.points, 1) // C : 1 nul
+  })
+
+  test('barème appliquant des points à la défaite', ({ assert }) => {
+    const [a, b] = teams('A', 'B')
+    const table = computeStandings(
+      [a, b],
+      [
+        match(1, 3, 0, 2), // A bat B
+        match(1, 1, 1, 2), // A et B nul
+      ],
+      { win: 3, draw: 1, loss: 1 } // « point de participation » même en défaite
+    )
+
+    const byId = new Map(table.map((r) => [r.teamId, r]))
+    assert.equal(byId.get(1)!.points, 4) // A : victoire (3) + nul (1)
+    assert.equal(byId.get(2)!.points, 2) // B : défaite (1) + nul (1)
+  })
+
+  test('le barème peut inverser le classement (victoire faiblement récompensée)', ({ assert }) => {
+    const [a, b, c, d] = teams('A', 'B', 'C', 'D')
+    // A gagne un match ; B fait deux nuls. Avec 1/1/0, B (2) passe devant A (1).
+    const table = computeStandings(
+      [a, b, c, d],
+      [
+        match(1, 1, 0, 3), // A bat C
+        match(2, 0, 0, 3), // B et C nul
+        match(2, 0, 0, 4), // B et D nul
+      ],
+      { win: 1, draw: 1, loss: 0 }
+    )
+
+    const byId = new Map(table.map((r) => [r.teamId, r]))
+    assert.equal(byId.get(1)!.points, 1) // A : 1 victoire × 1
+    assert.equal(byId.get(2)!.points, 2) // B : 2 nuls × 1
+    assert.equal(table[0].teamId, 2) // B devant A grâce au barème
+  })
+
+  test('barème par défaut (3/1/0) quand aucun barème n’est fourni', ({ assert }) => {
+    const [a, b] = teams('A', 'B')
+    const table = computeStandings([a, b], [match(1, 2, 0, 2)])
+    const byId = new Map(table.map((r) => [r.teamId, r]))
+    assert.equal(byId.get(1)!.points, 3) // victoire = 3 par défaut
+  })
+})
+
 test.group('standings · départages', () => {
   test('à points égaux, la différence de buts départage', ({ assert }) => {
     const [a, b, c] = teams('A', 'B', 'C')

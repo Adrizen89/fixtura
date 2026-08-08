@@ -169,6 +169,70 @@ function submit() {
       </div>
     </section>
 
+    <!-- Barème de points (issue #104) -->
+    <section class="rounded-2xl border border-sand-6 bg-white p-6">
+      <h2 class="mb-1 text-base font-semibold text-sand-12">Barème de points</h2>
+      <p class="mb-4 text-sm text-sand-11">
+        Points attribués au classement. Par défaut : victoire 3, nul 1, défaite 0.
+      </p>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div>
+          <label for="winPoints" class="mb-1 block text-sm font-medium text-sand-12">
+            Victoire
+          </label>
+          <input
+            id="winPoints"
+            v-model.number="form.winPoints"
+            type="number"
+            min="0"
+            max="10"
+            required
+            class="w-full rounded-lg border border-sand-7 px-3 py-2 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+            :class="{ 'border-red-400': form.errors.winPoints }"
+          />
+          <p v-if="form.errors.winPoints" class="mt-1 text-sm text-red-700">
+            {{ form.errors.winPoints }}
+          </p>
+        </div>
+
+        <div>
+          <label for="drawPoints" class="mb-1 block text-sm font-medium text-sand-12">Nul</label>
+          <input
+            id="drawPoints"
+            v-model.number="form.drawPoints"
+            type="number"
+            min="0"
+            max="10"
+            required
+            class="w-full rounded-lg border border-sand-7 px-3 py-2 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+            :class="{ 'border-red-400': form.errors.drawPoints }"
+          />
+          <p v-if="form.errors.drawPoints" class="mt-1 text-sm text-red-700">
+            {{ form.errors.drawPoints }}
+          </p>
+        </div>
+
+        <div>
+          <label for="lossPoints" class="mb-1 block text-sm font-medium text-sand-12">
+            Défaite
+          </label>
+          <input
+            id="lossPoints"
+            v-model.number="form.lossPoints"
+            type="number"
+            min="0"
+            max="10"
+            required
+            class="w-full rounded-lg border border-sand-7 px-3 py-2 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+            :class="{ 'border-red-400': form.errors.lossPoints }"
+          />
+          <p v-if="form.errors.lossPoints" class="mt-1 text-sm text-red-700">
+            {{ form.errors.lossPoints }}
+          </p>
+        </div>
+      </div>
+    </section>
+
     <!-- Horaires & terrains -->
     <section class="rounded-2xl border border-sand-6 bg-white p-6">
       <h2 class="mb-1 text-base font-semibold text-sand-12">Horaires & terrains</h2>

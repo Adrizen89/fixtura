@@ -7,6 +7,7 @@ import Event from '#models/event'
 import Team from '#models/team'
 import Match from '#models/match'
 import { withTenantScope } from '#models/concerns/tenant_scoped'
+import type { Scoring } from '#services/standings'
 
 export type TournamentStatus = 'draft' | 'scheduled' | 'live' | 'finished'
 
@@ -83,6 +84,16 @@ export default class Tournament extends compose(BaseModel, withTenantScope()) {
   @column()
   declare numTerrains: number
 
+  /** Barème de points configurable (issue #104) — défaut football 3 / 1 / 0. */
+  @column()
+  declare winPoints: number
+
+  @column()
+  declare drawPoints: number
+
+  @column()
+  declare lossPoints: number
+
   @column()
   declare status: TournamentStatus
 
@@ -122,4 +133,9 @@ export default class Tournament extends compose(BaseModel, withTenantScope()) {
 
   @hasMany(() => Match)
   declare matches: HasMany<typeof Match>
+
+  /** Barème du tournoi, prêt à passer au service de classement pur (issue #104). */
+  get scoring(): Scoring {
+    return { win: this.winPoints, draw: this.drawPoints, loss: this.lossPoints }
+  }
 }
