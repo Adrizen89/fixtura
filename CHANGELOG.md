@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.7](https://github.com/Adrizen89/fixtura/compare/v0.1.6...v0.1.7) (2026-08-08)
+
+
+### ✨ Fonctionnalités
+
+* add configurable scoring system per tournament ([#104](https://github.com/Adrizen89/fixtura/issues/104)) ([cb8fd74](https://github.com/Adrizen89/fixtura/commit/cb8fd74f2967911cd3bb6ddcbd65ad73162a59c8))
+* classement final (podium 1er–4e) du tableau à élimination ([#128](https://github.com/Adrizen89/fixtura/issues/128)) ([c7467fd](https://github.com/Adrizen89/fixtura/commit/c7467fd98e032cf61627562184c579e4936a5220)), closes [#106](https://github.com/Adrizen89/fixtura/issues/106)
+* historique & consultation des éditions terminées ([#108](https://github.com/Adrizen89/fixtura/issues/108)) ([#124](https://github.com/Adrizen89/fixtura/issues/124)) ([8fb0d69](https://github.com/Adrizen89/fixtura/commit/8fb0d69ca65771d51edd34b0186c964ed7b177fa))
+* palmarès (vainqueurs par édition) + bilan cumulé par équipe ([#109](https://github.com/Adrizen89/fixtura/issues/109)) ([#130](https://github.com/Adrizen89/fixtura/issues/130)) ([61f48ee](https://github.com/Adrizen89/fixtura/commit/61f48eec78cf339d0f91ee8fc957537cdec99c78))
+* public team registration for tournaments ([#112](https://github.com/Adrizen89/fixtura/issues/112)) ([f11cf14](https://github.com/Adrizen89/fixtura/commit/f11cf14e297ff4ae029aa01c2a3ee0eb36f32253))
+* résolution d'un nul en élimination directe (tirs au but) ([#126](https://github.com/Adrizen89/fixtura/issues/126)) ([a5fc7b4](https://github.com/Adrizen89/fixtura/commit/a5fc7b4d5aed4b105c4d3dcf424a07dd26bf865f)), closes [#105](https://github.com/Adrizen89/fixtura/issues/105)
+
 ## [0.1.6](https://github.com/Adrizen89/fixtura/compare/v0.1.5...v0.1.6) (2026-08-08)
 
 
