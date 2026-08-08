@@ -9,5 +9,9 @@ export const matchScoreValidator = vine.compile(
   vine.object({
     homeScore: vine.number().withoutDecimals().min(0).max(99),
     awayScore: vine.number().withoutDecimals().min(0).max(99),
+    // Vainqueur aux tirs au but (élimination, issue #105) : requis seulement quand un
+    // match à élimination finit nul — la règle métier est appliquée côté service.
+    // Nullable : le formulaire envoie toujours le champ (null quand non concerné).
+    shootoutWinner: vine.enum(['home', 'away']).nullable().optional(),
   })
 )

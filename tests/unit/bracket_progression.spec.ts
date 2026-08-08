@@ -20,6 +20,7 @@ function m(p: Partial<ProgressMatch> & { id: number }): ProgressMatch {
     awayTeamId: null,
     homeScore: null,
     awayScore: null,
+    shootoutWinnerTeamId: null,
     homeSourceType: null,
     homeSourceMatchId: null,
     homeSourcePool: null,
@@ -264,5 +265,47 @@ test.group('progression · idempotence & correction', () => {
     const { fills, conflict } = planProgression([qf1, sf], TEAMS)
     assert.isDefined(conflict)
     assert.lengthOf(fills, 0)
+  })
+})
+
+test.group('progression · tirs au but (nul en élimination — #105)', () => {
+  test('outcomeOf : un nul départagé aux t.a.b. désigne un vainqueur', ({ assert }) => {
+    const base = {
+      id: 1,
+      status: 'finished',
+      homeTeamId: 1,
+      awayTeamId: 2,
+      homeScore: 1,
+      awayScore: 1,
+    }
+    // Sans vainqueur t.a.b. → pas d’issue.
+    assert.isNull(outcomeOf(m({ ...base })))
+    // Vainqueur t.a.b. côté domicile.
+    assert.deepEqual(outcomeOf(m({ ...base, shootoutWinnerTeamId: 1 })), {
+      winnerId: 1,
+      loserId: 2,
+    })
+    // Vainqueur t.a.b. côté extérieur.
+    assert.deepEqual(outcomeOf(m({ ...base, shootoutWinnerTeamId: 2 })), {
+      winnerId: 2,
+      loserId: 1,
+    })
+  })
+
+  test('le vainqueur t.a.b. d’une demie nulle remplit la finale', ({ assert }) => {
+    const sf = m({
+      id: 1,
+      status: 'finished',
+      homeTeamId: 1,
+      awayTeamId: 2,
+      homeScore: 0,
+      awayScore: 0,
+      shootoutWinnerTeamId: 2, // B gagne aux t.a.b.
+    })
+    const final = m({ id: 2, ...winner(1) }) // finale = vainqueur de la demie #1
+
+    const { fills, conflict } = planProgression([sf, final], TEAMS)
+    assert.isUndefined(conflict)
+    assert.deepEqual(fills, [{ matchId: 2, side: 'home', teamId: 2 }])
   })
 })

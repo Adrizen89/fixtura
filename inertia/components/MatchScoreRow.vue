@@ -17,14 +17,24 @@ const forfeitTeam = computed(() => {
   if (props.match.forfeitSide === 'away') return props.match.awayTeam
   return null
 })
+const shootoutTeam = computed(() => {
+  if (props.match.shootoutWinnerSide === 'home') return props.match.homeTeam
+  if (props.match.shootoutWinnerSide === 'away') return props.match.awayTeam
+  return null
+})
 
 /** Panneau « aléas » replié par défaut pour garder la ligne compacte (mobile-first). */
 const showIncidents = ref(false)
 
 /* --- Saisie / correction du score ---------------------------------------- */
-const scoreForm = useForm<{ homeScore: number | null; awayScore: number | null }>({
+const scoreForm = useForm<{
+  homeScore: number | null
+  awayScore: number | null
+  shootoutWinner: 'home' | 'away' | null
+}>({
   homeScore: props.match.homeScore,
   awayScore: props.match.awayScore,
+  shootoutWinner: props.match.shootoutWinnerSide,
 })
 
 /**
@@ -33,16 +43,31 @@ const scoreForm = useForm<{ homeScore: number | null; awayScore: number | null }
  * clobbe jamais ce que l'utilisateur est en train de taper.
  */
 watch(
-  () => [props.match.homeScore, props.match.awayScore] as const,
-  ([homeScore, awayScore]) => {
+  () => [props.match.homeScore, props.match.awayScore, props.match.shootoutWinnerSide] as const,
+  ([homeScore, awayScore, shootoutWinner]) => {
     if (scoreForm.isDirty) return
     scoreForm.homeScore = homeScore
     scoreForm.awayScore = awayScore
-    scoreForm.defaults({ homeScore, awayScore })
+    scoreForm.shootoutWinner = shootoutWinner
+    scoreForm.defaults({ homeScore, awayScore, shootoutWinner })
   }
 )
 
+/**
+ * Nul en élimination directe (issue #105) : un vainqueur aux tirs au but doit être
+ * désigné pour faire avancer le tableau. Le sélecteur n'apparaît que dans ce cas.
+ */
+const needsShootout = computed(
+  () =>
+    props.match.stage === 'knockout' &&
+    scoreForm.homeScore !== null &&
+    scoreForm.awayScore !== null &&
+    scoreForm.homeScore === scoreForm.awayScore
+)
+
 function submitScore() {
+  // Hors nul en élimination, aucun vainqueur t.a.b. n'est transmis.
+  if (!needsShootout.value) scoreForm.shootoutWinner = null
   scoreForm.patch(base.value, { preserveScroll: true })
 }
 
@@ -145,9 +170,45 @@ function formatTime(iso: string | null) {
       </button>
     </form>
 
-    <!-- Ligne d'état : forfait et/ou dernière saisie. -->
+    <!-- Nul en élimination : désignation du vainqueur aux tirs au but (issue #105). -->
+    <div v-if="needsShootout" class="mt-2 flex flex-wrap items-center gap-2 pl-11">
+      <span class="text-xs font-semibold uppercase tracking-wide text-amber-700">
+        Nul — vainqueur t.a.b.
+      </span>
+      <div class="flex gap-1.5" role="group" aria-label="Vainqueur aux tirs au but">
+        <button
+          type="button"
+          :aria-pressed="scoreForm.shootoutWinner === 'home'"
+          class="rounded-lg border px-3 py-1 text-sm font-medium transition"
+          :class="
+            scoreForm.shootoutWinner === 'home'
+              ? 'border-primary bg-primary text-white'
+              : 'border-sand-7 text-sand-12 hover:bg-sand-3'
+          "
+          @click="scoreForm.shootoutWinner = 'home'"
+        >
+          {{ match.homeTeam }}
+        </button>
+        <button
+          type="button"
+          :aria-pressed="scoreForm.shootoutWinner === 'away'"
+          class="rounded-lg border px-3 py-1 text-sm font-medium transition"
+          :class="
+            scoreForm.shootoutWinner === 'away'
+              ? 'border-primary bg-primary text-white'
+              : 'border-sand-7 text-sand-12 hover:bg-sand-3'
+          "
+          @click="scoreForm.shootoutWinner = 'away'"
+        >
+          {{ match.awayTeam }}
+        </button>
+      </div>
+      <span class="text-xs text-sand-9">puis « Enregistrer »</span>
+    </div>
+
+    <!-- Ligne d'état : forfait, tirs au but et/ou dernière saisie. -->
     <p
-      v-if="isForfeit || match.updatedBy"
+      v-if="isForfeit || shootoutTeam || match.updatedBy"
       class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 pl-11 text-xs text-sand-9"
     >
       <span
@@ -155,6 +216,12 @@ function formatTime(iso: string | null) {
         class="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-800"
       >
         Forfait{{ forfeitTeam ? ` — ${forfeitTeam}` : '' }}
+      </span>
+      <span
+        v-if="shootoutTeam"
+        class="inline-flex items-center rounded-full bg-sand-3 px-2 py-0.5 font-medium text-sand-11"
+      >
+        t.a.b. — {{ shootoutTeam }}
       </span>
       <span v-if="match.updatedBy">
         Saisi par {{ match.updatedBy

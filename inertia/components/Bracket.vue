@@ -48,7 +48,12 @@ function winnerSide(m: ResultMatchRow): 'home' | 'away' | null {
   if (!isPlayed(m)) return null
   if ((m.homeScore as number) > (m.awayScore as number)) return 'home'
   if ((m.awayScore as number) > (m.homeScore as number)) return 'away'
-  return null
+  return m.shootoutWinnerSide // nul départagé aux tirs au but (#105)
+}
+
+/** Le match a-t-il été départagé aux tirs au but (nul au score) ? */
+function isShootout(m: ResultMatchRow): boolean {
+  return isPlayed(m) && m.homeScore === m.awayScore && m.shootoutWinnerSide !== null
 }
 
 const teamName = (m: ResultMatchRow, side: 'home' | 'away') =>
@@ -87,6 +92,12 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
                   teamScore(m, side)
                 }}</span>
               </div>
+              <div
+                v-if="isShootout(m)"
+                class="px-3 pb-1 pt-0.5 text-[10px] font-semibold uppercase tracking-wide text-sand-9"
+              >
+                Tirs au but
+              </div>
             </div>
           </div>
         </div>
@@ -112,6 +123,12 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
           <span v-if="isPlayed(third)" class="shrink-0 tabular-nums">
             {{ teamScore(third, side) }}
           </span>
+        </div>
+        <div
+          v-if="isShootout(third)"
+          class="px-3 pb-1 pt-0.5 text-[10px] font-semibold uppercase tracking-wide text-sand-9"
+        >
+          Tirs au but
         </div>
       </div>
     </div>
