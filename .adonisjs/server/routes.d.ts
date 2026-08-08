@@ -9,6 +9,8 @@ export type ScannedRoutes = {
     'unsubscribe': { paramsTuple?: []; params?: {} }
     'public.tournament': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'public.event': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'public.registration': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
+    'public.registration.submit': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'legal.mentions': { paramsTuple?: []; params?: {} }
     'legal.terms': { paramsTuple?: []; params?: {} }
     'legal.privacy': { paramsTuple?: []; params?: {} }
@@ -38,6 +40,7 @@ export type ScannedRoutes = {
     'members.remove': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'club.appearance.edit': { paramsTuple?: []; params?: {} }
     'club.appearance.update': { paramsTuple?: []; params?: {} }
+    'history.index': { paramsTuple?: []; params?: {} }
     'tournaments.index': { paramsTuple?: []; params?: {} }
     'tournaments.create': { paramsTuple?: []; params?: {} }
     'tournaments.store': { paramsTuple?: []; params?: {} }
@@ -45,6 +48,7 @@ export type ScannedRoutes = {
     'tournaments.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tournaments.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tournaments.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'tournaments.registration.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tournaments.teams.store': { paramsTuple: [ParamValue]; params: {'tournament_id': ParamValue} }
     'tournaments.teams.update': { paramsTuple: [ParamValue,ParamValue]; params: {'tournament_id': ParamValue,'id': ParamValue} }
     'tournaments.teams.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'tournament_id': ParamValue,'id': ParamValue} }
@@ -63,6 +67,7 @@ export type ScannedRoutes = {
     'event_stream': { paramsTuple?: []; params?: {} }
     'public.tournament': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'public.event': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'public.registration': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'legal.mentions': { paramsTuple?: []; params?: {} }
     'legal.terms': { paramsTuple?: []; params?: {} }
     'legal.privacy': { paramsTuple?: []; params?: {} }
@@ -77,6 +82,7 @@ export type ScannedRoutes = {
     'account.export': { paramsTuple?: []; params?: {} }
     'members.index': { paramsTuple?: []; params?: {} }
     'club.appearance.edit': { paramsTuple?: []; params?: {} }
+    'history.index': { paramsTuple?: []; params?: {} }
     'tournaments.index': { paramsTuple?: []; params?: {} }
     'tournaments.create': { paramsTuple?: []; params?: {} }
     'tournaments.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -92,6 +98,7 @@ export type ScannedRoutes = {
     'event_stream': { paramsTuple?: []; params?: {} }
     'public.tournament': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'public.event': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'public.registration': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'legal.mentions': { paramsTuple?: []; params?: {} }
     'legal.terms': { paramsTuple?: []; params?: {} }
     'legal.privacy': { paramsTuple?: []; params?: {} }
@@ -106,6 +113,7 @@ export type ScannedRoutes = {
     'account.export': { paramsTuple?: []; params?: {} }
     'members.index': { paramsTuple?: []; params?: {} }
     'club.appearance.edit': { paramsTuple?: []; params?: {} }
+    'history.index': { paramsTuple?: []; params?: {} }
     'tournaments.index': { paramsTuple?: []; params?: {} }
     'tournaments.create': { paramsTuple?: []; params?: {} }
     'tournaments.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -120,6 +128,7 @@ export type ScannedRoutes = {
   POST: {
     'subscribe': { paramsTuple?: []; params?: {} }
     'unsubscribe': { paramsTuple?: []; params?: {} }
+    'public.registration.submit': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'login': { paramsTuple?: []; params?: {} }
     'register': { paramsTuple?: []; params?: {} }
     'invitations.accept': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
@@ -142,6 +151,7 @@ export type ScannedRoutes = {
     'events.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'members.role': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tournaments.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'tournaments.registration.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tournaments.teams.update': { paramsTuple: [ParamValue,ParamValue]; params: {'tournament_id': ParamValue,'id': ParamValue} }
     'tournaments.matches.update': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'matchId': ParamValue} }
     'tournaments.matches.reschedule': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'matchId': ParamValue} }

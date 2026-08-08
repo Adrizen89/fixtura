@@ -142,7 +142,18 @@ function destroyTeam(team: Team) {
 
         <!-- Mode affichage -->
         <div v-else class="flex items-center gap-2">
-          <span class="min-w-0 flex-1 truncate">{{ team.name }}</span>
+          <span class="min-w-0 flex-1 truncate">
+            {{ team.name }}
+            <!-- Contact d'une équipe inscrite en ligne (#112) — visible orga uniquement. -->
+            <a
+              v-if="team.contactEmail"
+              :href="`mailto:${team.contactEmail}`"
+              class="ml-1 text-xs font-normal text-sand-10 hover:text-sand-12 hover:underline"
+              :title="`Contact : ${team.contactEmail}`"
+            >
+              · {{ team.contactEmail }}
+            </a>
+          </span>
           <button
             type="button"
             class="shrink-0 text-xs font-medium text-sand-11 transition hover:text-sand-12"

@@ -10,12 +10,23 @@
 | Nom (facultatif), e-mail, rôle | `users` | Oui | Authentifier les organisateurs |
 | Mot de passe **haché** (scrypt) | `users` | Oui (secret) | Sécuriser l'accès |
 | Nom d'équipe | `teams` | Non (dénomination) | Planning, résultats, classement |
+| E-mail de contact d'équipe (facultatif) | `teams` | Oui | Contacter l'équipe inscrite en ligne (#112) |
 | Paramètres, scores, horodatage, auteur de saisie | `tournaments`, `matches` | Indirect | Générer le planning et le classement |
 | Nom / slug du club | `clubs` | Non | Racine multi-tenant |
 
 **Minimisation** : aucune donnée de joueur (nom, âge, licence). Les équipes ne sont
-qu'un **nom**. L'écran public (lecture seule, lien non devinable) n'expose que le nom
-du tournoi, les équipes, les scores et le classement — jamais un e-mail ou un compte.
+qu'un **nom** (+ un e-mail de contact **uniquement** en cas d'inscription en ligne,
+cf. ci-dessous). L'écran public (lecture seule, lien non devinable) n'expose que le
+nom du tournoi, les équipes, les scores et le classement — **jamais** un e-mail ou un
+compte.
+
+**Inscription publique d'une équipe (#112)** : un formulaire public
+(`/inscription/:token`, sans compte, **sans paiement**) collecte le **nom d'équipe**
+et un **e-mail de contact** — données minimales, finalité affichée (organiser le
+tournoi), lien vers la politique de confidentialité sur le formulaire. L'e-mail est
+visible de l'organisateur (gestion des équipes) et **jamais** diffusé sur l'écran
+public. Il est inclus dans l'export (§3) et l'effacement (§4) du club, avec le reste
+des équipes. Anti-abus : honeypot + limitation de débit (aucune donnée de traçage).
 
 ## 2. Aucune ressource tierce traçante
 

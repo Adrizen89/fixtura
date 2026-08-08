@@ -13,6 +13,14 @@ export default class Team extends BaseModel {
   @column()
   declare name: string
 
+  /**
+   * Contact minimal de l'équipe, renseigné lors d'une inscription publique
+   * (issue #112). Nullable : les équipes ajoutées par l'organisateur n'en ont pas.
+   * Donnée personnelle (RGPD, cf. §10) — jamais exposée sur l'écran public.
+   */
+  @column()
+  declare contactEmail: string | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

@@ -94,6 +94,21 @@ export default class Tournament extends compose(BaseModel, withTenantScope()) {
   @column()
   declare lossPoints: number
 
+  /**
+   * Inscription publique d'une équipe (issue #112). `registrationOpen` est
+   * l'intention de l'orga ; le lien public passe par `registrationToken` (non
+   * devinable, distinct du `publicSlug` des résultats). La « fermeture pleine » est
+   * dérivée du nombre d'équipes vs `registrationCapacity` (jamais stockée).
+   */
+  @column()
+  declare registrationOpen: boolean
+
+  @column()
+  declare registrationToken: string | null
+
+  @column()
+  declare registrationCapacity: number | null
+
   @column()
   declare status: TournamentStatus
 

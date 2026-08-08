@@ -29,6 +29,8 @@ const MembersController = () => import('#controllers/members_controller')
 const ClubController = () => import('#controllers/club_controller')
 const QrController = () => import('#controllers/qr_controller')
 const HistoryController = () => import('#controllers/history_controller')
+const PublicRegistrationController = () => import('#controllers/public_registration_controller')
+const RegistrationSettingsController = () => import('#controllers/registration_settings_controller')
 
 /**
  * Routes du temps réel (SSE) : `__transmit/events` (flux), `__transmit/subscribe`
@@ -59,6 +61,16 @@ router.get('/t/:slug', [PublicController, 'show']).as('public.tournament')
  * et lisible de loin, rafraîchi via SSE (un canal par catégorie).
  */
 router.get('/e/:slug', [PublicEventController, 'show']).as('public.event')
+
+/**
+ * Inscription publique d'une équipe à un tournoi (issue #112) — sans auth, sans
+ * compte, sans paiement, via un `registration_token` non devinable. GET affiche le
+ * formulaire (ou l'état fermé/complet), POST enregistre l'équipe.
+ */
+router.get('/inscription/:token', [PublicRegistrationController, 'show']).as('public.registration')
+router
+  .post('/inscription/:token', [PublicRegistrationController, 'register'])
+  .as('public.registration.submit')
 
 /**
  * Pages légales — publiques, sans auth (information des personnes exigée par le
@@ -129,6 +141,10 @@ router
     router.get('/historique', [HistoryController, 'index']).as('history.index')
 
     router.resource('tournaments', TournamentsController)
+    // Inscriptions en ligne (#112) : ouverture/fermeture + capacité, depuis la page du tournoi.
+    router
+      .patch('/tournaments/:id/registration', [RegistrationSettingsController, 'update'])
+      .as('tournaments.registration.update')
     // Équipes gérées depuis la page du tournoi (ajout / renommage / suppression).
     router.resource('tournaments.teams', TeamsController).only(['store', 'update', 'destroy'])
     // Génération du planning : aperçu (GET) puis validation/persistance (POST).
