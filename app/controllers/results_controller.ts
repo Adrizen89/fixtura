@@ -227,7 +227,8 @@ export default class ResultsController {
   private async progress(tournament: Tournament, trx: TransactionClientContract) {
     if (tournament.format === 'championship') return
     const teamsById = new Map(tournament.teams.map((t) => [t.id, t.name]))
-    await progressBracket(tournament.id, teamsById, trx)
+    // Qualification des poules avec le barème du tournoi (issue #104).
+    await progressBracket(tournament.id, teamsById, trx, tournament.scoring)
   }
 
   /**

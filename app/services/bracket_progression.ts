@@ -1,6 +1,7 @@
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import Match from '#models/match'
-import { computeStandings } from '#services/standings'
+import { computeStandings, DEFAULT_SCORING } from '#services/standings'
+import type { Scoring } from '#services/standings'
 
 /**
  * Progression des brackets (sous-issue #45 de #31).
@@ -87,7 +88,8 @@ function poolQualifier(
   matches: ProgressMatch[],
   teamsById: Map<number, string>,
   pool: string,
-  rank: number
+  rank: number,
+  scoring: Scoring
 ): number | null {
   const poolMatches = matches.filter((m) => m.stage === 'pool' && m.groupLabel === pool)
   if (poolMatches.length === 0) return null
@@ -109,7 +111,7 @@ function poolQualifier(
       awayScore: m.awayScore!,
     }))
 
-  const standings = computeStandings(teams, played)
+  const standings = computeStandings(teams, played, scoring)
   return standings[rank - 1]?.teamId ?? null
 }
 
@@ -121,7 +123,8 @@ function resolveSlot(
   type: string | null,
   matchId: number | null,
   pool: string | null,
-  rank: number | null
+  rank: number | null,
+  scoring: Scoring
 ): number | null {
   switch (type) {
     case 'match_winner': {
@@ -133,7 +136,9 @@ function resolveSlot(
       return feeder ? (outcomeOf(feeder)?.loserId ?? null) : null
     }
     case 'pool_rank':
-      return pool !== null && rank !== null ? poolQualifier(matches, teamsById, pool, rank) : null
+      return pool !== null && rank !== null
+        ? poolQualifier(matches, teamsById, pool, rank, scoring)
+        : null
     default:
       return null // 'team' / null : slot déjà concret, rien à résoudre
   }
@@ -148,7 +153,8 @@ function resolveSlot(
  */
 export function planProgression(
   matches: ProgressMatch[],
-  teamsById: Map<number, string>
+  teamsById: Map<number, string>,
+  scoring: Scoring = DEFAULT_SCORING
 ): ProgressionPlan {
   const byId = new Map(matches.map((m) => [m.id, m]))
   const fills: SlotFill[] = []
@@ -171,7 +177,8 @@ export function planProgression(
         type,
         side === 'home' ? m.homeSourceMatchId : m.awaySourceMatchId,
         side === 'home' ? m.homeSourcePool : m.awaySourcePool,
-        side === 'home' ? m.homeSourceRank : m.awaySourceRank
+        side === 'home' ? m.homeSourceRank : m.awaySourceRank,
+        scoring
       )
 
       if (correct === null || correct === current) continue // pas encore résoluble, ou déjà bon
@@ -219,10 +226,11 @@ function toProgressMatch(m: Match): ProgressMatch {
 export async function progressBracket(
   tournamentId: number,
   teamsById: Map<number, string>,
-  trx: TransactionClientContract
+  trx: TransactionClientContract,
+  scoring: Scoring = DEFAULT_SCORING
 ): Promise<number[]> {
   const rows = await Match.query({ client: trx }).where('tournament_id', tournamentId)
-  const { fills, conflict } = planProgression(rows.map(toProgressMatch), teamsById)
+  const { fills, conflict } = planProgression(rows.map(toProgressMatch), teamsById, scoring)
 
   if (conflict) throw new ProgressionConflictError(conflict)
 

@@ -49,6 +49,9 @@ export interface Tournament {
   lunchStart: string | null
   lunchDurationMin: number
   numTerrains: number
+  winPoints: number
+  drawPoints: number
+  lossPoints: number
   status: TournamentStatus
   publicSlug: string
   format: TournamentFormat
@@ -235,6 +238,9 @@ export interface TournamentFormData {
   lunchStart: string
   lunchDurationMin: number
   numTerrains: number
+  winPoints: number
+  drawPoints: number
+  lossPoints: number
   format: TournamentFormat
   numPools: number | null
   qualifiersPerPool: number | null

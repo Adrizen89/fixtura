@@ -43,9 +43,14 @@ export default class TournamentsController {
     return Tournament.query()
   }
 
-  /** Tableau de bord des tournois du club. */
+  /**
+   * Tableau de bord des tournois **actifs** du club. Les tournois terminés
+   * (`finished`) sont archivés et consultés depuis l'Historique (issue #108) : on
+   * les exclut ici pour distinguer clairement actifs / archivés.
+   */
   async index({ inertia }: HttpContext) {
     const tournaments = await this.query()
+      .whereNot('status', 'finished')
       .withCount('teams')
       .orderBy('event_date', 'desc')
       .orderBy('created_at', 'desc')
@@ -78,6 +83,9 @@ export default class TournamentsController {
       lunchStart: data.lunchStart ?? null,
       lunchDurationMin: data.lunchDurationMin,
       numTerrains: data.numTerrains,
+      winPoints: data.winPoints ?? 3,
+      drawPoints: data.drawPoints ?? 1,
+      lossPoints: data.lossPoints ?? 0,
       status: 'draft',
       publicSlug: generatePublicSlug(data.name),
       format: data.format,
@@ -131,6 +139,9 @@ export default class TournamentsController {
       lunchStart: data.lunchStart ?? null,
       lunchDurationMin: data.lunchDurationMin,
       numTerrains: data.numTerrains,
+      winPoints: data.winPoints ?? 3,
+      drawPoints: data.drawPoints ?? 1,
+      lossPoints: data.lossPoints ?? 0,
       format: data.format,
       formatConfig: formatConfigOf(data),
     })

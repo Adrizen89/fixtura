@@ -21,6 +21,12 @@ export const tournamentValidator = vine.compile(
     lunchDurationMin: vine.number().min(0).max(180),
     numTerrains: vine.number().min(1).max(20),
 
+    // Barème de points configurable (issue #104) — défaut 3/1/0 appliqué au
+    // contrôleur si absent (formulaires antérieurs / catégories d'événement).
+    winPoints: vine.number().withoutDecimals().min(0).max(10).optional(),
+    drawPoints: vine.number().withoutDecimals().min(0).max(10).optional(),
+    lossPoints: vine.number().withoutDecimals().min(0).max(10).optional(),
+
     // Format v2 (défaut championnat). La cohérence fine (numPools requis en
     // poules/hybride, qualifiés ≤ taille de poule…) est vérifiée à la génération
     // du planning par le scheduler, qui renvoie une erreur explicite.
