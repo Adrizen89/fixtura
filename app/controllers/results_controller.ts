@@ -210,16 +210,20 @@ export default class ResultsController {
    * « tous réglés » revient à « finale (+ petite finale) réglée » (dernière bande).
    */
   private async syncTournamentStatus(tournament: Tournament, trx: TransactionClientContract) {
-    const total = await Match.query({ client: trx })
+    // Une seule requête agrégée (issue #41) : total des matchs + nombre de matchs
+    // « réglés » (score saisi ou forfait), via un COUNT conditionnel (Postgres
+    // `FILTER`). Remplace les deux `COUNT` séparés exécutés à chaque saisie.
+    const row = await trx
+      .from('matches')
       .where('tournament_id', tournament.id)
-      .count('* as total')
-    const settled = await Match.query({ client: trx })
-      .where('tournament_id', tournament.id)
-      .whereIn('status', ['finished', 'forfeit'])
-      .count('* as total')
+      .select(
+        db.raw('count(*)::int as total'),
+        db.raw('count(*) filter (where status in (?, ?))::int as settled', ['finished', 'forfeit'])
+      )
+      .first()
 
-    const totalCount = Number(total[0].$extras.total)
-    const settledCount = Number(settled[0].$extras.total)
+    const totalCount = Number(row?.total ?? 0)
+    const settledCount = Number(row?.settled ?? 0)
 
     let next = tournament.status
     if (totalCount > 0 && settledCount === totalCount) {

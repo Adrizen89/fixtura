@@ -21,7 +21,10 @@ export default class PublicController {
       .preload('club')
       .firstOrFail()
 
-    const { matches, standings, pools } = await buildResultsData(tournament)
+    // Écran public : l'auteur de la dernière saisie n'est pas affiché (issue #41).
+    const { matches, standings, pools } = await buildResultsData(tournament, {
+      withUpdatedBy: false,
+    })
 
     // Mode TV (?tv=1) : affichage plein écran en rotation planning ↔ classement (#40).
     const tv = ['1', 'true'].includes(String(request.qs().tv ?? ''))
