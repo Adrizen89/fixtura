@@ -41,6 +41,10 @@ function logout() {
             <Link href="/tournaments" class="text-sand-11 transition hover:text-sand-12"
               >Tournois</Link
             >
+            <!-- Archives des éditions terminées, en lecture seule (issue #108). -->
+            <Link href="/historique" class="text-sand-11 transition hover:text-sand-12"
+              >Historique</Link
+            >
             <!-- Gestion des membres — réservée au responsable (issue #35). -->
             <Link
               v-if="user.role === 'owner'"

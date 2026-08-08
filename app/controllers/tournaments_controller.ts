@@ -43,9 +43,14 @@ export default class TournamentsController {
     return Tournament.query()
   }
 
-  /** Tableau de bord des tournois du club. */
+  /**
+   * Tableau de bord des tournois **actifs** du club. Les tournois terminés
+   * (`finished`) sont archivés et consultés depuis l'Historique (issue #108) : on
+   * les exclut ici pour distinguer clairement actifs / archivés.
+   */
   async index({ inertia }: HttpContext) {
     const tournaments = await this.query()
+      .whereNot('status', 'finished')
       .withCount('teams')
       .orderBy('event_date', 'desc')
       .orderBy('created_at', 'desc')

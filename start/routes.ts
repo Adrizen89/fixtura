@@ -28,6 +28,7 @@ const InvitationsController = () => import('#controllers/invitations_controller'
 const MembersController = () => import('#controllers/members_controller')
 const ClubController = () => import('#controllers/club_controller')
 const QrController = () => import('#controllers/qr_controller')
+const HistoryController = () => import('#controllers/history_controller')
 
 /**
  * Routes du temps réel (SSE) : `__transmit/events` (flux), `__transmit/subscribe`
@@ -123,6 +124,9 @@ router
     // Personnalisation du club : logo + couleur sur l'écran public (issue #40).
     router.get('/club/apparence', [ClubController, 'edit']).as('club.appearance.edit')
     router.post('/club/apparence', [ClubController, 'update']).as('club.appearance.update')
+
+    // Historique du club : consultation en lecture seule des éditions terminées (#108).
+    router.get('/historique', [HistoryController, 'index']).as('history.index')
 
     router.resource('tournaments', TournamentsController)
     // Équipes gérées depuis la page du tournoi (ajout / renommage / suppression).
