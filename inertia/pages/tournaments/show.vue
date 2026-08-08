@@ -4,6 +4,7 @@ import { Head, Link } from '@inertiajs/vue3'
 import AdminLayout from '~/layouts/AdminLayout.vue'
 import StatusBadge from '~/components/StatusBadge.vue'
 import TeamsManager from '~/components/TeamsManager.vue'
+import RegistrationManager from '~/components/RegistrationManager.vue'
 import PlanningGrid from '~/components/PlanningGrid.vue'
 import type { PlanningView, Tournament } from '~/app/types'
 
@@ -144,6 +145,9 @@ function hhmm(v: string | null) {
         </div>
       </div>
     </section>
+
+    <!-- Inscriptions en ligne des équipes (#112) -->
+    <RegistrationManager class="mt-6" :tournament="tournament" />
 
     <!-- Planning -->
     <section class="mt-6 rounded-2xl border border-sand-6 bg-white p-6">
