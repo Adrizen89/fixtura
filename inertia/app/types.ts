@@ -244,3 +244,29 @@ export interface TournamentFormData {
   qualifiersPerPool: number | null
   thirdPlace: boolean
 }
+
+/** Palmarès (issue #109) — vues sérialisées pour la page admin. */
+export interface Laureate {
+  teamId: number
+  teamName: string
+}
+
+/** Vainqueur / finaliste d'une édition terminée. */
+export interface EditionResult {
+  tournamentId: number
+  name: string
+  category: string
+  eventDate: string | null
+  format: TournamentFormat
+  winner: Laureate | null
+  finalist: Laureate | null
+}
+
+/** Bilan cumulé d'une équipe (agrégé par nom) sur l'historique du club. */
+export interface TeamRecord {
+  teamName: string
+  participations: number
+  wins: number
+  finals: number
+  winRate: number
+}
