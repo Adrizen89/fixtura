@@ -30,6 +30,7 @@ export type TournamentFormat = 'championship' | 'pools' | 'knockout' | 'hybrid'
 export interface TournamentFormatConfig {
   numPools?: number | null
   qualifiersPerPool?: number | null
+  bestRunnersUp?: number | null
   thirdPlace?: boolean
 }
 
@@ -244,5 +245,6 @@ export interface TournamentFormData {
   format: TournamentFormat
   numPools: number | null
   qualifiersPerPool: number | null
+  bestRunnersUp: number | null
   thirdPlace: boolean
 }

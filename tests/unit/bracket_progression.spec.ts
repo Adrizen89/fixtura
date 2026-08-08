@@ -25,10 +25,12 @@ function m(p: Partial<ProgressMatch> & { id: number }): ProgressMatch {
     homeSourceMatchId: null,
     homeSourcePool: null,
     homeSourceRank: null,
+    homeSourceIndex: null,
     awaySourceType: null,
     awaySourceMatchId: null,
     awaySourcePool: null,
     awaySourceRank: null,
+    awaySourceIndex: null,
     ...p,
   }
 }
@@ -307,5 +309,77 @@ test.group('progression · tirs au but (nul en élimination — #105)', () => {
     const { fills, conflict } = planProgression([sf, final], TEAMS)
     assert.isUndefined(conflict)
     assert.deepEqual(fills, [{ matchId: 2, side: 'home', teamId: 2 }])
+  })
+})
+
+test.group('progression · repêchage inter-poules (pool_best — #107)', () => {
+  test('meilleurs 2es toutes poules confondues, départagés par diff. de buts', ({ assert }) => {
+    // Poule A : 1 bat 2 (2-0). Poule B : 3 bat 4 (1-0).
+    // 2es : team2 (diff -2) et team4 (diff -1) → team4 est le meilleur 2e.
+    const pools = [
+      m({
+        id: 1,
+        stage: 'pool',
+        groupLabel: 'A',
+        status: 'finished',
+        homeTeamId: 1,
+        awayTeamId: 2,
+        homeScore: 2,
+        awayScore: 0,
+      }),
+      m({
+        id: 2,
+        stage: 'pool',
+        groupLabel: 'B',
+        status: 'finished',
+        homeTeamId: 3,
+        awayTeamId: 4,
+        homeScore: 1,
+        awayScore: 0,
+      }),
+    ]
+    const ko = m({
+      id: 3,
+      homeSourceType: 'pool_best',
+      homeSourceRank: 2,
+      homeSourceIndex: 1,
+      awaySourceType: 'pool_best',
+      awaySourceRank: 2,
+      awaySourceIndex: 2,
+    })
+
+    const { fills, conflict } = planProgression([...pools, ko], TEAMS)
+    assert.isUndefined(conflict)
+    assert.deepEqual(fills, [
+      { matchId: 3, side: 'home', teamId: 4 }, // meilleur 2e
+      { matchId: 3, side: 'away', teamId: 2 }, // 2e meilleur 2e
+    ])
+  })
+
+  test('une poule non terminée : le repêchage reste indéterminé', ({ assert }) => {
+    const pools = [
+      m({
+        id: 1,
+        stage: 'pool',
+        groupLabel: 'A',
+        status: 'finished',
+        homeTeamId: 1,
+        awayTeamId: 2,
+        homeScore: 2,
+        awayScore: 0,
+      }),
+      m({
+        id: 2,
+        stage: 'pool',
+        groupLabel: 'B',
+        status: 'scheduled',
+        homeTeamId: 3,
+        awayTeamId: 4,
+      }),
+    ]
+    const ko = m({ id: 3, homeSourceType: 'pool_best', homeSourceRank: 2, homeSourceIndex: 1 })
+
+    const { fills } = planProgression([...pools, ko], TEAMS)
+    assert.lengthOf(fills, 0)
   })
 })
