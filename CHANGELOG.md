@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.1.6](https://github.com/Adrizen89/fixtura/compare/v0.1.5...v0.1.6) (2026-08-08)
+
+
+### ✨ Fonctionnalités
+
+* add Redis transport for transmit SSE multi-instance scaling ([#84](https://github.com/Adrizen89/fixtura/issues/84)) ([fbc3ebb](https://github.com/Adrizen89/fixtura/commit/fbc3ebba0d9863bfd512ab2c7d5b4ed713a65142)), closes [#37](https://github.com/Adrizen89/fixtura/issues/37)
+* départage du classement par confrontation directe ([#33](https://github.com/Adrizen89/fixtura/issues/33)) ([#85](https://github.com/Adrizen89/fixtura/issues/85)) ([f32617b](https://github.com/Adrizen89/fixtura/commit/f32617b80f82f920ed9dae0a72ebcbbf5c95fb86))
+* élimination directe au niveau événement multi-catégories ([#32](https://github.com/Adrizen89/fixtura/issues/32)) ([#90](https://github.com/Adrizen89/fixtura/issues/90)) ([1a75523](https://github.com/Adrizen89/fixtura/commit/1a75523ff1d699a3850ac98378ddf0255fe9b951))
+* événements multi-catégories sur pool de terrains partagé ([#32](https://github.com/Adrizen89/fixtura/issues/32)) ([#89](https://github.com/Adrizen89/fixtura/issues/89)) ([9dee4d5](https://github.com/Adrizen89/fixtura/commit/9dee4d5294b94f0623121ade01af8bf5a16e4240))
+* **export:** printable PDF exports for planning, match sheets & standings ([#86](https://github.com/Adrizen89/fixtura/issues/86)) ([a585bc8](https://github.com/Adrizen89/fixtura/commit/a585bc893bd6e89b57b3b48de9dca967f526f555)), closes [#38](https://github.com/Adrizen89/fixtura/issues/38)
+* **multi-club:** scope global automatique, rôles/policies & contexte club ([#34](https://github.com/Adrizen89/fixtura/issues/34)) ([#92](https://github.com/Adrizen89/fixtura/issues/92)) ([7f74346](https://github.com/Adrizen89/fixtura/commit/7f7434650cd9bc07f8ef521ca87cc499a2abc18d))
+* **onboarding:** inscription de club, invitations & gestion des membres ([#35](https://github.com/Adrizen89/fixtura/issues/35)) ([#94](https://github.com/Adrizen89/fixtura/issues/94)) ([8df3780](https://github.com/Adrizen89/fixtura/commit/8df3780aa8456a0e77728c01b6995d27b3ce57ec))
+* **public:** notifications temps réel — prochain match & alertes par équipe ([#91](https://github.com/Adrizen89/fixtura/issues/91)) ([229946d](https://github.com/Adrizen89/fixtura/commit/229946d9bab432b1e1abf9b807c05486be007e84)), closes [#39](https://github.com/Adrizen89/fixtura/issues/39)
+* **public:** QR code, PWA offline, club branding & TV mode ([#93](https://github.com/Adrizen89/fixtura/issues/93)) ([2f8829d](https://github.com/Adrizen89/fixtura/commit/2f8829dc4974e8452569adf40acf3949c8f4edc6)), closes [#40](https://github.com/Adrizen89/fixtura/issues/40)
+* **rgpd:** pages légales, consentement, export & suppression des données ([#36](https://github.com/Adrizen89/fixtura/issues/36)) ([#88](https://github.com/Adrizen89/fixtura/issues/88)) ([e44be21](https://github.com/Adrizen89/fixtura/commit/e44be21d591f78ad0199db62c70cd120bac0fa5c))
+
+
+### ⚡ Performances
+
+* index matches (tournament_id, scheduled_at) + syncTournamentStatus agrégé ([#41](https://github.com/Adrizen89/fixtura/issues/41)) ([#95](https://github.com/Adrizen89/fixtura/issues/95)) ([f6fc397](https://github.com/Adrizen89/fixtura/commit/f6fc3970bc6247e089bc99db315a1c3989e1c1f6))
+
+
+### ✅ Tests
+
+* intégration temps réel SSE — saisie de score → écran public ([#30](https://github.com/Adrizen89/fixtura/issues/30)) ([#96](https://github.com/Adrizen89/fixtura/issues/96)) ([f61c33a](https://github.com/Adrizen89/fixtura/commit/f61c33aeb3c24b0b189442b0762fcd4e88b6b8e8))
+
 ## [0.1.5](https://github.com/Adrizen89/fixtura/compare/v0.1.4...v0.1.5) (2026-08-07)
 
 
