@@ -1,13 +1,17 @@
 import Match from '#models/match'
 import type Tournament from '#models/tournament'
 import { computeStandings } from '#services/standings'
-import type { StandingRow } from '#services/standings'
+import type { StandingRow, Scoring } from '#services/standings'
 import { forfeitSideOf } from '#services/match_incidents'
 import { participantLabel } from '#services/match_labels'
 import type { ResultRow, PoolStanding } from '#services/realtime'
 
 /** Classements par poule (formats poules / hybride) à partir des matchs de poule. */
-function poolStandingsOf(matches: Match[], teamsById: Map<number, string>): PoolStanding[] {
+function poolStandingsOf(
+  matches: Match[],
+  teamsById: Map<number, string>,
+  scoring: Scoring
+): PoolStanding[] {
   const poolMatches = matches.filter((m) => m.stage === 'pool' && m.groupLabel !== null)
   if (poolMatches.length === 0) return []
 
@@ -40,7 +44,7 @@ function poolStandingsOf(matches: Match[], teamsById: Map<number, string>): Pool
         homeScore: m.homeScore!,
         awayScore: m.awayScore!,
       }))
-    return { label, standings: computeStandings(teams, played) }
+    return { label, standings: computeStandings(teams, played, scoring) }
   })
 }
 
@@ -107,6 +111,9 @@ export async function buildResultsData(
 
   const teamsById = new Map(tournament.teams.map((t) => [t.id, t.name]))
 
+  // Barème du tournoi (issue #104) — appliqué au classement global ET par poule.
+  const scoring = tournament.scoring
+
   const standings = computeStandings(
     tournament.teams.map((t) => ({ id: t.id, name: t.name })),
     matches
@@ -122,8 +129,9 @@ export async function buildResultsData(
         awayTeamId: m.awayTeamId!,
         homeScore: m.homeScore!,
         awayScore: m.awayScore!,
-      }))
+      })),
+    scoring
   )
 
-  return { matches: rows, standings, pools: poolStandingsOf(matches, teamsById) }
+  return { matches: rows, standings, pools: poolStandingsOf(matches, teamsById, scoring) }
 }

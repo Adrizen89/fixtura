@@ -46,20 +46,32 @@ export interface StandingRow {
   points: number
 }
 
-const WIN_POINTS = 3
-const DRAW_POINTS = 1
+/**
+ * Barème de points (issue #104) : configurable par tournoi. Défaut football 3/1/0.
+ * Le service reste **pur** — le barème lui est passé en paramètre, jamais lu en base.
+ */
+export interface Scoring {
+  win: number
+  draw: number
+  loss: number
+}
+
+/** Barème par défaut (victoire 3, nul 1, défaite 0). */
+export const DEFAULT_SCORING: Scoring = { win: 3, draw: 1, loss: 0 }
 
 /**
  * Calcule le classement d'un tournoi.
  *
  * @param teams   Toutes les équipes du tournoi (celles sans match apparaissent à 0).
  * @param matches Uniquement les matchs à comptabiliser (deux scores connus).
+ * @param scoring Barème de points (défaut 3/1/0).
  * @returns Les lignes triées, rang renseigné (les équipes à égalité parfaite
  *          partagent le même rang).
  */
 export function computeStandings(
   teams: StandingsTeamInput[],
-  matches: StandingsMatchInput[]
+  matches: StandingsMatchInput[],
+  scoring: Scoring = DEFAULT_SCORING
 ): StandingRow[] {
   // Accumulateur par équipe, initialisé pour TOUTES les équipes (0 partout).
   const rows = new Map<number, StandingRow>()
@@ -104,9 +116,9 @@ export function computeStandings(
     }
   }
 
-  // Dérive points et différence de buts.
+  // Dérive points (selon le barème) et différence de buts.
   for (const row of rows.values()) {
-    row.points = row.won * WIN_POINTS + row.drawn * DRAW_POINTS
+    row.points = row.won * scoring.win + row.drawn * scoring.draw + row.lost * scoring.loss
     row.goalDifference = row.goalsFor - row.goalsAgainst
   }
 
@@ -115,7 +127,7 @@ export function computeStandings(
   // indissociables (elles partageront le même rang).
   const byPoints = [...rows.values()].sort((a, b) => b.points - a.points)
   const buckets = groupByAdjacent(byPoints, (a, b) => a.points === b.points).flatMap((group) =>
-    resolveTiedGroup(group, matches)
+    resolveTiedGroup(group, matches, scoring)
   )
 
   // Aplatit les buckets en attribuant les rangs (classement standard « 1-1-3 ») :
@@ -146,7 +158,8 @@ interface HeadToHeadStat {
  */
 function headToHeadStats(
   groupIds: Set<number>,
-  matches: StandingsMatchInput[]
+  matches: StandingsMatchInput[],
+  scoring: Scoring
 ): Map<number, HeadToHeadStat> {
   const stats = new Map<number, HeadToHeadStat>()
   for (const id of groupIds) {
@@ -164,12 +177,14 @@ function headToHeadStats(
     away.goalDifference += match.awayScore - match.homeScore
 
     if (match.homeScore > match.awayScore) {
-      home.points += WIN_POINTS
+      home.points += scoring.win
+      away.points += scoring.loss
     } else if (match.homeScore < match.awayScore) {
-      away.points += WIN_POINTS
+      away.points += scoring.win
+      home.points += scoring.loss
     } else {
-      home.points += DRAW_POINTS
-      away.points += DRAW_POINTS
+      home.points += scoring.draw
+      away.points += scoring.draw
     }
   }
 
@@ -188,11 +203,15 @@ function headToHeadStats(
  *    ou égalité circulaire), on retombe sur les critères généraux : différence de
  *    buts → buts marqués → nom (déterministe).
  */
-function resolveTiedGroup(group: StandingRow[], matches: StandingsMatchInput[]): StandingRow[][] {
+function resolveTiedGroup(
+  group: StandingRow[],
+  matches: StandingsMatchInput[],
+  scoring: Scoring
+): StandingRow[][] {
   if (group.length <= 1) return [group]
 
   const groupIds = new Set(group.map((r) => r.teamId))
-  const h2h = headToHeadStats(groupIds, matches)
+  const h2h = headToHeadStats(groupIds, matches, scoring)
   const stat = (row: StandingRow) => h2h.get(row.teamId)!
 
   const byHeadToHead = [...group].sort(
@@ -212,7 +231,7 @@ function resolveTiedGroup(group: StandingRow[], matches: StandingsMatchInput[]):
   // La confrontation directe a séparé le groupe → on affine chaque sous-groupe
   // (strictement plus petit ⇒ récursion garantie de terminer).
   if (h2hClasses.length > 1) {
-    return h2hClasses.flatMap((cls) => resolveTiedGroup(cls, matches))
+    return h2hClasses.flatMap((cls) => resolveTiedGroup(cls, matches, scoring))
   }
 
   // Confrontation directe indécise → critères généraux ; les équipes encore égales
