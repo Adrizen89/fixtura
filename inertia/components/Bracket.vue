@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { ResultMatchRow } from '~/app/types'
+import { finalRanking, ordinalFr } from '~/composables/final_ranking'
 
 /**
  * Arbre d'élimination directe — affichage **sobre** en colonnes par tour.
@@ -39,6 +40,17 @@ const columns = computed(() => {
 
 const third = computed(() => ko.value.find((m) => m.bracketRound === 'third') ?? null)
 
+/** Classement final (podium 1er/2e/3e/4e) dérivé de la finale + petite finale (#106). */
+const podium = computed(() => finalRanking(ko.value))
+
+/** Fond de médaille pour la lisibilité de loin (or / argent / bronze). */
+function medalClass(rank: number) {
+  if (rank === 1) return 'bg-amber-100 text-amber-900'
+  if (rank === 2) return 'bg-sand-4 text-sand-12'
+  if (rank === 3) return 'bg-orange-100 text-orange-900'
+  return 'bg-sand-3 text-sand-11'
+}
+
 function isPlayed(m: ResultMatchRow) {
   return m.homeScore !== null && m.awayScore !== null
 }
@@ -48,7 +60,12 @@ function winnerSide(m: ResultMatchRow): 'home' | 'away' | null {
   if (!isPlayed(m)) return null
   if ((m.homeScore as number) > (m.awayScore as number)) return 'home'
   if ((m.awayScore as number) > (m.homeScore as number)) return 'away'
-  return null
+  return m.shootoutWinnerSide // nul départagé aux tirs au but (#105)
+}
+
+/** Le match a-t-il été départagé aux tirs au but (nul au score) ? */
+function isShootout(m: ResultMatchRow): boolean {
+  return isPlayed(m) && m.homeScore === m.awayScore && m.shootoutWinnerSide !== null
 }
 
 const teamName = (m: ResultMatchRow, side: 'home' | 'away') =>
@@ -59,6 +76,24 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
 
 <template>
   <div v-if="ko.length">
+    <!-- Classement final (podium) une fois la finale jouée (issue #106). -->
+    <div v-if="podium.length" class="mb-5">
+      <h3 class="mb-2 text-xs font-semibold uppercase tracking-wide text-sand-9">
+        Classement final
+      </h3>
+      <ol class="flex flex-wrap gap-2">
+        <li
+          v-for="row in podium"
+          :key="row.rank"
+          class="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold sm:text-base"
+          :class="medalClass(row.rank)"
+        >
+          <span class="tabular-nums">{{ ordinalFr(row.rank) }}</span>
+          <span>{{ row.teamName }}</span>
+        </li>
+      </ol>
+    </div>
+
     <div class="overflow-x-auto pb-2">
       <div class="flex gap-4">
         <div
@@ -87,6 +122,12 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
                   teamScore(m, side)
                 }}</span>
               </div>
+              <div
+                v-if="isShootout(m)"
+                class="px-3 pb-1 pt-0.5 text-[10px] font-semibold uppercase tracking-wide text-sand-9"
+              >
+                Tirs au but
+              </div>
             </div>
           </div>
         </div>
@@ -112,6 +153,12 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
           <span v-if="isPlayed(third)" class="shrink-0 tabular-nums">
             {{ teamScore(third, side) }}
           </span>
+        </div>
+        <div
+          v-if="isShootout(third)"
+          class="px-3 pb-1 pt-0.5 text-[10px] font-semibold uppercase tracking-wide text-sand-9"
+        >
+          Tirs au but
         </div>
       </div>
     </div>

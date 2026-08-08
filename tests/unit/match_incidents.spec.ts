@@ -6,6 +6,10 @@ import {
   scoreFields,
   forfeitSideOf,
   timeToMinutes,
+  scoreResult,
+  stageAllowsDraw,
+  shootoutSideOf,
+  DrawNotAllowedError,
 } from '#services/match_incidents'
 import { computeStandings } from '#services/standings'
 
@@ -96,5 +100,55 @@ test.group('match_incidents · impact classement du forfait', () => {
     assert.equal(bravo.points, 0)
     assert.equal(bravo.lost, 1)
     assert.equal(bravo.played, 1)
+  })
+})
+
+test.group('match_incidents · scoreResult (nul en élimination — #105)', () => {
+  const KO = { stage: 'knockout', homeTeamId: 10, awayTeamId: 20 }
+  const POOL = { stage: 'pool', homeTeamId: 10, awayTeamId: 20 }
+
+  test('phases autorisant le nul : poule et championnat, pas l’élimination', ({ assert }) => {
+    assert.isTrue(stageAllowsDraw('pool'))
+    assert.isTrue(stageAllowsDraw('main'))
+    assert.isFalse(stageAllowsDraw('knockout'))
+  })
+
+  test('score décisif : terminé, aucun vainqueur t.a.b.', ({ assert }) => {
+    const fields = scoreResult({ ...KO, homeScore: 2, awayScore: 1 })
+    assert.equal(fields.status, 'finished')
+    assert.isNull(fields.shootoutWinnerTeamId)
+  })
+
+  test('nul en poule : autorisé, aucun vainqueur t.a.b.', ({ assert }) => {
+    const fields = scoreResult({ ...POOL, homeScore: 1, awayScore: 1 })
+    assert.equal(fields.status, 'finished')
+    assert.isNull(fields.shootoutWinnerTeamId)
+  })
+
+  test('nul en élimination sans vainqueur désigné → DrawNotAllowedError', ({ assert }) => {
+    assert.throws(() => scoreResult({ ...KO, homeScore: 1, awayScore: 1 }), DrawNotAllowedError)
+    assert.throws(
+      () => scoreResult({ ...KO, homeScore: 1, awayScore: 1, shootoutWinner: null }),
+      DrawNotAllowedError
+    )
+  })
+
+  test('nul en élimination avec vainqueur t.a.b. → équipe de ce côté', ({ assert }) => {
+    const home = scoreResult({ ...KO, homeScore: 1, awayScore: 1, shootoutWinner: 'home' })
+    assert.equal(home.shootoutWinnerTeamId, 10)
+    const away = scoreResult({ ...KO, homeScore: 2, awayScore: 2, shootoutWinner: 'away' })
+    assert.equal(away.shootoutWinnerTeamId, 20)
+  })
+
+  test('score décisif en élimination : le vainqueur t.a.b. transmis est ignoré', ({ assert }) => {
+    const fields = scoreResult({ ...KO, homeScore: 3, awayScore: 1, shootoutWinner: 'away' })
+    assert.isNull(fields.shootoutWinnerTeamId)
+  })
+
+  test('shootoutSideOf : déduit le côté du vainqueur t.a.b.', ({ assert }) => {
+    assert.equal(shootoutSideOf(10, 10, 20), 'home')
+    assert.equal(shootoutSideOf(20, 10, 20), 'away')
+    assert.isNull(shootoutSideOf(null, 10, 20))
+    assert.isNull(shootoutSideOf(99, 10, 20))
   })
 })

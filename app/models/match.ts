@@ -48,6 +48,14 @@ export default class Match extends BaseModel {
   @column()
   declare forfeitTeamId: number | null
 
+  /**
+   * Vainqueur aux tirs au but (élimination directe, issue #105) : renseigné quand un
+   * match à élimination finit à égalité au score. Null sinon (décidé au score, poule,
+   * ou non joué). Sert à faire avancer le bracket malgré un score nul.
+   */
+  @column()
+  declare shootoutWinnerTeamId: number | null
+
   @column()
   declare updatedByUserId: number | null
 

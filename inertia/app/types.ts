@@ -117,6 +117,8 @@ export interface ResultMatchRow {
   status: string
   /** Côté forfaitaire ('home' | 'away') si le match est un forfait, sinon null. */
   forfeitSide: 'home' | 'away' | null
+  /** Côté vainqueur aux tirs au but si le match a fini nul en élimination (#105). */
+  shootoutWinnerSide: 'home' | 'away' | null
   updatedBy: string | null
   updatedAt: string | null
   /** Phase du match (formats v2) : 'main' | 'pool' | 'knockout'. */
@@ -249,4 +251,30 @@ export interface TournamentFormData {
   numPools: number | null
   qualifiersPerPool: number | null
   thirdPlace: boolean
+}
+
+/** Palmarès (issue #109) — vues sérialisées pour la page admin. */
+export interface Laureate {
+  teamId: number
+  teamName: string
+}
+
+/** Vainqueur / finaliste d'une édition terminée. */
+export interface EditionResult {
+  tournamentId: number
+  name: string
+  category: string
+  eventDate: string | null
+  format: TournamentFormat
+  winner: Laureate | null
+  finalist: Laureate | null
+}
+
+/** Bilan cumulé d'une équipe (agrégé par nom) sur l'historique du club. */
+export interface TeamRecord {
+  teamName: string
+  participations: number
+  wins: number
+  finals: number
+  winRate: number
 }

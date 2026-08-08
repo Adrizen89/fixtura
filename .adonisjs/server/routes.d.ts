@@ -41,6 +41,7 @@ export type ScannedRoutes = {
     'club.appearance.edit': { paramsTuple?: []; params?: {} }
     'club.appearance.update': { paramsTuple?: []; params?: {} }
     'history.index': { paramsTuple?: []; params?: {} }
+    'palmares.index': { paramsTuple?: []; params?: {} }
     'tournaments.index': { paramsTuple?: []; params?: {} }
     'tournaments.create': { paramsTuple?: []; params?: {} }
     'tournaments.store': { paramsTuple?: []; params?: {} }
@@ -83,6 +84,7 @@ export type ScannedRoutes = {
     'members.index': { paramsTuple?: []; params?: {} }
     'club.appearance.edit': { paramsTuple?: []; params?: {} }
     'history.index': { paramsTuple?: []; params?: {} }
+    'palmares.index': { paramsTuple?: []; params?: {} }
     'tournaments.index': { paramsTuple?: []; params?: {} }
     'tournaments.create': { paramsTuple?: []; params?: {} }
     'tournaments.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -114,6 +116,7 @@ export type ScannedRoutes = {
     'members.index': { paramsTuple?: []; params?: {} }
     'club.appearance.edit': { paramsTuple?: []; params?: {} }
     'history.index': { paramsTuple?: []; params?: {} }
+    'palmares.index': { paramsTuple?: []; params?: {} }
     'tournaments.index': { paramsTuple?: []; params?: {} }
     'tournaments.create': { paramsTuple?: []; params?: {} }
     'tournaments.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

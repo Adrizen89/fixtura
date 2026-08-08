@@ -31,6 +31,7 @@ const QrController = () => import('#controllers/qr_controller')
 const HistoryController = () => import('#controllers/history_controller')
 const PublicRegistrationController = () => import('#controllers/public_registration_controller')
 const RegistrationSettingsController = () => import('#controllers/registration_settings_controller')
+const PalmaresController = () => import('#controllers/palmares_controller')
 
 /**
  * Routes du temps réel (SSE) : `__transmit/events` (flux), `__transmit/subscribe`
@@ -139,6 +140,8 @@ router
 
     // Historique du club : consultation en lecture seule des éditions terminées (#108).
     router.get('/historique', [HistoryController, 'index']).as('history.index')
+    // Palmarès : vainqueurs par édition + bilan cumulé par équipe (#109).
+    router.get('/palmares', [PalmaresController, 'index']).as('palmares.index')
 
     router.resource('tournaments', TournamentsController)
     // Inscriptions en ligne (#112) : ouverture/fermeture + capacité, depuis la page du tournoi.

@@ -101,6 +101,7 @@ Règles foot : victoire = 3 pts, nul = 1, défaite = 0 **par défaut** — barè
   - Grille de saisie des résultats (live).
   - Gestion des aléas : décaler un match, forfait, corriger un score.
   - **Historique** (`/historique` — #108) : liste en lecture seule des éditions **terminées** (événements + tournois autonomes), scopée club, triée par date. Les tableaux de bord (tournois/événements) ne montrent que les éditions **actives** (non `finished`) ; la consultation figée d'une édition passée réutilise l'écran public (`/t/:slug`, `/e/:slug`).
+  - **Palmarès** (`/palmares` — #109) : vainqueur/finaliste de chaque édition terminée + bilan cumulé par équipe (participations, titres, finales, ratio), agrégé sur **toutes** les éditions terminées (y compris les catégories d'un événement). Calcul par service **pur** `app/services/palmares.ts` (jamais stocké) : vainqueur = vainqueur de la finale de tableau (élimination/hybride) sinon 1er du classement général (championnat/poules, barème #104). Agrégation par **nom** d'équipe.
   - **Gestion des membres** (`/membres`, **owner** — #35) : inviter (lien + jeton), révoquer, changer un rôle, retirer.
   - **Inscriptions en ligne** (page du tournoi, #112) : ouvrir/fermer le lien public d'inscription, fixer une capacité, copier le lien. Contact des équipes inscrites visible ici (jamais en public).
 - **Public (sans auth)** :

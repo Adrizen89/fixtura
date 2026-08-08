@@ -149,6 +149,13 @@ function forfeitTeamName(m: ResultMatchRow) {
   return null
 }
 
+/** Nom du vainqueur aux tirs au but (nul en élimination, #105), ou null. */
+function shootoutTeamName(m: ResultMatchRow) {
+  if (m.shootoutWinnerSide === 'home') return m.homeTeam
+  if (m.shootoutWinnerSide === 'away') return m.awayTeam
+  return null
+}
+
 /** Classe de fond du podium (3 premiers) pour la lisibilité de loin. */
 function rowClass(rank: number) {
   if (rank === 1) return 'bg-primary-100'
@@ -389,6 +396,12 @@ function rowClass(rank: number) {
                     class="w-full text-right text-xs font-semibold uppercase tracking-wide text-amber-700"
                   >
                     Forfait<span v-if="forfeitTeamName(m)"> — {{ forfeitTeamName(m) }}</span>
+                  </span>
+                  <span
+                    v-else-if="shootoutTeamName(m)"
+                    class="w-full text-right text-xs font-semibold uppercase tracking-wide text-sand-9"
+                  >
+                    Tirs au but — {{ shootoutTeamName(m) }}
                   </span>
                 </li>
               </ul>

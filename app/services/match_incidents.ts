@@ -63,6 +63,82 @@ export function scoreFields(homeScore: number, awayScore: number): MatchResultFi
 }
 
 /**
+ * Un match de cette phase peut-il rester nul ? En **élimination directe**
+ * (`knockout`), non : il faut un vainqueur (tirs au but) pour faire avancer le
+ * bracket. En championnat (`main`) et en **poule** (`pool`), le nul est autorisé
+ * (cf. issue #105).
+ */
+export function stageAllowsDraw(stage: string): boolean {
+  return stage !== 'knockout'
+}
+
+/** Levée quand un match à élimination finit à égalité sans vainqueur désigné. */
+export class DrawNotAllowedError extends Error {
+  constructor() {
+    super('Match nul en élimination directe : désignez le vainqueur (tirs au but).')
+    this.name = 'DrawNotAllowedError'
+  }
+}
+
+/** Champs d'un match dont le score est saisi, avec l'éventuel vainqueur aux t.a.b. */
+export interface ScoredMatchFields extends MatchResultFields {
+  shootoutWinnerTeamId: number | null
+}
+
+/**
+ * Champs résultant de la saisie d'un score, en tenant compte de la règle du nul
+ * selon la phase (issue #105). Fonction **pure** (aucune dépendance DB) :
+ *  - score décisif (≠) → `finished`, pas de t.a.b. (efface un éventuel vainqueur) ;
+ *  - nul dans une phase qui l'autorise (poule / championnat) → `finished`, pas de t.a.b. ;
+ *  - nul en élimination → **exige** un côté vainqueur (`shootoutWinner`) → t.a.b. sur
+ *    l'équipe de ce côté ; à défaut, lève `DrawNotAllowedError`.
+ */
+export function scoreResult(params: {
+  stage: string
+  homeScore: number
+  awayScore: number
+  homeTeamId: number | null
+  awayTeamId: number | null
+  shootoutWinner?: MatchSide | null
+}): ScoredMatchFields {
+  const base: MatchResultFields = {
+    homeScore: params.homeScore,
+    awayScore: params.awayScore,
+    status: 'finished',
+    forfeitTeamId: null,
+  }
+
+  // Score décisif, ou nul autorisé par la phase : jamais de tirs au but.
+  if (params.homeScore !== params.awayScore || stageAllowsDraw(params.stage)) {
+    return { ...base, shootoutWinnerTeamId: null }
+  }
+
+  // Nul en élimination : un vainqueur aux tirs au but est requis.
+  if (params.shootoutWinner === 'home' && params.homeTeamId !== null) {
+    return { ...base, shootoutWinnerTeamId: params.homeTeamId }
+  }
+  if (params.shootoutWinner === 'away' && params.awayTeamId !== null) {
+    return { ...base, shootoutWinnerTeamId: params.awayTeamId }
+  }
+  throw new DrawNotAllowedError()
+}
+
+/**
+ * Déduit de quel côté ('home' / 'away') se trouve le vainqueur aux tirs au but d'un
+ * match, ou `null` si le match n'a pas été départagé ainsi. Sert à l'affichage.
+ */
+export function shootoutSideOf(
+  shootoutWinnerTeamId: number | null,
+  homeTeamId: number | null,
+  awayTeamId: number | null
+): MatchSide | null {
+  if (shootoutWinnerTeamId === null) return null
+  if (shootoutWinnerTeamId === homeTeamId) return 'home'
+  if (shootoutWinnerTeamId === awayTeamId) return 'away'
+  return null
+}
+
+/**
  * Déduit de quel côté se trouve l'équipe forfaitaire d'un match, ou `null` si le
  * match n'est pas un forfait. Sert à l'affichage (grille de saisie, écran public).
  */
