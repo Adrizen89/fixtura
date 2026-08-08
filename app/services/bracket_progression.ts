@@ -38,6 +38,8 @@ export interface ProgressMatch {
   awayTeamId: number | null
   homeScore: number | null
   awayScore: number | null
+  /** Vainqueur aux tirs au but si le match a fini nul en élimination (issue #105). */
+  shootoutWinnerTeamId: number | null
   homeSourceType: string | null
   homeSourceMatchId: number | null
   homeSourcePool: string | null
@@ -70,7 +72,14 @@ export function outcomeOf(m: ProgressMatch): { winnerId: number; loserId: number
   if (m.homeScore === null || m.awayScore === null) return null
   if (m.homeScore > m.awayScore) return { winnerId: m.homeTeamId, loserId: m.awayTeamId }
   if (m.awayScore > m.homeScore) return { winnerId: m.awayTeamId, loserId: m.homeTeamId }
-  return null // nul → pas de vainqueur, on ne propage pas
+  // Nul : départagé aux tirs au but (élimination, issue #105) le cas échéant.
+  if (m.shootoutWinnerTeamId === m.homeTeamId) {
+    return { winnerId: m.homeTeamId, loserId: m.awayTeamId }
+  }
+  if (m.shootoutWinnerTeamId === m.awayTeamId) {
+    return { winnerId: m.awayTeamId, loserId: m.homeTeamId }
+  }
+  return null // nul non départagé → pas de vainqueur, on ne propage pas
 }
 
 /** Xᵉ du classement d'une poule terminée (`pool`), ou null si la poule n'est pas finie. */
@@ -188,6 +197,7 @@ function toProgressMatch(m: Match): ProgressMatch {
     awayTeamId: m.awayTeamId,
     homeScore: m.homeScore,
     awayScore: m.awayScore,
+    shootoutWinnerTeamId: m.shootoutWinnerTeamId,
     homeSourceType: m.homeSourceType,
     homeSourceMatchId: m.homeSourceMatchId,
     homeSourcePool: m.homeSourcePool,

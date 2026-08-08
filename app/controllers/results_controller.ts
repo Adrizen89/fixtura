@@ -4,7 +4,12 @@ import Tournament from '#models/tournament'
 import Match from '#models/match'
 import { matchScoreValidator } from '#validators/match_score'
 import { matchScheduleValidator, matchForfeitValidator } from '#validators/match_incident'
-import { scoreFields, forfeitFields, timeToMinutes } from '#services/match_incidents'
+import {
+  scoreResult,
+  DrawNotAllowedError,
+  forfeitFields,
+  timeToMinutes,
+} from '#services/match_incidents'
 import { broadcastResults } from '#services/realtime'
 import { buildResultsData } from '#services/tournament_results'
 import db from '@adonisjs/lucid/services/db'
@@ -83,13 +88,34 @@ export default class ResultsController {
     const tournament = await this.findTournament(params.id)
     const match = await this.findMatch(tournament, params.matchId)
 
-    const { homeScore, awayScore } = await request.validateUsing(matchScoreValidator)
+    const { homeScore, awayScore, shootoutWinner } =
+      await request.validateUsing(matchScoreValidator)
+
+    // Règle du nul selon la phase (issue #105) : en élimination, un nul exige un
+    // vainqueur aux tirs au but ; en poule / championnat, le nul est autorisé.
+    let fields
+    try {
+      fields = scoreResult({
+        stage: match.stage,
+        homeScore,
+        awayScore,
+        homeTeamId: match.homeTeamId,
+        awayTeamId: match.awayTeamId,
+        shootoutWinner,
+      })
+    } catch (error) {
+      if (error instanceof DrawNotAllowedError) {
+        session.flash('error', error.message)
+        return response.redirect().toRoute('tournaments.results', { id: tournament.id })
+      }
+      throw error
+    }
 
     try {
       await db.transaction(async (trx) => {
         match.useTransaction(trx)
         match.merge({
-          ...scoreFields(homeScore, awayScore),
+          ...fields,
           updatedByUserId: auth.user!.id, // traçabilité : qui a saisi en dernier
         })
         await match.save()
@@ -171,6 +197,7 @@ export default class ResultsController {
         match.useTransaction(trx)
         match.merge({
           ...forfeitFields(side, homeTeamId, awayTeamId),
+          shootoutWinnerTeamId: null, // un forfait est décidé au score (3–0)
           updatedByUserId: auth.user!.id,
         })
         await match.save()

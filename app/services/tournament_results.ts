@@ -2,7 +2,7 @@ import Match from '#models/match'
 import type Tournament from '#models/tournament'
 import { computeStandings } from '#services/standings'
 import type { StandingRow } from '#services/standings'
-import { forfeitSideOf } from '#services/match_incidents'
+import { forfeitSideOf, shootoutSideOf } from '#services/match_incidents'
 import { participantLabel } from '#services/match_labels'
 import type { ResultRow, PoolStanding } from '#services/realtime'
 
@@ -96,6 +96,8 @@ export async function buildResultsData(
         m.homeTeamId !== null && m.awayTeamId !== null
           ? forfeitSideOf(m.status, m.forfeitTeamId, m.homeTeamId, m.awayTeamId)
           : null,
+      // Côté vainqueur aux t.a.b. (nul en élimination départagé, issue #105).
+      shootoutWinnerSide: shootoutSideOf(m.shootoutWinnerTeamId, m.homeTeamId, m.awayTeamId),
       updatedBy: m.updatedByUser ? (m.updatedByUser.fullName ?? m.updatedByUser.email) : null,
       updatedAt: settled && m.updatedAt ? m.updatedAt.toISO() : null,
       stage: m.stage,

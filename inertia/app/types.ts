@@ -108,6 +108,8 @@ export interface ResultMatchRow {
   status: string
   /** Côté forfaitaire ('home' | 'away') si le match est un forfait, sinon null. */
   forfeitSide: 'home' | 'away' | null
+  /** Côté vainqueur aux tirs au but si le match a fini nul en élimination (#105). */
+  shootoutWinnerSide: 'home' | 'away' | null
   updatedBy: string | null
   updatedAt: string | null
   /** Phase du match (formats v2) : 'main' | 'pool' | 'knockout'. */
