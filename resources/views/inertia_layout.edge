@@ -6,6 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#16a34a">
 
+  <!-- PWA : manifeste + icône (résilience offline de l'écran public, issue #40). -->
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icons/icon.svg">
+
   <title inertia>Fixtura</title>
 
   @vite(['inertia/app/app.ts', `inertia/pages/${page.component}.vue`])

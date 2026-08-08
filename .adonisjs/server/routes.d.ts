@@ -36,6 +36,8 @@ export type ScannedRoutes = {
     'members.invitations.revoke': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'members.role': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'members.remove': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'club.appearance.edit': { paramsTuple?: []; params?: {} }
+    'club.appearance.update': { paramsTuple?: []; params?: {} }
     'tournaments.index': { paramsTuple?: []; params?: {} }
     'tournaments.create': { paramsTuple?: []; params?: {} }
     'tournaments.store': { paramsTuple?: []; params?: {} }
@@ -53,6 +55,7 @@ export type ScannedRoutes = {
     'tournaments.matches.reschedule': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'matchId': ParamValue} }
     'tournaments.matches.forfeit': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'matchId': ParamValue} }
     'tournaments.export.planning': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'tournaments.qrcode': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tournaments.export.matchSheets': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tournaments.export.standings': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
@@ -73,6 +76,7 @@ export type ScannedRoutes = {
     'events.planning.preview': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'account.export': { paramsTuple?: []; params?: {} }
     'members.index': { paramsTuple?: []; params?: {} }
+    'club.appearance.edit': { paramsTuple?: []; params?: {} }
     'tournaments.index': { paramsTuple?: []; params?: {} }
     'tournaments.create': { paramsTuple?: []; params?: {} }
     'tournaments.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -80,6 +84,7 @@ export type ScannedRoutes = {
     'tournaments.planning.preview': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tournaments.results': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tournaments.export.planning': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'tournaments.qrcode': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tournaments.export.matchSheets': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tournaments.export.standings': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
@@ -100,6 +105,7 @@ export type ScannedRoutes = {
     'events.planning.preview': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'account.export': { paramsTuple?: []; params?: {} }
     'members.index': { paramsTuple?: []; params?: {} }
+    'club.appearance.edit': { paramsTuple?: []; params?: {} }
     'tournaments.index': { paramsTuple?: []; params?: {} }
     'tournaments.create': { paramsTuple?: []; params?: {} }
     'tournaments.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -107,6 +113,7 @@ export type ScannedRoutes = {
     'tournaments.planning.preview': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tournaments.results': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tournaments.export.planning': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'tournaments.qrcode': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tournaments.export.matchSheets': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'tournaments.export.standings': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
@@ -121,6 +128,7 @@ export type ScannedRoutes = {
     'events.categories.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'events.planning.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'members.invite': { paramsTuple?: []; params?: {} }
+    'club.appearance.update': { paramsTuple?: []; params?: {} }
     'tournaments.store': { paramsTuple?: []; params?: {} }
     'tournaments.teams.store': { paramsTuple: [ParamValue]; params: {'tournament_id': ParamValue} }
     'tournaments.planning.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }

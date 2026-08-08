@@ -26,6 +26,8 @@ const AccountController = () => import('#controllers/account_controller')
 const RegistrationController = () => import('#controllers/registration_controller')
 const InvitationsController = () => import('#controllers/invitations_controller')
 const MembersController = () => import('#controllers/members_controller')
+const ClubController = () => import('#controllers/club_controller')
+const QrController = () => import('#controllers/qr_controller')
 
 /**
  * Routes du temps réel (SSE) : `__transmit/events` (flux), `__transmit/subscribe`
@@ -118,6 +120,10 @@ router
     router.patch('/membres/:id/role', [MembersController, 'updateRole']).as('members.role')
     router.delete('/membres/:id', [MembersController, 'remove']).as('members.remove')
 
+    // Personnalisation du club : logo + couleur sur l'écran public (issue #40).
+    router.get('/club/apparence', [ClubController, 'edit']).as('club.appearance.edit')
+    router.post('/club/apparence', [ClubController, 'update']).as('club.appearance.update')
+
     router.resource('tournaments', TournamentsController)
     // Équipes gérées depuis la page du tournoi (ajout / renommage / suppression).
     router.resource('tournaments.teams', TeamsController).only(['store', 'update', 'destroy'])
@@ -145,6 +151,8 @@ router
     router
       .get('/tournaments/:id/export/planning', [ExportController, 'planning'])
       .as('tournaments.export.planning')
+    // QR code (SVG) vers l'écran public du tournoi, à afficher au bord des terrains (#40).
+    router.get('/tournaments/:id/qrcode', [QrController, 'tournament']).as('tournaments.qrcode')
     router
       .get('/tournaments/:id/export/match-sheets', [ExportController, 'matchSheets'])
       .as('tournaments.export.matchSheets')

@@ -4,11 +4,13 @@ import { Head } from '@inertiajs/vue3'
 import Bracket from '~/components/Bracket.vue'
 import PoolStandings from '~/components/PoolStandings.vue'
 import TeamFollow from '~/components/TeamFollow.vue'
+import TvBoard from '~/components/TvBoard.vue'
 import { useLiveTournament } from '~/composables/use_live_tournament'
 import type {
   ResultMatchRow,
   StandingRow,
   PoolStanding,
+  PublicClub,
   TournamentStatus,
   TournamentFormat,
 } from '~/app/types'
@@ -27,10 +29,34 @@ const props = defineProps<{
     publicSlug: string
     format: TournamentFormat
   }
+  club: PublicClub
+  tv: boolean
   matches: ResultMatchRow[]
   standings: StandingRow[]
   pools: PoolStanding[]
 }>()
+
+/**
+ * Personnalisation du club (#40) : on surcharge les variables CSS de la couleur
+ * primaire sur la racine de l'écran public. Tailwind v4 exposant ses couleurs de
+ * thème via `var(--color-…)`, cette surcharge se propage aux utilitaires `primary`
+ * de toute la page. `color-mix` dérive les nuances ; navigateurs sans support →
+ * repli sur la palette verte par défaut (dégradation gracieuse).
+ */
+const brandStyle = computed(() => {
+  const c = props.club.primaryColor
+  if (!c) return {}
+  return {
+    '--color-primary': c,
+    '--color-primary-50': `color-mix(in srgb, ${c} 8%, white)`,
+    '--color-primary-100': `color-mix(in srgb, ${c} 16%, white)`,
+    '--color-primary-200': `color-mix(in srgb, ${c} 28%, white)`,
+    '--color-primary-700': `color-mix(in srgb, ${c} 82%, black)`,
+    '--color-primary-800': `color-mix(in srgb, ${c} 68%, black)`,
+  }
+})
+
+const accent = computed(() => props.club.primaryColor || '#16a34a')
 
 const showBracket = computed(
   () => props.tournament.format === 'knockout' || props.tournament.format === 'hybrid'
@@ -134,19 +160,45 @@ function rowClass(rank: number) {
 <template>
   <Head :title="`${tournament.name} — en direct`" />
 
-  <div class="min-h-screen bg-sand-1 text-sand-12">
+  <!-- Mode TV : affichage plein écran en rotation, très gros contrastes (#40). -->
+  <TvBoard
+    v-if="tv"
+    :tournament="{
+      name: tournament.name,
+      category: tournament.category,
+      status: tournament.status,
+      format: tournament.format,
+    }"
+    :club="club"
+    :matches="liveMatches"
+    :standings="liveStandings"
+    :pools="livePools"
+    :live-state="liveState"
+  />
+
+  <div v-else class="min-h-screen bg-sand-1 text-sand-12" :style="brandStyle">
+    <!-- Bandeau d'accent aux couleurs du club. -->
+    <div class="h-1.5 w-full" :style="{ backgroundColor: accent }" />
     <div class="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
       <!-- En-tête -->
       <header class="mb-8 border-b border-sand-6 pb-6">
         <div class="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-              {{ tournament.name }}
-            </h1>
-            <p class="mt-1 text-base text-sand-11 sm:text-lg">
-              {{ tournament.category
-              }}<span v-if="tournament.eventDate"> · {{ formatDate(tournament.eventDate) }}</span>
-            </p>
+          <div class="flex items-center gap-4">
+            <img
+              v-if="club.logo"
+              :src="club.logo"
+              alt=""
+              class="h-14 w-14 shrink-0 rounded-xl object-contain sm:h-16 sm:w-16"
+            />
+            <div>
+              <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+                {{ tournament.name }}
+              </h1>
+              <p class="mt-1 text-base text-sand-11 sm:text-lg">
+                {{ tournament.category
+                }}<span v-if="tournament.eventDate"> · {{ formatDate(tournament.eventDate) }}</span>
+              </p>
+            </div>
           </div>
           <div class="flex flex-col items-end gap-2">
             <span

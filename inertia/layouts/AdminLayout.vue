@@ -48,6 +48,13 @@ function logout() {
               class="text-sand-11 transition hover:text-sand-12"
               >Membres</Link
             >
+            <!-- Personnalisation de l'écran public — responsable (issue #40). -->
+            <Link
+              v-if="user.role === 'owner'"
+              href="/club/apparence"
+              class="text-sand-11 transition hover:text-sand-12"
+              >Apparence</Link
+            >
           </nav>
         </div>
 

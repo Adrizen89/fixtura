@@ -28,3 +28,16 @@ createInertiaApp({
       .mount(el)
   },
 })
+
+/**
+ * PWA (issue #40) : enregistrement best-effort du service worker pour la résilience
+ * hors-ligne de l'écran public (réseau instable au bord des terrains). Aucun impact
+ * si indisponible (vieux navigateur, échec) — dégradation gracieuse, pas de polling.
+ */
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // Silencieux : l'app reste pleinement fonctionnelle sans service worker.
+    })
+  })
+}
