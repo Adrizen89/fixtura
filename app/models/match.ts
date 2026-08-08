@@ -7,8 +7,8 @@ import User from '#models/user'
 
 export type MatchStatus = 'scheduled' | 'live' | 'finished' | 'forfeit'
 
-/** Phase du match dans la compétition (cf. #42). */
-export type MatchStage = 'main' | 'pool' | 'knockout'
+/** Phase du match dans la compétition (cf. #42 ; système suisse #110). */
+export type MatchStage = 'main' | 'pool' | 'knockout' | 'swiss'
 
 /** Manière dont un slot (domicile/extérieur) est rempli tant qu'il n'est pas résolu. */
 export type SlotSourceType = 'team' | 'match_winner' | 'match_loser' | 'pool_rank'

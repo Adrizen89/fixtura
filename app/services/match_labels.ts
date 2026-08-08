@@ -64,5 +64,10 @@ export function participantLabel(
     return `${who} ${ref ? matchTag(ref) : '?'}`
   }
   if (type === 'pool_rank') return poolRankLabel(pool, rank)
+
+  // Bye (système suisse, #110) : un seul côté est renseigné, l'autre est « exempt ».
+  const otherTeamId = side === 'home' ? m.awayTeamId : m.homeTeamId
+  if (otherTeamId !== null) return 'Exempt'
+
   return 'À définir'
 }
