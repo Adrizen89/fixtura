@@ -26,9 +26,14 @@ export default class EventsController {
     return Event.query()
   }
 
-  /** Tableau de bord des événements du club. */
+  /**
+   * Tableau de bord des événements **actifs** du club. Les événements terminés
+   * (`finished`) sont archivés et consultés depuis l'Historique (issue #108) : on
+   * les exclut ici pour distinguer clairement actifs / archivés.
+   */
   async index({ inertia }: HttpContext) {
     const events = await this.query()
+      .whereNot('status', 'finished')
       .withCount('tournaments')
       .orderBy('event_date', 'desc')
       .orderBy('created_at', 'desc')
