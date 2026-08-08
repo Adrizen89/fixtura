@@ -54,15 +54,23 @@ function poolStandingsOf(matches: Match[], teamsById: Map<number, string>): Pool
  * l'affichage public montrent exactement la même chose. Le tournoi doit avoir ses
  * `teams` préchargées. Robuste aux participants **différés** (slots bracket non
  * résolus) : ceux-ci sont nommés depuis leur source, jamais déréférencés.
+ *
+ * `withUpdatedBy` (issue #41) : ne précharge l'auteur de la dernière saisie
+ * (`updatedByUser`) que quand il est **affiché** — la grille admin (« Saisi par… »)
+ * et le flux SSE qui l'alimente. Les écrans publics et les exports ne l'affichent
+ * pas : ils passent `false` et évitent une jointure inutile à chaque rendu.
  */
 export async function buildResultsData(
-  tournament: Tournament
+  tournament: Tournament,
+  options: { withUpdatedBy?: boolean } = {}
 ): Promise<{ matches: ResultRow[]; standings: StandingRow[]; pools: PoolStanding[] }> {
+  const { withUpdatedBy = true } = options
+
   const matches = await Match.query()
     .where('tournament_id', tournament.id)
     .preload('homeTeam')
     .preload('awayTeam')
-    .preload('updatedByUser')
+    .if(withUpdatedBy, (q) => q.preload('updatedByUser'))
     .orderBy('scheduled_at')
     .orderBy('terrain_number')
 

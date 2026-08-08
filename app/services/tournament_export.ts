@@ -140,7 +140,8 @@ export function buildMatchSheetsExport(
  * (poules / hybride). Le tournoi doit avoir ses `teams` préchargées.
  */
 export async function buildStandingsExport(tournament: Tournament): Promise<StandingsExport> {
-  const { standings, pools } = await buildResultsData(tournament)
+  // Export classement : n'utilise que standings/pools → pas d'auteur de saisie (issue #41).
+  const { standings, pools } = await buildResultsData(tournament, { withUpdatedBy: false })
   const hasResults =
     standings.some((r) => r.played > 0) || pools.some((p) => p.standings.some((r) => r.played > 0))
 

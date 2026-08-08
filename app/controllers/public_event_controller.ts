@@ -25,7 +25,10 @@ export default class PublicEventController {
 
     const categories = []
     for (const tournament of tournaments) {
-      const { matches, standings, pools } = await buildResultsData(tournament)
+      // Écran public : auteur de saisie non affiché → pas de préchargement (issue #41).
+      const { matches, standings, pools } = await buildResultsData(tournament, {
+        withUpdatedBy: false,
+      })
       categories.push({
         id: tournament.id,
         name: tournament.name,
