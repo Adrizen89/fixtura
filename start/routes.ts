@@ -34,6 +34,14 @@ const RegistrationSettingsController = () => import('#controllers/registration_s
 const PalmaresController = () => import('#controllers/palmares_controller')
 
 /**
+ * Fenêtres de limitation de débit (issue #116). Généreuses : elles bloquent l'abus
+ * (bruteforce, scraping) sans jamais gêner un usage légitime (un stade derrière une
+ * même IP, quelques essais de connexion). Store en mémoire, cf. §10/§11.
+ */
+const MINUTE = 60_000
+const HOUR = 60 * MINUTE
+
+/**
  * Routes du temps réel (SSE) : `__transmit/events` (flux), `__transmit/subscribe`
  * et `__transmit/unsubscribe`. Volontairement **publiques** : l'écran public
  * (lecture seule, sans auth) doit pouvoir s'abonner au flux d'un tournoi. Elles
@@ -53,7 +61,10 @@ router.on('/').redirect('tournaments.index')
  * Lecture seule (planning, résultats, classement en direct), mobile-first et
  * lisible de loin. Rafraîchissement via SSE (canal `tournaments/{public_slug}`).
  */
-router.get('/t/:slug', [PublicController, 'show']).as('public.tournament')
+router
+  .get('/t/:slug', [PublicController, 'show'])
+  .as('public.tournament')
+  .use(middleware.throttle({ name: 'public-screen', max: 300, windowMs: MINUTE }))
 
 /**
  * Écran public d'un **événement** multi-catégories (#32) — sans auth, via le
@@ -61,14 +72,22 @@ router.get('/t/:slug', [PublicController, 'show']).as('public.tournament')
  * elles (planning + classement en direct de chacune). Lecture seule, mobile-first
  * et lisible de loin, rafraîchi via SSE (un canal par catégorie).
  */
-router.get('/e/:slug', [PublicEventController, 'show']).as('public.event')
+router
+  .get('/e/:slug', [PublicEventController, 'show'])
+  .as('public.event')
+  .use(middleware.throttle({ name: 'public-screen', max: 300, windowMs: MINUTE }))
 
 /**
  * Inscription publique d'une équipe à un tournoi (issue #112) — sans auth, sans
  * compte, sans paiement, via un `registration_token` non devinable. GET affiche le
  * formulaire (ou l'état fermé/complet), POST enregistre l'équipe.
  */
-router.get('/inscription/:token', [PublicRegistrationController, 'show']).as('public.registration')
+router
+  .get('/inscription/:token', [PublicRegistrationController, 'show'])
+  .as('public.registration')
+  .use(middleware.throttle({ name: 'registration-view', max: 60, windowMs: MINUTE }))
+// La soumission d'inscription a son propre anti-spam (honeypot + rate-limit) dans le
+// contrôleur (#112) : on ne la double-limite pas ici.
 router
   .post('/inscription/:token', [PublicRegistrationController, 'register'])
   .as('public.registration.submit')
@@ -87,11 +106,19 @@ router.get('/confidentialite', [LegalController, 'privacy']).as('legal.privacy')
 router
   .group(() => {
     router.get('/login', [AuthController, 'showLogin']).as('login.show')
-    router.post('/login', [AuthController, 'login']).as('login')
+    // Anti-bruteforce : 10 tentatives / 5 min par IP → 429 (issue #116).
+    router
+      .post('/login', [AuthController, 'login'])
+      .as('login')
+      .use(middleware.throttle({ name: 'login', max: 10, windowMs: 5 * MINUTE }))
 
     // Onboarding (issue #35) : inscription d'un club (crée club + owner).
     router.get('/register', [RegistrationController, 'show']).as('register.show')
-    router.post('/register', [RegistrationController, 'register']).as('register')
+    // Création de club rare : plafond horaire par IP contre l'abus de masse (#116).
+    router
+      .post('/register', [RegistrationController, 'register'])
+      .as('register')
+      .use(middleware.throttle({ name: 'signup', max: 5, windowMs: HOUR }))
 
     // Acceptation d'une invitation d'organisateur via jeton non devinable.
     router.get('/invitations/:token', [InvitationsController, 'show']).as('invitations.show')
