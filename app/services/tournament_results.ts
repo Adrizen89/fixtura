@@ -116,6 +116,20 @@ export async function buildResultsData(
   // Barème du tournoi (issue #104) — appliqué au classement global ET par poule.
   const scoring = tournament.scoring
 
+  // Byes du système suisse (#110) : un match réglé à un seul côté renseigné =
+  // victoire d'office. Comptés dans le classement, jamais comme un match joué.
+  const byes = new Map<number, number>()
+  for (const m of matches) {
+    if (
+      m.homeTeamId !== null &&
+      m.awayTeamId === null &&
+      m.awaySourceType === null &&
+      (m.status === 'finished' || m.status === 'forfeit')
+    ) {
+      byes.set(m.homeTeamId, (byes.get(m.homeTeamId) ?? 0) + 1)
+    }
+  }
+
   const standings = computeStandings(
     tournament.teams.map((t) => ({ id: t.id, name: t.name })),
     matches
@@ -132,7 +146,8 @@ export async function buildResultsData(
         homeScore: m.homeScore!,
         awayScore: m.awayScore!,
       })),
-    scoring
+    scoring,
+    byes
   )
 
   return { matches: rows, standings, pools: poolStandingsOf(matches, teamsById, scoring) }

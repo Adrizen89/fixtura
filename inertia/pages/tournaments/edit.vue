@@ -28,6 +28,7 @@ const initial: TournamentFormData = {
   qualifiersPerPool: props.tournament.formatConfig?.qualifiersPerPool ?? null,
   bestRunnersUp: props.tournament.formatConfig?.bestRunnersUp ?? null,
   thirdPlace: props.tournament.formatConfig?.thirdPlace ?? false,
+  swissRounds: props.tournament.formatConfig?.swissRounds ?? null,
 }
 </script>
 

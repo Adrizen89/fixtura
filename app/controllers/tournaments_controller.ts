@@ -16,6 +16,7 @@ function formatConfigOf(data: {
   qualifiersPerPool?: number | null
   bestRunnersUp?: number | null
   thirdPlace?: boolean
+  swissRounds?: number | null
 }): TournamentFormatConfig | null {
   switch (data.format) {
     case 'pools':
@@ -29,6 +30,9 @@ function formatConfigOf(data: {
         bestRunnersUp: data.bestRunnersUp ?? undefined,
         thirdPlace: data.thirdPlace ?? false,
       }
+    case 'swiss':
+      // Nombre de rondes facultatif : absent → auto ⌈log₂(N)⌉ à la génération (#110).
+      return { swissRounds: data.swissRounds ?? undefined }
     default:
       return null // championnat : aucun paramètre de format
   }

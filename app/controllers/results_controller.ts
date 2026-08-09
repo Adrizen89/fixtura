@@ -15,6 +15,7 @@ import { buildResultsData } from '#services/tournament_results'
 import db from '@adonisjs/lucid/services/db'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { progressBracket, ProgressionConflictError } from '#services/bracket_progression'
+import { advanceSwiss } from '#services/swiss'
 
 /**
  * Saisie des résultats le jour J + classement en direct + gestion des aléas
@@ -226,6 +227,12 @@ export default class ResultsController {
    */
   private async progress(tournament: Tournament, trx: TransactionClientContract) {
     if (tournament.format === 'championship') return
+    // Système suisse (#110) : la ronde suivante se génère à partir du classement
+    // dès que la ronde en cours est réglée (pas de slot différé à remplir).
+    if (tournament.format === 'swiss') {
+      await advanceSwiss(tournament, trx)
+      return
+    }
     const teamsById = new Map(tournament.teams.map((t) => [t.id, t.name]))
     // Qualification des poules avec le barème du tournoi (issue #104).
     await progressBracket(tournament.id, teamsById, trx, tournament.scoring)

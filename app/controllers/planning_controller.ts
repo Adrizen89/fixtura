@@ -10,6 +10,7 @@ import {
   persistPhasedSchedule,
   viewFromPhased,
 } from '#services/planning'
+import { previewInitialRound, persistInitialRound } from '#services/swiss'
 
 /**
  * Génération du planning d'un tournoi (cf. CLAUDE.md §6).
@@ -38,12 +39,15 @@ export default class PlanningController {
       const names = new Map(tournament.teams.map((t) => [t.id, t.name]))
       const hasExistingPlanning = await Match.query().where('tournament_id', tournament.id).first()
 
-      // Championnat : chemin v1 intact. Autres formats (poules / élimination /
-      // hybride) : planning multi-phases (participants éventuellement différés).
+      // Championnat : chemin v1 intact. Suisse (#110) : seule la ronde 1 est
+      // connue d'avance (les suivantes se génèrent à la saisie des scores). Autres
+      // formats (poules / élimination / hybride) : planning multi-phases.
       const preview =
         tournament.format === 'championship'
           ? viewFromSchedule(generateFor(tournament), names)
-          : viewFromPhased(generatePhasedFor(tournament), names)
+          : tournament.format === 'swiss'
+            ? previewInitialRound(tournament)
+            : viewFromPhased(generatePhasedFor(tournament), names)
 
       return inertia.render('tournaments/planning', {
         tournament: tournament.serialize(),
@@ -74,6 +78,8 @@ export default class PlanningController {
     try {
       if (tournament.format === 'championship') {
         await persistSchedule(tournament, generateFor(tournament))
+      } else if (tournament.format === 'swiss') {
+        await persistInitialRound(tournament)
       } else {
         await persistPhasedSchedule(tournament, generatePhasedFor(tournament))
       }

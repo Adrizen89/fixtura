@@ -25,13 +25,15 @@ export interface FlashMessages {
 
 export type TournamentStatus = 'draft' | 'scheduled' | 'live' | 'finished'
 
-export type TournamentFormat = 'championship' | 'pools' | 'knockout' | 'hybrid'
+export type TournamentFormat = 'championship' | 'pools' | 'knockout' | 'hybrid' | 'swiss'
 
 export interface TournamentFormatConfig {
   numPools?: number | null
   qualifiersPerPool?: number | null
   bestRunnersUp?: number | null
   thirdPlace?: boolean
+  /** Système suisse (#110) : nombre de rondes ; null = auto ⌈log₂(N)⌉. */
+  swissRounds?: number | null
 }
 
 export interface Team {
@@ -253,6 +255,7 @@ export interface TournamentFormData {
   qualifiersPerPool: number | null
   bestRunnersUp: number | null
   thirdPlace: boolean
+  swissRounds: number | null
 }
 
 /** Palmarès (issue #109) — vues sérialisées pour la page admin. */

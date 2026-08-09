@@ -11,8 +11,8 @@ import type { Scoring } from '#services/standings'
 
 export type TournamentStatus = 'draft' | 'scheduled' | 'live' | 'finished'
 
-/** Format de compétition (cf. #42 — championnat par défaut en v1). */
-export type TournamentFormat = 'championship' | 'pools' | 'knockout' | 'hybrid'
+/** Format de compétition (cf. #42 — championnat par défaut en v1 ; suisse #110). */
+export type TournamentFormat = 'championship' | 'pools' | 'knockout' | 'hybrid' | 'swiss'
 
 /** Paramètres propres au format, stockés en JSON (`format_config`). */
 export interface TournamentFormatConfig {
@@ -21,6 +21,8 @@ export interface TournamentFormatConfig {
   /** Repêchage : nb de meilleurs (qualifiersPerPool+1)ᵉˢ inter-poules (#107). */
   bestRunnersUp?: number
   thirdPlace?: boolean
+  /** Système suisse (#110) : nombre de rondes ; absent = auto ⌈log₂(N)⌉. */
+  swissRounds?: number
 }
 
 export default class Tournament extends compose(BaseModel, withTenantScope()) {

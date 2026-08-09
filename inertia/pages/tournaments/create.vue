@@ -22,6 +22,7 @@ const initial: TournamentFormData = {
   qualifiersPerPool: null,
   bestRunnersUp: null,
   thirdPlace: false,
+  swissRounds: null,
 }
 </script>
 

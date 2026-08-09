@@ -14,7 +14,7 @@ import type { SchedulerParams, SlotSource, BracketMatch } from './types.js'
  * colonnes `matches.*` de #42, pour un pont de persistance trivial.
  */
 
-export type FormatKind = 'championship' | 'pools' | 'knockout' | 'hybrid'
+export type FormatKind = 'championship' | 'pools' | 'knockout' | 'hybrid' | 'swiss'
 
 /** Paramètres propres au format (issus de `tournaments.format_config`). */
 export interface FormatConfig {
@@ -329,6 +329,11 @@ export function generatePhased(
     const repechage = config.bestRunnersUp ?? 0
     validateQualifiers(params.teamIds, numPools, qpp, repechage)
     built = hybridPhased(params, numPools, qpp, repechage, config.thirdPlace ?? false)
+  } else if (format === 'swiss') {
+    // Le système suisse (#110) se génère **ronde par ronde** (les appariements
+    // dépendent du classement) : il ne passe pas par ce planning figé d'avance,
+    // mais par `app/services/swiss.ts`. Garde-fou défensif — jamais atteint.
+    throw new SchedulerError('Le système suisse se génère ronde par ronde.')
   } else {
     throw new SchedulerError(`Format inconnu : « ${format} ».`)
   }

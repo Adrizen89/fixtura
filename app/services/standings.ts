@@ -65,13 +65,17 @@ export const DEFAULT_SCORING: Scoring = { win: 3, draw: 1, loss: 0 }
  * @param teams   Toutes les équipes du tournoi (celles sans match apparaissent à 0).
  * @param matches Uniquement les matchs à comptabiliser (deux scores connus).
  * @param scoring Barème de points (défaut 3/1/0).
+ * @param byes    Exemptions du système suisse (issue #110) : teamId → nombre de byes.
+ *                Un bye compte comme une **victoire d'office** (partie jouée + gagnée),
+ *                sans buts. N'entre pas dans la confrontation directe (aucun adversaire).
  * @returns Les lignes triées, rang renseigné (les équipes à égalité parfaite
  *          partagent le même rang).
  */
 export function computeStandings(
   teams: StandingsTeamInput[],
   matches: StandingsMatchInput[],
-  scoring: Scoring = DEFAULT_SCORING
+  scoring: Scoring = DEFAULT_SCORING,
+  byes: ReadonlyMap<number, number> = new Map()
 ): StandingRow[] {
   // Accumulateur par équipe, initialisé pour TOUTES les équipes (0 partout).
   const rows = new Map<number, StandingRow>()
@@ -116,7 +120,16 @@ export function computeStandings(
     }
   }
 
-  // Dérive points (selon le barème) et différence de buts.
+  // Byes (système suisse) : victoire d'office sans adversaire ni buts.
+  for (const [teamId, count] of byes) {
+    const row = rows.get(teamId)
+    if (!row || count <= 0) continue
+    row.played += count
+    row.won += count
+  }
+
+  // Dérive points (selon le barème) et différence de buts. Les byes sont déjà
+  // comptés dans `won`, donc leurs points de victoire sont inclus ici.
   for (const row of rows.values()) {
     row.points = row.won * scoring.win + row.drawn * scoring.draw + row.lost * scoring.loss
     row.goalDifference = row.goalsFor - row.goalsAgainst
