@@ -112,6 +112,9 @@ function submit() {
             <option value="championship">Championnat — toutes les équipes se rencontrent</option>
             <option value="pools">Poules</option>
             <option value="knockout">Élimination directe</option>
+            <option value="double_elimination">
+              Double élimination — repêchage + grande finale
+            </option>
             <option value="hybrid">Hybride — poules puis phase finale</option>
             <option value="swiss">Système suisse — appariements par niveau, sans rematch</option>
           </select>

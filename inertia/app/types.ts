@@ -25,7 +25,8 @@ export interface FlashMessages {
 
 export type TournamentStatus = 'draft' | 'scheduled' | 'live' | 'finished'
 
-export type TournamentFormat = 'championship' | 'pools' | 'knockout' | 'hybrid' | 'swiss'
+export type TournamentFormat =
+  'championship' | 'pools' | 'knockout' | 'hybrid' | 'swiss' | 'double_elimination'
 
 export interface TournamentFormatConfig {
   numPools?: number | null

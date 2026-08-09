@@ -138,6 +138,16 @@ des brackets — `ResultsController.progress`), jusqu'à `format_config.swissRou
 défaut). Le **bye** est une victoire d'office matérialisée en match à un seul côté,
 créditée au classement via `computeStandings(teams, matches, scoring, byes)`. Tournois
 autonomes uniquement (pas en événement multi-catégories).
+**Double élimination (#111)** : moteur pur `app/services/scheduler/double_elimination.ts`
+(`buildDoubleElimination`) — tableau principal (gagnants) + repêchage (losers, alternance
+tours mineurs/majeurs, perdants descendus via la source `match_loser`) + **grande finale
+unique** (pas de bracket reset en v1 — évolution possible). Byes attribués aux têtes de
+série (helpers partagés `scheduler/seeding.ts`) ; ordonnancement par bandes topologiques
+(comme l'élimination directe) ; codes de tour `wb-r{n}` / `lb-r{n}` / `gf`. Persistance et
+progression **génériques** (aucune adaptation : la descente des perdants passe par
+`match_loser`). Rendu : `inertia/components/DoubleEliminationBracket.vue`. Le vainqueur
+d'une double élimination = vainqueur de la grande finale (palmarès #109 et classement
+final #106 alignés).
 
 ## 7. Stratégie de développement — réalisée (historique)
 

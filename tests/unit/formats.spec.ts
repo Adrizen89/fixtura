@@ -142,6 +142,49 @@ test.group('formats · hybride (poules → phase finale)', () => {
   })
 })
 
+test.group('formats · double élimination (#111)', () => {
+  test('place le tableau principal + repêchage + grande finale, ordre topologique', ({
+    assert,
+  }) => {
+    const s = generatePhased(baseParams(8), 'double_elimination')
+    assert.equal(s.format, 'double_elimination')
+    assert.equal(s.matches.length, 14) // 2N−2
+
+    for (const m of s.matches) {
+      assert.equal(m.stage, 'knockout')
+      assert.isNotNull(m.bracketId)
+      assert.isAtLeast(m.terrainNumber, 1)
+      assert.match(m.startTime, /^\d{2}:\d{2}$/)
+    }
+
+    const rounds = new Set(s.matches.map((m) => m.bracketRound))
+    assert.isTrue(
+      [...rounds].some((r) => r?.startsWith('wb-r')),
+      'des tours principaux'
+    )
+    assert.isTrue(
+      [...rounds].some((r) => r?.startsWith('lb-r')),
+      'des tours de repêchage'
+    )
+    assert.isTrue(rounds.has('gf'), 'une grande finale')
+
+    // Ordre topologique : un nourricier est placé sur un créneau antérieur.
+    const slotById = slotByBracketId(s.matches)
+    for (const m of s.matches) {
+      for (const src of [m.home, m.away]) {
+        if (src && (src.type === 'match_winner' || src.type === 'match_loser')) {
+          assert.isBelow(slotById.get(src.matchId)!, m.slotIndex, `${m.bracketId} après source`)
+        }
+      }
+    }
+  })
+
+  test('byes : 6 équipes → 10 matchs placés', ({ assert }) => {
+    const s = generatePhased(baseParams(6), 'double_elimination')
+    assert.equal(s.matches.length, 10) // 2·6 − 2
+  })
+})
+
 test.group('formats · hybride avec repêchage (#107)', () => {
   test('repêchage : les meilleurs 2es entrent comme sources pool_best', ({ assert }) => {
     // 12 équipes / 3 poules de 4, 2 qualifiés + 2 repêchés → 8 entrants (bracket plein).

@@ -59,7 +59,10 @@ const brandStyle = computed(() => {
 const accent = computed(() => props.club.primaryColor || '#16a34a')
 
 const showBracket = computed(
-  () => props.tournament.format === 'knockout' || props.tournament.format === 'hybrid'
+  () =>
+    props.tournament.format === 'knockout' ||
+    props.tournament.format === 'hybrid' ||
+    props.tournament.format === 'double_elimination'
 )
 const showPools = computed(
   () => props.tournament.format === 'pools' || props.tournament.format === 'hybrid'

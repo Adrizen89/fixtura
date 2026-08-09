@@ -18,6 +18,7 @@ const formatLabel: Record<TournamentFormat, string> = {
   championship: 'Championnat',
   pools: 'Poules',
   knockout: 'Élimination directe',
+  double_elimination: 'Double élimination',
   hybrid: 'Poules + tableau',
 }
 

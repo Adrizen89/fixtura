@@ -1,35 +1,6 @@
 import { SchedulerError, InfeasibleScheduleError } from './errors.js'
+import { nextPowerOfTwo, seedPositions } from './seeding.js'
 import type { SlotSource, BracketMatch, Bracket, KnockoutParams } from './types.js'
-
-/** Prochaine puissance de 2 ≥ n (n ≥ 1). */
-function nextPowerOfTwo(n: number): number {
-  let p = 1
-  while (p < n) p *= 2
-  return p
-}
-
-/**
- * Ordre de tête de série standard des positions d'un bracket de taille `size`
- * (puissance de 2). Renvoie, pour chaque position (de haut en bas), le numéro de
- * tête de série qui l'occupe. Construit récursivement de sorte que la meilleure
- * tête affronte la moins bien classée, et que les têtes 1 et 2 se trouvent dans
- * des moitiés opposées (elles ne peuvent se croiser qu'en finale).
- *
- * size=4 → [1, 4, 2, 3] ; size=8 → [1, 8, 4, 5, 2, 7, 3, 6].
- */
-function seedPositions(size: number): number[] {
-  let seeds = [1]
-  while (seeds.length < size) {
-    const sum = seeds.length * 2 + 1
-    const next: number[] = []
-    for (const s of seeds) {
-      next.push(s)
-      next.push(sum - s)
-    }
-    seeds = next
-  }
-  return seeds
-}
 
 /** Code de tour aligné sur `matches.bracket_round`, d'après la distance à la finale. */
 function roundCode(round: number, rounds: number): string {

@@ -1,6 +1,7 @@
 import { generateSchedule } from './index.js'
 import { generatePoolPairings, placePoolMatches, splitIntoPools, poolLabel } from './pools.js'
 import { buildKnockout } from './knockout.js'
+import { buildDoubleElimination } from './double_elimination.js'
 import { SchedulerError } from './errors.js'
 import type { SchedulerParams, SlotSource, BracketMatch } from './types.js'
 
@@ -14,7 +15,8 @@ import type { SchedulerParams, SlotSource, BracketMatch } from './types.js'
  * colonnes `matches.*` de #42, pour un pont de persistance trivial.
  */
 
-export type FormatKind = 'championship' | 'pools' | 'knockout' | 'hybrid' | 'swiss'
+export type FormatKind =
+  'championship' | 'pools' | 'knockout' | 'hybrid' | 'swiss' | 'double_elimination'
 
 /** Paramètres propres au format (issus de `tournaments.format_config`). */
 export interface FormatConfig {
@@ -233,6 +235,20 @@ function knockoutPhased(
   return { matches, slotsCount: nextSlot }
 }
 
+function doubleEliminationPhased(params: SchedulerParams): {
+  matches: PhasedMatch[]
+  slotsCount: number
+} {
+  const entrants: SlotSource[] = params.teamIds.map((id) => ({ type: 'team', teamId: id }))
+  const de = buildDoubleElimination({ entrants })
+  // Réutilise le placement par bandes topologiques : les tableaux principal et de
+  // repêchage + la grande finale forment un DAG, ordonnancé comme tout bracket.
+  const { pos, nextSlot } = placeBracketOntoGrid(de.matches, params.numTerrains, 0)
+  const slotStart = assignSlotTimes(nextSlot, params)
+  const matches = de.matches.map((m) => bracketMatchToPhased(m, pos.get(m.id)!, slotStart))
+  return { matches, slotsCount: nextSlot }
+}
+
 /**
  * Ordre de série hybride : vainqueurs de poule d'abord, puis dauphins
  * (→ « 1er A vs 2e B »), puis enfin les **repêchés** — les meilleurs
@@ -323,6 +339,8 @@ export function generatePhased(
     built = poolsPhased(params, requirePools(config, params))
   } else if (format === 'knockout') {
     built = knockoutPhased(params, config.thirdPlace ?? false)
+  } else if (format === 'double_elimination') {
+    built = doubleEliminationPhased(params)
   } else if (format === 'hybrid') {
     const numPools = requirePools(config, params)
     const qpp = config.qualifiersPerPool ?? 2

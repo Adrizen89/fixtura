@@ -105,6 +105,33 @@ export interface BracketMatch {
   away: SlotSource
   /** true pour la petite finale (3e place). */
   thirdPlace?: boolean
+  /**
+   * Tableau d'appartenance en double élimination : `winners` (tableau principal),
+   * `losers` (repêchage) ou `grand_final`. Absent en élimination directe simple.
+   */
+  bracket?: 'winners' | 'losers' | 'grand_final'
+}
+
+/** Paramètres de construction d'un arbre à double élimination. */
+export interface DoubleEliminationParams {
+  /** Participants qualifiés, en ordre de tête de série (meilleur en premier, ≥ 2). */
+  entrants: SlotSource[]
+}
+
+/** Résultat de la construction d'un arbre à double élimination. */
+export interface DoubleElimination {
+  /** Tous les matchs (tableau principal, repêchage, grande finale), non placés. */
+  matches: BracketMatch[]
+  /** Taille du tableau principal (prochaine puissance de 2 ≥ nombre de qualifiés). */
+  size: number
+  /** Nombre de tours du tableau principal (log2(size)). */
+  winnersRounds: number
+  /** Nombre de tours du repêchage (0 pour 2 qualifiés, sinon 2·(winnersRounds−1)). */
+  losersRounds: number
+  /** Nombre de byes (size − nombre de qualifiés), attribués aux têtes de série. */
+  byes: number
+  /** Profondeur d'ordonnancement (nombre de bandes topologiques). */
+  bands: number
 }
 
 /** Paramètres de construction d'un arbre d'élimination directe. */

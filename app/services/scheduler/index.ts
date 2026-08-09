@@ -6,8 +6,10 @@ import type { SchedulerParams, Schedule, ScheduledMatch } from './types.js'
 export { SchedulerError, InfeasibleScheduleError } from './errors.js'
 export { generateRoundRobin } from './round_robin.js'
 export { buildKnockout } from './knockout.js'
+export { buildDoubleElimination } from './double_elimination.js'
 export type { SchedulerParams, Schedule, ScheduledMatch, Pairing } from './types.js'
 export type { SlotSource, BracketMatch, Bracket, KnockoutParams } from './types.js'
+export type { DoubleElimination, DoubleEliminationParams } from './types.js'
 
 // Phase de poules (formats v2 — cf. issue #43 / #31). Moteur pur, réutilise le
 // round-robin et le solveur de placement existants.
