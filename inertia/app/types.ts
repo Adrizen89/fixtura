@@ -26,17 +26,22 @@ export interface FlashMessages {
 export type TournamentStatus = 'draft' | 'scheduled' | 'live' | 'finished'
 
 export type TournamentFormat =
-  'championship' | 'pools' | 'knockout' | 'hybrid' | 'double_elimination'
+  'championship' | 'pools' | 'knockout' | 'hybrid' | 'swiss' | 'double_elimination'
 
 export interface TournamentFormatConfig {
   numPools?: number | null
   qualifiersPerPool?: number | null
+  bestRunnersUp?: number | null
   thirdPlace?: boolean
+  /** Système suisse (#110) : nombre de rondes ; null = auto ⌈log₂(N)⌉. */
+  swissRounds?: number | null
 }
 
 export interface Team {
   id: number
   name: string
+  /** Contact renseigné lors d'une inscription publique (#112) ; visible admin uniquement. */
+  contactEmail?: string | null
 }
 
 export interface Tournament {
@@ -53,6 +58,10 @@ export interface Tournament {
   winPoints: number
   drawPoints: number
   lossPoints: number
+  /** Inscriptions en ligne (#112) : intention orga, jeton du lien public, capacité. */
+  registrationOpen: boolean
+  registrationToken: string | null
+  registrationCapacity: number | null
   status: TournamentStatus
   publicSlug: string
   format: TournamentFormat
@@ -245,7 +254,9 @@ export interface TournamentFormData {
   format: TournamentFormat
   numPools: number | null
   qualifiersPerPool: number | null
+  bestRunnersUp: number | null
   thirdPlace: boolean
+  swissRounds: number | null
 }
 
 /** Palmarès (issue #109) — vues sérialisées pour la page admin. */

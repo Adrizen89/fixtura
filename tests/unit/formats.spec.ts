@@ -184,3 +184,60 @@ test.group('formats · double élimination (#111)', () => {
     assert.equal(s.matches.length, 10) // 2·6 − 2
   })
 })
+
+test.group('formats · hybride avec repêchage (#107)', () => {
+  test('repêchage : les meilleurs 2es entrent comme sources pool_best', ({ assert }) => {
+    // 12 équipes / 3 poules de 4, 2 qualifiés + 2 repêchés → 8 entrants (bracket plein).
+    const s = generatePhased(baseParams(12), 'hybrid', {
+      numPools: 3,
+      qualifiersPerPool: 2,
+      bestRunnersUp: 2,
+    })
+    const ko = s.matches.filter((m) => m.stage === 'knockout')
+    assert.equal(ko.length, 7) // bracket de 8 → 7 matchs
+
+    const best = ko
+      .flatMap((m) => [m.home, m.away])
+      .filter((src): src is Extract<typeof src, { type: 'pool_best' }> => src?.type === 'pool_best')
+    assert.equal(best.length, 2)
+    // Le repêchage porte sur le (qualifiersPerPool + 1)ᵉ ; index 1 et 2, uniques.
+    for (const b of best) assert.equal(b.rank, 3)
+    assert.deepEqual(best.map((b) => b.index).sort(), [1, 2])
+  })
+
+  test('bestRunnersUp = 0 : hybride inchangé (non-régression)', ({ assert }) => {
+    const s = generatePhased(baseParams(8), 'hybrid', {
+      numPools: 2,
+      qualifiersPerPool: 2,
+      bestRunnersUp: 0,
+    })
+    const ko = s.matches.filter((m) => m.stage === 'knockout')
+    assert.equal(ko.length, 3) // bracket de 4, aucun repêché
+    assert.isFalse(ko.some((m) => m.home?.type === 'pool_best' || m.away?.type === 'pool_best'))
+  })
+
+  test('repêchage > nb de poules éligibles → SchedulerError', ({ assert }) => {
+    // 3 poules de 4 : 3 poules ont un 3e, on ne peut pas en repêcher 4.
+    assert.throws(
+      () =>
+        generatePhased(baseParams(12), 'hybrid', {
+          numPools: 3,
+          qualifiersPerPool: 2,
+          bestRunnersUp: 4,
+        }),
+      SchedulerError
+    )
+  })
+
+  test('repêchage négatif → SchedulerError', ({ assert }) => {
+    assert.throws(
+      () =>
+        generatePhased(baseParams(12), 'hybrid', {
+          numPools: 3,
+          qualifiersPerPool: 2,
+          bestRunnersUp: -1,
+        }),
+      SchedulerError
+    )
+  })
+})

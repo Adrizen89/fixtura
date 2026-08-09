@@ -83,8 +83,8 @@ Modèle (tables pluriel snake_case / modèles Lucid singulier PascalCase) :
 - **clubs** `(id, name, slug, created_at, updated_at)` — racine multi-tenant, **1 seule ligne en v1**.
 - **users** `(id, club_id, full_name, email, password, role[owner|organizer], created_at, updated_at)` — les organisateurs. Se connectent pour saisir. Rôle exposé via `User.isOwner` (policies).
 - **events** `(id, club_id, name, event_date, start_time, match_duration_min, break_duration_min, lunch_start, lunch_duration_min, num_terrains, status[draft|scheduled|live|finished], public_slug, created_at, updated_at)` — **v2 (#32)** : un événement regroupe plusieurs catégories (tournois) le même jour sur un **pool de terrains partagé** ; il porte les paramètres **communs** (date, rythme, terrains). Cloisonnement par club **automatique** (mixin `withTenantScope`, issue #34) ; scope nommé `Event.forClub` conservé pour les usages hors requête. Écran public `/e/:public_slug`.
-- **tournaments** `(id, club_id, event_id?, name, category, event_date, start_time, match_duration_min, break_duration_min, lunch_start, lunch_duration_min, num_terrains, win_points, draw_points, loss_points, status[draft|scheduled|live|finished], public_slug, format, format_config, created_at, updated_at)`. `win_points`/`draw_points`/`loss_points` (défaut 3/1/0) — barème configurable (#104). `event_id` **nullable** (v2 #32) : un tournoi autonome (v1) n'a pas d'événement ; une catégorie d'un événement le référence (le pool de terrains + le rythme viennent alors de l'événement). La migration a rétro-converti chaque tournoi v1 en **un événement à une catégorie**.
-- **teams** `(id, tournament_id, name, created_at, updated_at)` — nom uniquement.
+- **tournaments** `(id, club_id, event_id?, name, category, event_date, start_time, match_duration_min, break_duration_min, lunch_start, lunch_duration_min, num_terrains, win_points, draw_points, loss_points, status[draft|scheduled|live|finished], public_slug, format, format_config, created_at, updated_at)`. `win_points`/`draw_points`/`loss_points` (défaut 3/1/0) — barème configurable (#104). `registration_open`/`registration_token`/`registration_capacity` (v3 #112) — **inscription publique** d'équipes : intention de l'orga, jeton non devinable du lien (distinct du `public_slug` des résultats), capacité facultative ; la « fermeture pleine » est **dérivée** du nombre d'équipes (jamais stockée). `event_id` **nullable** (v2 #32) : un tournoi autonome (v1) n'a pas d'événement ; une catégorie d'un événement le référence (le pool de terrains + le rythme viennent alors de l'événement). La migration a rétro-converti chaque tournoi v1 en **un événement à une catégorie**. `format` ∈ `championship|pools|knockout|hybrid|swiss` (suisse #110) ; `format_config` (JSON) porte les paramètres du format : `numPools`, `qualifiersPerPool`, `thirdPlace`, et `swissRounds` (facultatif — auto ⌈log₂N⌉ si absent).
+- **teams** `(id, tournament_id, name, contact_email?, created_at, updated_at)` — nom uniquement (aucune gestion de joueurs). `contact_email` **nullable** (v3 #112) : renseigné lors d'une **inscription publique** (cf. ci-dessous) ; donnée personnelle **jamais exposée sur l'écran public**.
 - **matches** `(id, tournament_id, round_number, terrain_number, scheduled_at, home_team_id, away_team_id, home_score, away_score, status[scheduled|live|finished|forfeit], forfeit_team_id?, updated_by_user_id, created_at, updated_at)`.
 - **invitations** `(id, club_id, email, role[owner|organizer], token, invited_by_user_id?, expires_at, accepted_at?, created_at, updated_at)` — **v2 (#35)** : invitation d'un organisateur par lien non devinable (jeton + expiration). Tenant-scopé (mixin `withTenantScope`) ; l'acceptation publique (`/invitations/:token`, hors contexte tenant) crée l'utilisateur dans le club avec le rôle prévu. Logique isolée : `app/services/invitations.ts` + `app/services/invitation_delivery.ts` (envoi email branchable, log du lien en v2).
 
@@ -103,9 +103,11 @@ Règles foot : victoire = 3 pts, nul = 1, défaite = 0 **par défaut** — barè
   - **Historique** (`/historique` — #108) : liste en lecture seule des éditions **terminées** (événements + tournois autonomes), scopée club, triée par date. Les tableaux de bord (tournois/événements) ne montrent que les éditions **actives** (non `finished`) ; la consultation figée d'une édition passée réutilise l'écran public (`/t/:slug`, `/e/:slug`).
   - **Palmarès** (`/palmares` — #109) : vainqueur/finaliste de chaque édition terminée + bilan cumulé par équipe (participations, titres, finales, ratio), agrégé sur **toutes** les éditions terminées (y compris les catégories d'un événement). Calcul par service **pur** `app/services/palmares.ts` (jamais stocké) : vainqueur = vainqueur de la finale de tableau (élimination/hybride) sinon 1er du classement général (championnat/poules, barème #104). Agrégation par **nom** d'équipe.
   - **Gestion des membres** (`/membres`, **owner** — #35) : inviter (lien + jeton), révoquer, changer un rôle, retirer.
+  - **Inscriptions en ligne** (page du tournoi, #112) : ouvrir/fermer le lien public d'inscription, fixer une capacité, copier le lien. Contact des équipes inscrites visible ici (jamais en public).
 - **Public (sans auth)** :
   - Écran d'un tournoi via `/t/:public_slug` : planning, résultats, classement en direct. **Mobile-first** (le « lien mobile lecture seule ») **et** lisible de loin (TV / vidéoprojecteur). Auto-refresh via SSE, aucune interaction requise.
   - **Onboarding (invités — #35)** : inscription d'un club (`/register`), acceptation d'une invitation (`/invitations/:token`), pages légales (`/mentions-legales`, `/cgu`, `/confidentialite`).
+  - **Inscription d'une équipe (#112)** : `/inscription/:registration_token` — formulaire public (nom + contact), **sans compte, sans paiement**. Affiche l'état fermé/ouvert/complet ; anti-spam **honeypot + rate-limit** (`app/services/rate_limit.ts`, en mémoire — v1 instance unique). Logique isolée dans `app/services/team_registration.ts`.
 
 ## 6. Module critique — Génération du planning
 
@@ -123,7 +125,29 @@ Deux étapes :
 
 **Tests unitaires obligatoires** couvrant : nombre pair/impair d'équipes, 1 terrain vs plusieurs, contrainte de repos respectée, pause déjeuner, et cas infaisable (doit lever une erreur claire).
 
-**Formats v2/v3** (dispatch pur `app/services/scheduler/formats.ts`, colonne `tournaments.format`) : `championship`, `pools`, `knockout`, `hybrid`, et **`double_elimination`** (#111). Tous produisent des matchs **placés** à participants éventuellement **différés** (sources `match_winner` / `match_loser` / `pool_rank`), persistés puis résolus par la **progression** (`app/services/bracket_progression.ts`). La **double élimination** (`app/services/scheduler/double_elimination.ts`) construit un tableau principal (gagnants) + un repêchage (losers, alternance tours mineurs/majeurs, perdants descendus via `match_loser`) + une **grande finale unique** (pas de bracket reset en v1 — évolution possible) ; byes attribués aux têtes de série ; ordonnancement par bandes topologiques (comme l'élimination directe). Codes de tour : `wb-r{n}` / `lb-r{n}` / `gf`. Le vainqueur d'un tournoi à double élimination = vainqueur de la grande finale (palmarès #109, classement final #106 alignés).
+**Formats v2/v3** (au-delà du championnat) : poules, élimination directe, hybride
+(poules + phase finale) — cf. `app/services/scheduler/formats.ts` (`generatePhased`) +
+progression des slots différés (`bracket_progression.ts`). **Système suisse (#110)** :
+moteur pur `app/services/scheduler/swiss.ts` (`pairSwissRound` — appariement par
+proximité de classement, sans rematch via backtracking, bye rotatif ; `defaultSwissRounds`
+= ⌈log₂N⌉). Particularité : les appariements d'une ronde dépendent du **classement
+après** la ronde précédente — il ne se génère donc **pas** d'avance mais **ronde par
+ronde** (`app/services/swiss.ts`) : la ronde 1 au planning, puis chaque ronde suivante
+**automatiquement** à la saisie des scores (dans la transaction, comme la progression
+des brackets — `ResultsController.progress`), jusqu'à `format_config.swissRounds` (ou le
+défaut). Le **bye** est une victoire d'office matérialisée en match à un seul côté,
+créditée au classement via `computeStandings(teams, matches, scoring, byes)`. Tournois
+autonomes uniquement (pas en événement multi-catégories).
+**Double élimination (#111)** : moteur pur `app/services/scheduler/double_elimination.ts`
+(`buildDoubleElimination`) — tableau principal (gagnants) + repêchage (losers, alternance
+tours mineurs/majeurs, perdants descendus via la source `match_loser`) + **grande finale
+unique** (pas de bracket reset en v1 — évolution possible). Byes attribués aux têtes de
+série (helpers partagés `scheduler/seeding.ts`) ; ordonnancement par bandes topologiques
+(comme l'élimination directe) ; codes de tour `wb-r{n}` / `lb-r{n}` / `gf`. Persistance et
+progression **génériques** (aucune adaptation : la descente des perdants passe par
+`match_loser`). Rendu : `inertia/components/DoubleEliminationBracket.vue`. Le vainqueur
+d'une double élimination = vainqueur de la grande finale (palmarès #109 et classement
+final #106 alignés).
 
 ## 7. Stratégie de développement — réalisée (historique)
 

@@ -21,6 +21,10 @@ export type { PoolPairing, PlacedPoolMatch, PlacedPoolsResult } from './pools.js
 export { placeEventGrid } from './event_grid.js'
 export type { EventGridUnit, PlacedEventGridUnit, EventGridPlacement } from './event_grid.js'
 
+// Système suisse (#110) : moteur d'appariement pur, une ronde à la fois.
+export { pairSwissRound, defaultSwissRounds, pairKey } from './swiss.js'
+export type { SwissPairing, SwissRound } from './swiss.js'
+
 const TIME_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/
 
 function parseTimeToMinutes(t: string): number {

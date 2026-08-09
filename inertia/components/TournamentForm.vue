@@ -17,6 +17,10 @@ const form = useForm<TournamentFormData>({ ...props.initial })
 const needsPools = computed(() => form.format === 'pools' || form.format === 'hybrid')
 const needsQualifiers = computed(() => form.format === 'hybrid')
 const allowsThird = computed(() => form.format === 'knockout' || form.format === 'hybrid')
+const needsSwissRounds = computed(() => form.format === 'swiss')
+
+// Libellé du rang repêché : « 3es » si 2 qualifiés par poule, « 4es » si 3, etc.
+const nextRankLabel = computed(() => `${(form.qualifiersPerPool ?? 2) + 1}es`)
 
 function submit() {
   form.transform((data) => ({
@@ -95,7 +99,7 @@ function submit() {
       <h2 class="mb-1 text-base font-semibold text-sand-12">Format</h2>
       <p class="mb-4 text-sm text-sand-11">Détermine comment le planning est généré.</p>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div :class="{ 'sm:col-span-2': !needsPools }">
+        <div :class="{ 'sm:col-span-2': !needsPools && !needsSwissRounds }">
           <label for="format" class="mb-1 block text-sm font-medium text-sand-12">
             Type de compétition
           </label>
@@ -112,9 +116,32 @@ function submit() {
               Double élimination — repêchage + grande finale
             </option>
             <option value="hybrid">Hybride — poules puis phase finale</option>
+            <option value="swiss">Système suisse — appariements par niveau, sans rematch</option>
           </select>
           <p v-if="form.errors.format" class="mt-1 text-sm text-red-700">
             {{ form.errors.format }}
+          </p>
+        </div>
+
+        <div v-if="needsSwissRounds">
+          <label for="swissRounds" class="mb-1 block text-sm font-medium text-sand-12">
+            Nombre de rondes
+          </label>
+          <input
+            id="swissRounds"
+            v-model.number="form.swissRounds"
+            type="number"
+            min="1"
+            max="20"
+            placeholder="Auto"
+            class="w-full rounded-lg border border-sand-7 px-3 py-2 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+            :class="{ 'border-red-400': form.errors.swissRounds }"
+          />
+          <p class="mt-1 text-xs text-sand-10">
+            Laisser vide pour automatique (⌈log₂ du nombre d'équipes⌉).
+          </p>
+          <p v-if="form.errors.swissRounds" class="mt-1 text-sm text-red-700">
+            {{ form.errors.swissRounds }}
           </p>
         </div>
 
@@ -153,6 +180,28 @@ function submit() {
           />
           <p v-if="form.errors.qualifiersPerPool" class="mt-1 text-sm text-red-700">
             {{ form.errors.qualifiersPerPool }}
+          </p>
+        </div>
+
+        <div v-if="needsQualifiers">
+          <label for="bestRunnersUp" class="mb-1 block text-sm font-medium text-sand-12">
+            Meilleurs repêchés
+          </label>
+          <input
+            id="bestRunnersUp"
+            v-model.number="form.bestRunnersUp"
+            type="number"
+            min="0"
+            max="64"
+            class="w-full rounded-lg border border-sand-7 px-3 py-2 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+            :class="{ 'border-red-400': form.errors.bestRunnersUp }"
+          />
+          <p class="mt-1 text-xs text-sand-11">
+            Repêche les meilleurs {{ nextRankLabel }} de poule, toutes poules confondues (0 = aucun
+            repêchage).
+          </p>
+          <p v-if="form.errors.bestRunnersUp" class="mt-1 text-sm text-red-700">
+            {{ form.errors.bestRunnersUp }}
           </p>
         </div>
 

@@ -11,6 +11,17 @@ const props = defineProps<{
 
 const base = computed(() => `/tournaments/${props.tournamentId}/matches/${props.match.id}`)
 
+// Bye du système suisse (#110) : un seul côté renseigné → victoire d'office, non
+// saisissable (aucun match à jouer).
+const isBye = computed(
+  () =>
+    props.match.stage === 'swiss' &&
+    (props.match.homeTeamId === null || props.match.awayTeamId === null)
+)
+const byeTeam = computed(() =>
+  props.match.homeTeamId !== null ? props.match.homeTeam : props.match.awayTeam
+)
+
 const isForfeit = computed(() => props.match.status === 'forfeit')
 const forfeitTeam = computed(() => {
   if (props.match.forfeitSide === 'home') return props.match.homeTeam
@@ -108,7 +119,26 @@ function formatTime(iso: string | null) {
 
 <template>
   <div class="py-2">
-    <form class="flex flex-wrap items-center gap-x-3 gap-y-1.5" @submit.prevent="submitScore">
+    <!-- Bye (système suisse) : ligne en lecture seule, aucune saisie. -->
+    <div v-if="isBye" class="flex items-center gap-2 py-1 text-sm">
+      <span
+        class="w-8 shrink-0 rounded-md bg-sand-3 px-2 py-0.5 text-center text-xs font-medium text-sand-11"
+      >
+        —
+      </span>
+      <span class="min-w-0 flex-1 truncate font-medium text-sand-12">{{ byeTeam }}</span>
+      <span
+        class="inline-flex shrink-0 items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800"
+      >
+        Exempt · victoire
+      </span>
+    </div>
+
+    <form
+      v-else
+      class="flex flex-wrap items-center gap-x-3 gap-y-1.5"
+      @submit.prevent="submitScore"
+    >
       <span
         class="w-8 shrink-0 rounded-md bg-sand-3 px-2 py-0.5 text-center text-xs font-medium text-sand-11"
       >

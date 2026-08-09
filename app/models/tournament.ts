@@ -11,15 +11,19 @@ import type { Scoring } from '#services/standings'
 
 export type TournamentStatus = 'draft' | 'scheduled' | 'live' | 'finished'
 
-/** Format de compétition (cf. #42 — championnat par défaut en v1). */
+/** Format de compétition (cf. #42 — championnat par défaut en v1 ; suisse #110 ; double élim #111). */
 export type TournamentFormat =
-  'championship' | 'pools' | 'knockout' | 'hybrid' | 'double_elimination'
+  'championship' | 'pools' | 'knockout' | 'hybrid' | 'swiss' | 'double_elimination'
 
 /** Paramètres propres au format, stockés en JSON (`format_config`). */
 export interface TournamentFormatConfig {
   numPools?: number
   qualifiersPerPool?: number
+  /** Repêchage : nb de meilleurs (qualifiersPerPool+1)ᵉˢ inter-poules (#107). */
+  bestRunnersUp?: number
   thirdPlace?: boolean
+  /** Système suisse (#110) : nombre de rondes ; absent = auto ⌈log₂(N)⌉. */
+  swissRounds?: number
 }
 
 export default class Tournament extends compose(BaseModel, withTenantScope()) {
@@ -94,6 +98,21 @@ export default class Tournament extends compose(BaseModel, withTenantScope()) {
 
   @column()
   declare lossPoints: number
+
+  /**
+   * Inscription publique d'une équipe (issue #112). `registrationOpen` est
+   * l'intention de l'orga ; le lien public passe par `registrationToken` (non
+   * devinable, distinct du `publicSlug` des résultats). La « fermeture pleine » est
+   * dérivée du nombre d'équipes vs `registrationCapacity` (jamais stockée).
+   */
+  @column()
+  declare registrationOpen: boolean
+
+  @column()
+  declare registrationToken: string | null
+
+  @column()
+  declare registrationCapacity: number | null
 
   @column()
   declare status: TournamentStatus

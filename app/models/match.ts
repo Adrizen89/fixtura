@@ -7,11 +7,11 @@ import User from '#models/user'
 
 export type MatchStatus = 'scheduled' | 'live' | 'finished' | 'forfeit'
 
-/** Phase du match dans la compétition (cf. #42). */
-export type MatchStage = 'main' | 'pool' | 'knockout'
+/** Phase du match dans la compétition (cf. #42 ; système suisse #110). */
+export type MatchStage = 'main' | 'pool' | 'knockout' | 'swiss'
 
 /** Manière dont un slot (domicile/extérieur) est rempli tant qu'il n'est pas résolu. */
-export type SlotSourceType = 'team' | 'match_winner' | 'match_loser' | 'pool_rank'
+export type SlotSourceType = 'team' | 'match_winner' | 'match_loser' | 'pool_rank' | 'pool_best'
 
 export default class Match extends BaseModel {
   @column({ isPrimary: true })
@@ -85,6 +85,10 @@ export default class Match extends BaseModel {
   @column()
   declare homeSourceRank: number | null
 
+  /** Index de sélection du repêchage inter-poules (`pool_best`), 1-based (#107). */
+  @column()
+  declare homeSourceIndex: number | null
+
   // --- Source du slot extérieur ---
   @column()
   declare awaySourceType: SlotSourceType | null
@@ -97,6 +101,9 @@ export default class Match extends BaseModel {
 
   @column()
   declare awaySourceRank: number | null
+
+  @column()
+  declare awaySourceIndex: number | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

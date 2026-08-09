@@ -77,6 +77,9 @@ export type SlotSource =
   | { type: 'match_winner'; matchId: string }
   | { type: 'match_loser'; matchId: string }
   | { type: 'pool_rank'; pool: string; rank: number }
+  // Repêchage inter-poules (#107) : le `index`-ᵉ meilleur `rank`-ᵉ de poule,
+  // toutes poules confondues (index 1-based, 1 = le meilleur).
+  | { type: 'pool_best'; rank: number; index: number }
 
 /** Un match de l'arbre d'élimination directe (participants éventuellement différés). */
 export interface BracketMatch {

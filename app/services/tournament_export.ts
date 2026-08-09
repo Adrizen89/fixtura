@@ -77,6 +77,8 @@ export function formatLabel(format: TournamentFormat): string {
       return 'Double élimination'
     case 'hybrid':
       return 'Poules + élimination'
+    case 'swiss':
+      return 'Système suisse'
     default:
       return 'Championnat'
   }

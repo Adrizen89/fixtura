@@ -15,12 +15,15 @@ import type { SchedulerParams, SlotSource, BracketMatch } from './types.js'
  * colonnes `matches.*` de #42, pour un pont de persistance trivial.
  */
 
-export type FormatKind = 'championship' | 'pools' | 'knockout' | 'hybrid' | 'double_elimination'
+export type FormatKind =
+  'championship' | 'pools' | 'knockout' | 'hybrid' | 'swiss' | 'double_elimination'
 
 /** Paramètres propres au format (issus de `tournaments.format_config`). */
 export interface FormatConfig {
   numPools?: number
   qualifiersPerPool?: number
+  /** Repêchage : nb de meilleurs (qualifiersPerPool+1)ᵉˢ inter-poules (#107). */
+  bestRunnersUp?: number
   thirdPlace?: boolean
 }
 
@@ -246,13 +249,26 @@ function doubleEliminationPhased(params: SchedulerParams): {
   return { matches, slotsCount: nextSlot }
 }
 
-/** Ordre de série hybride : vainqueurs de poule d'abord, puis dauphins (→ « 1er A vs 2e B »). */
-function hybridEntrants(numPools: number, qualifiersPerPool: number): SlotSource[] {
+/**
+ * Ordre de série hybride : vainqueurs de poule d'abord, puis dauphins
+ * (→ « 1er A vs 2e B »), puis enfin les **repêchés** — les meilleurs
+ * (qualifiersPerPool+1)ᵉˢ inter-poules — en dernières têtes de série (#107).
+ */
+function hybridEntrants(
+  numPools: number,
+  qualifiersPerPool: number,
+  bestRunnersUp: number
+): SlotSource[] {
   const entrants: SlotSource[] = []
   for (let rank = 1; rank <= qualifiersPerPool; rank++) {
     for (let i = 0; i < numPools; i++) {
       entrants.push({ type: 'pool_rank', pool: poolLabel(i), rank })
     }
+  }
+  // Repêchage : les `bestRunnersUp` meilleurs (qualifiersPerPool+1)ᵉˢ, comparés
+  // entre poules (points → diff → BP → nom, cf. #33). Résolus par la progression.
+  for (let index = 1; index <= bestRunnersUp; index++) {
+    entrants.push({ type: 'pool_best', rank: qualifiersPerPool + 1, index })
   }
   return entrants
 }
@@ -261,6 +277,7 @@ function hybridPhased(
   params: SchedulerParams,
   numPools: number,
   qualifiersPerPool: number,
+  bestRunnersUp: number,
   thirdPlace: boolean
 ): { matches: PhasedMatch[]; slotsCount: number } {
   // Phase de poules d'abord (créneaux 0..P-1).
@@ -268,7 +285,7 @@ function hybridPhased(
   const pools = placePoolMatches(pairings, params.numTerrains)
 
   // Phase finale : qualifiés en sources de poule, placée APRÈS toutes les poules.
-  const entrants = hybridEntrants(numPools, qualifiersPerPool)
+  const entrants = hybridEntrants(numPools, qualifiersPerPool, bestRunnersUp)
   const bracket = buildKnockout({ entrants, thirdPlace })
   const { pos, nextSlot } = placeBracketOntoGrid(
     bracket.matches,
@@ -327,8 +344,14 @@ export function generatePhased(
   } else if (format === 'hybrid') {
     const numPools = requirePools(config, params)
     const qpp = config.qualifiersPerPool ?? 2
-    validateQualifiers(params.teamIds, numPools, qpp)
-    built = hybridPhased(params, numPools, qpp, config.thirdPlace ?? false)
+    const repechage = config.bestRunnersUp ?? 0
+    validateQualifiers(params.teamIds, numPools, qpp, repechage)
+    built = hybridPhased(params, numPools, qpp, repechage, config.thirdPlace ?? false)
+  } else if (format === 'swiss') {
+    // Le système suisse (#110) se génère **ronde par ronde** (les appariements
+    // dépendent du classement) : il ne passe pas par ce planning figé d'avance,
+    // mais par `app/services/swiss.ts`. Garde-fou défensif — jamais atteint.
+    throw new SchedulerError('Le système suisse se génère ronde par ronde.')
   } else {
     throw new SchedulerError(`Format inconnu : « ${format} ».`)
   }
@@ -353,17 +376,36 @@ function requirePools(config: FormatConfig, params: SchedulerParams): number {
 }
 
 /** Vérifie qu'on ne qualifie pas plus d'équipes qu'une poule n'en contient. */
-function validateQualifiers(teamIds: number[], numPools: number, qualifiersPerPool: number): void {
+function validateQualifiers(
+  teamIds: number[],
+  numPools: number,
+  qualifiersPerPool: number,
+  bestRunnersUp: number
+): void {
   if (!Number.isInteger(qualifiersPerPool) || qualifiersPerPool < 1) {
     throw new SchedulerError('Le nombre de qualifiés par poule doit être ≥ 1.')
   }
-  const smallestPool = Math.min(...splitIntoPools(teamIds, numPools).map((p) => p.length))
+  const poolSizes = splitIntoPools(teamIds, numPools).map((p) => p.length)
+  const smallestPool = Math.min(...poolSizes)
   if (qualifiersPerPool > smallestPool) {
     throw new SchedulerError(
       `Impossible de qualifier ${qualifiersPerPool} équipe(s) : la plus petite poule n'en compte que ${smallestPool}.`
     )
   }
-  if (numPools * qualifiersPerPool < 2) {
+
+  // Repêchage : les meilleurs (qualifiersPerPool+1)ᵉˢ inter-poules. Le vivier est le
+  // nombre de poules qui comptent au moins (qualifiersPerPool+1) équipes.
+  if (!Number.isInteger(bestRunnersUp) || bestRunnersUp < 0) {
+    throw new SchedulerError('Le nombre de repêchés doit être un entier ≥ 0.')
+  }
+  const repechagePool = poolSizes.filter((n) => n >= qualifiersPerPool + 1).length
+  if (bestRunnersUp > repechagePool) {
+    throw new SchedulerError(
+      `Repêchage impossible : seulement ${repechagePool} poule(s) comptent un ${qualifiersPerPool + 1}ᵉ, ` +
+        `on ne peut pas en repêcher ${bestRunnersUp}.`
+    )
+  }
+  if (numPools * qualifiersPerPool + bestRunnersUp < 2) {
     throw new SchedulerError('Il faut au moins 2 qualifiés pour une phase finale.')
   }
 }

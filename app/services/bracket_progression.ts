@@ -1,7 +1,7 @@
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import Match from '#models/match'
 import { computeStandings, DEFAULT_SCORING } from '#services/standings'
-import type { Scoring } from '#services/standings'
+import type { Scoring, StandingRow } from '#services/standings'
 
 /**
  * Progression des brackets (sous-issue #45 de #31).
@@ -45,10 +45,12 @@ export interface ProgressMatch {
   homeSourceMatchId: number | null
   homeSourcePool: string | null
   homeSourceRank: number | null
+  homeSourceIndex: number | null
   awaySourceType: string | null
   awaySourceMatchId: number | null
   awaySourcePool: string | null
   awaySourceRank: number | null
+  awaySourceIndex: number | null
 }
 
 /** Un remplissage de slot décidé par la progression. */
@@ -83,14 +85,17 @@ export function outcomeOf(m: ProgressMatch): { winnerId: number; loserId: number
   return null // nul non départagé → pas de vainqueur, on ne propage pas
 }
 
-/** Xᵉ du classement d'une poule terminée (`pool`), ou null si la poule n'est pas finie. */
-function poolQualifier(
+/**
+ * Classement complet d'une poule terminée (`pool`), ou null si elle n'est pas
+ * finie (aucun match, ou au moins un match non réglé). Base commune à
+ * `poolQualifier` (Xᵉ d'une poule) et `poolBestQualifier` (repêchage inter-poules).
+ */
+function poolStandings(
   matches: ProgressMatch[],
   teamsById: Map<number, string>,
   pool: string,
-  rank: number,
   scoring: Scoring
-): number | null {
+): StandingRow[] | null {
   const poolMatches = matches.filter((m) => m.stage === 'pool' && m.groupLabel === pool)
   if (poolMatches.length === 0) return null
   if (!poolMatches.every(isSettled)) return null // poule non terminée → pas encore de qualifiés
@@ -111,8 +116,63 @@ function poolQualifier(
       awayScore: m.awayScore!,
     }))
 
-  const standings = computeStandings(teams, played, scoring)
-  return standings[rank - 1]?.teamId ?? null
+  return computeStandings(teams, played, scoring)
+}
+
+/** Libellés de toutes les poules du tournoi (matchs `stage === 'pool'`), triés. */
+function allPoolLabels(matches: ProgressMatch[]): string[] {
+  const labels = new Set<string>()
+  for (const m of matches) {
+    if (m.stage === 'pool' && m.groupLabel !== null) labels.add(m.groupLabel)
+  }
+  return [...labels].sort()
+}
+
+/** Xᵉ du classement d'une poule terminée (`pool`), ou null si la poule n'est pas finie. */
+function poolQualifier(
+  matches: ProgressMatch[],
+  teamsById: Map<number, string>,
+  pool: string,
+  rank: number,
+  scoring: Scoring
+): number | null {
+  const standings = poolStandings(matches, teamsById, pool, scoring)
+  return standings ? (standings[rank - 1]?.teamId ?? null) : null
+}
+
+/**
+ * Repêchage inter-poules (#107) : le `index`-ᵉ **meilleur `rank`-ᵉ de poule**,
+ * toutes poules confondues. On collecte le `rank`-ᵉ de **chaque** poule, puis on
+ * les classe entre eux (points → différence de buts → buts marqués → nom, pour un
+ * ordre déterministe cohérent avec le départage #33). Renvoie null tant que **toutes**
+ * les poules ne sont pas terminées (un repêché ne peut être désigné qu'à poules closes).
+ */
+function poolBestQualifier(
+  matches: ProgressMatch[],
+  teamsById: Map<number, string>,
+  rank: number,
+  index: number,
+  scoring: Scoring
+): number | null {
+  const pools = allPoolLabels(matches)
+  if (pools.length === 0) return null
+
+  const candidates: StandingRow[] = []
+  for (const pool of pools) {
+    const standings = poolStandings(matches, teamsById, pool, scoring)
+    if (standings === null) return null // une poule non terminée → repêchage indéterminé
+    const row = standings[rank - 1]
+    if (row) candidates.push(row)
+  }
+
+  candidates.sort(
+    (a, b) =>
+      b.points - a.points ||
+      b.goalDifference - a.goalDifference ||
+      b.goalsFor - a.goalsFor ||
+      a.teamName.localeCompare(b.teamName)
+  )
+  return candidates[index - 1]?.teamId ?? null
 }
 
 /** Équipe « correcte » pour un slot différé, ou null si sa source n'est pas encore résolue. */
@@ -124,6 +184,7 @@ function resolveSlot(
   matchId: number | null,
   pool: string | null,
   rank: number | null,
+  index: number | null,
   scoring: Scoring
 ): number | null {
   switch (type) {
@@ -138,6 +199,10 @@ function resolveSlot(
     case 'pool_rank':
       return pool !== null && rank !== null
         ? poolQualifier(matches, teamsById, pool, rank, scoring)
+        : null
+    case 'pool_best':
+      return rank !== null && index !== null
+        ? poolBestQualifier(matches, teamsById, rank, index, scoring)
         : null
     default:
       return null // 'team' / null : slot déjà concret, rien à résoudre
@@ -167,7 +232,14 @@ export function planProgression(
   for (const m of matches) {
     for (const side of ['home', 'away'] as const) {
       const type = side === 'home' ? m.homeSourceType : m.awaySourceType
-      if (type !== 'match_winner' && type !== 'match_loser' && type !== 'pool_rank') continue
+      if (
+        type !== 'match_winner' &&
+        type !== 'match_loser' &&
+        type !== 'pool_rank' &&
+        type !== 'pool_best'
+      ) {
+        continue
+      }
 
       const current = side === 'home' ? m.homeTeamId : m.awayTeamId
       const correct = resolveSlot(
@@ -178,6 +250,7 @@ export function planProgression(
         side === 'home' ? m.homeSourceMatchId : m.awaySourceMatchId,
         side === 'home' ? m.homeSourcePool : m.awaySourcePool,
         side === 'home' ? m.homeSourceRank : m.awaySourceRank,
+        side === 'home' ? m.homeSourceIndex : m.awaySourceIndex,
         scoring
       )
 
@@ -209,10 +282,12 @@ function toProgressMatch(m: Match): ProgressMatch {
     homeSourceMatchId: m.homeSourceMatchId,
     homeSourcePool: m.homeSourcePool,
     homeSourceRank: m.homeSourceRank,
+    homeSourceIndex: m.homeSourceIndex,
     awaySourceType: m.awaySourceType,
     awaySourceMatchId: m.awaySourceMatchId,
     awaySourcePool: m.awaySourcePool,
     awaySourceRank: m.awaySourceRank,
+    awaySourceIndex: m.awaySourceIndex,
   }
 }
 
