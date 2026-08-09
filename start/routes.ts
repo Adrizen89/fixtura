@@ -22,6 +22,7 @@ const PublicIcalController = () => import('#controllers/public_ical_controller')
 const EventsController = () => import('#controllers/events_controller')
 const EventPlanningController = () => import('#controllers/event_planning_controller')
 const PublicEventController = () => import('#controllers/public_event_controller')
+const PublicApiController = () => import('#controllers/public_api_controller')
 const LegalController = () => import('#controllers/legal_controller')
 const AccountController = () => import('#controllers/account_controller')
 const RegistrationController = () => import('#controllers/registration_controller')
@@ -99,6 +100,21 @@ router
 router
   .post('/inscription/:token', [PublicRegistrationController, 'register'])
   .as('public.registration.submit')
+
+/**
+ * API de lecture publique (issue #122) — JSON **lecture seule**, sans auth, via le
+ * `public_slug`. Contrat **versionné** (`/api/v1/…`) et stable pour les intégrations
+ * tierces (planning, résultats, classement). Rate-limitée (#116) : 120 req/min par
+ * IP (les intégrations peuvent poller un peu plus que l'écran humain).
+ */
+router
+  .get('/api/v1/tournaments/:slug', [PublicApiController, 'tournament'])
+  .as('api.tournament')
+  .use(middleware.throttle({ name: 'api', max: 120, windowMs: MINUTE }))
+router
+  .get('/api/v1/events/:slug', [PublicApiController, 'event'])
+  .as('api.event')
+  .use(middleware.throttle({ name: 'api', max: 120, windowMs: MINUTE }))
 
 /**
  * Pages légales — publiques, sans auth (information des personnes exigée par le
