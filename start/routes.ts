@@ -18,6 +18,7 @@ const PlanningController = () => import('#controllers/planning_controller')
 const ResultsController = () => import('#controllers/results_controller')
 const ExportController = () => import('#controllers/export_controller')
 const PublicController = () => import('#controllers/public_controller')
+const PublicIcalController = () => import('#controllers/public_ical_controller')
 const EventsController = () => import('#controllers/events_controller')
 const EventPlanningController = () => import('#controllers/event_planning_controller')
 const PublicEventController = () => import('#controllers/public_event_controller')
@@ -54,6 +55,13 @@ router.on('/').redirect('tournaments.index')
  * lisible de loin. Rafraîchissement via SSE (canal `tournaments/{public_slug}`).
  */
 router.get('/t/:slug', [PublicController, 'show']).as('public.tournament')
+
+/**
+ * Export iCalendar du planning d'un tournoi (issue #121) — sans auth, via le même
+ * `public_slug`. Sert à la fois de fichier `.ics` téléchargeable et d'URL
+ * d'abonnement (agenda qui se met à jour). `?download=1` force le téléchargement.
+ */
+router.get('/t/:slug/calendrier.ics', [PublicIcalController, 'show']).as('public.tournament.ical')
 
 /**
  * Écran public d'un **événement** multi-catégories (#32) — sans auth, via le

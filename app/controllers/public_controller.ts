@@ -29,6 +29,13 @@ export default class PublicController {
     // Mode TV (?tv=1) : affichage plein écran en rotation planning ↔ classement (#40).
     const tv = ['1', 'true'].includes(String(request.qs().tv ?? ''))
 
+    // Export/abonnement iCal (#121) : URL de téléchargement + URL webcal d'abonnement.
+    const icalPath = `/t/${tournament.publicSlug}/calendrier.ics`
+    const ical = {
+      downloadUrl: `${icalPath}?download=1`,
+      subscribeUrl: `webcal://${request.host()}${icalPath}`,
+    }
+
     return inertia.render('public/tournament', {
       tournament: {
         name: tournament.name,
@@ -45,6 +52,7 @@ export default class PublicController {
         primaryColor: tournament.club.primaryColor,
       },
       tv,
+      ical,
       matches,
       standings,
       pools,
