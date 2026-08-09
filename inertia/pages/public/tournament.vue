@@ -31,6 +31,7 @@ const props = defineProps<{
   }
   club: PublicClub
   tv: boolean
+  ical: { downloadUrl: string; subscribeUrl: string }
   matches: ResultMatchRow[]
   standings: StandingRow[]
   pools: PoolStanding[]
@@ -415,6 +416,33 @@ function rowClass(rank: number) {
           </p>
         </section>
       </div>
+
+      <!-- Export / abonnement calendrier (#121) -->
+      <section
+        class="mt-10 flex flex-col items-center gap-3 border-t border-sand-6 pt-6 text-center"
+      >
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-sand-11">
+          Ajouter à mon agenda
+        </h2>
+        <p class="max-w-md text-sm text-sand-10">
+          Suivez le planning depuis votre téléphone. L'abonnement se met à jour automatiquement
+          (décalages, scores).
+        </p>
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <a
+            :href="ical.subscribeUrl"
+            class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          >
+            S'abonner au calendrier
+          </a>
+          <a
+            :href="ical.downloadUrl"
+            class="inline-flex items-center gap-2 rounded-lg border border-sand-7 px-4 py-2 text-sm font-semibold text-sand-12 transition hover:bg-sand-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          >
+            Télécharger le .ics
+          </a>
+        </div>
+      </section>
 
       <footer
         class="mt-10 flex flex-col items-center gap-2 border-t border-sand-6 pt-4 text-center text-xs text-sand-9"

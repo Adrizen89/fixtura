@@ -5,6 +5,7 @@ import Club from '#models/club'
 import User from '#models/user'
 import Tournament from '#models/tournament'
 import Team from '#models/team'
+import Match from '#models/match'
 
 /**
  * Écran public enrichi (issue #40) : QR code admin, personnalisation club (logo +
@@ -148,6 +149,44 @@ test.group('Écran public — QR, branding, mode TV, PWA (fonctionnel)', (group)
     const res = await client.get('/t/tournoi-public-a?tv=1')
     res.assertStatus(200)
     assert.include(res.text(), 'tv-board')
+  })
+
+  test('iCal : planning public exporté en .ics, 404 pour un slug inconnu', async ({
+    client,
+    assert,
+  }) => {
+    const { club } = await makeClub('Club A', 'club-a')
+    const tournament = await makeTournament(club.id, 'tournoi-public-a')
+    const teams = await Team.query().where('tournament_id', tournament.id).orderBy('name')
+
+    await Match.create({
+      tournamentId: tournament.id,
+      roundNumber: 1,
+      terrainNumber: 1,
+      scheduledAt: DateTime.fromISO('2026-09-01T09:00:00', { zone: 'utc' }),
+      homeTeamId: teams[0].id,
+      awayTeamId: teams[1].id,
+      homeScore: null,
+      awayScore: null,
+      status: 'scheduled',
+      stage: 'main',
+    })
+
+    const res = await client.get('/t/tournoi-public-a/calendrier.ics')
+    res.assertStatus(200)
+    assert.include(res.header('content-type') ?? '', 'text/calendar')
+    const body = res.text()
+    assert.include(body, 'BEGIN:VCALENDAR')
+    assert.include(body, 'BEGIN:VEVENT')
+    assert.include(body, 'SUMMARY:Alpha – Bravo')
+
+    // Téléchargement forcé.
+    const dl = await client.get('/t/tournoi-public-a/calendrier.ics?download=1')
+    assert.include(dl.header('content-disposition') ?? '', 'attachment')
+
+    // Slug inconnu → 404 (pas de fuite d'existence).
+    const notFound = await client.get('/t/inconnu/calendrier.ics').redirects(0)
+    notFound.assertStatus(404)
   })
 
   test('PWA : manifeste et service worker servis', async ({ client, assert }) => {
