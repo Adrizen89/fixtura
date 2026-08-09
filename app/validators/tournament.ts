@@ -33,6 +33,7 @@ export const tournamentValidator = vine.compile(
     format: vine.enum(['championship', 'pools', 'knockout', 'hybrid', 'swiss']),
     numPools: vine.number().min(2).max(64).nullable().optional(),
     qualifiersPerPool: vine.number().min(1).max(32).nullable().optional(),
+    bestRunnersUp: vine.number().min(0).max(64).nullable().optional(),
     thirdPlace: vine.boolean().optional(),
     // Système suisse (#110) : nombre de rondes ; vide = auto ⌈log₂(N)⌉.
     swissRounds: vine.number().withoutDecimals().min(1).max(20).nullable().optional(),

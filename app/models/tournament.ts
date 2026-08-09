@@ -18,6 +18,8 @@ export type TournamentFormat = 'championship' | 'pools' | 'knockout' | 'hybrid' 
 export interface TournamentFormatConfig {
   numPools?: number
   qualifiersPerPool?: number
+  /** Repêchage : nb de meilleurs (qualifiersPerPool+1)ᵉˢ inter-poules (#107). */
+  bestRunnersUp?: number
   thirdPlace?: boolean
   /** Système suisse (#110) : nombre de rondes ; absent = auto ⌈log₂(N)⌉. */
   swissRounds?: number

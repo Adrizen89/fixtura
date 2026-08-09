@@ -14,6 +14,7 @@ function formatConfigOf(data: {
   format: TournamentFormat
   numPools?: number | null
   qualifiersPerPool?: number | null
+  bestRunnersUp?: number | null
   thirdPlace?: boolean
   swissRounds?: number | null
 }): TournamentFormatConfig | null {
@@ -26,6 +27,7 @@ function formatConfigOf(data: {
       return {
         numPools: data.numPools ?? undefined,
         qualifiersPerPool: data.qualifiersPerPool ?? undefined,
+        bestRunnersUp: data.bestRunnersUp ?? undefined,
         thirdPlace: data.thirdPlace ?? false,
       }
     case 'swiss':

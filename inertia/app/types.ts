@@ -30,6 +30,7 @@ export type TournamentFormat = 'championship' | 'pools' | 'knockout' | 'hybrid' 
 export interface TournamentFormatConfig {
   numPools?: number | null
   qualifiersPerPool?: number | null
+  bestRunnersUp?: number | null
   thirdPlace?: boolean
   /** Système suisse (#110) : nombre de rondes ; null = auto ⌈log₂(N)⌉. */
   swissRounds?: number | null
@@ -252,6 +253,7 @@ export interface TournamentFormData {
   format: TournamentFormat
   numPools: number | null
   qualifiersPerPool: number | null
+  bestRunnersUp: number | null
   thirdPlace: boolean
   swissRounds: number | null
 }

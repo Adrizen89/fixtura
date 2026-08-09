@@ -19,6 +19,9 @@ const needsQualifiers = computed(() => form.format === 'hybrid')
 const allowsThird = computed(() => form.format === 'knockout' || form.format === 'hybrid')
 const needsSwissRounds = computed(() => form.format === 'swiss')
 
+// Libellé du rang repêché : « 3es » si 2 qualifiés par poule, « 4es » si 3, etc.
+const nextRankLabel = computed(() => `${(form.qualifiersPerPool ?? 2) + 1}es`)
+
 function submit() {
   form.transform((data) => ({
     ...data,
@@ -174,6 +177,28 @@ function submit() {
           />
           <p v-if="form.errors.qualifiersPerPool" class="mt-1 text-sm text-red-700">
             {{ form.errors.qualifiersPerPool }}
+          </p>
+        </div>
+
+        <div v-if="needsQualifiers">
+          <label for="bestRunnersUp" class="mb-1 block text-sm font-medium text-sand-12">
+            Meilleurs repêchés
+          </label>
+          <input
+            id="bestRunnersUp"
+            v-model.number="form.bestRunnersUp"
+            type="number"
+            min="0"
+            max="64"
+            class="w-full rounded-lg border border-sand-7 px-3 py-2 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+            :class="{ 'border-red-400': form.errors.bestRunnersUp }"
+          />
+          <p class="mt-1 text-xs text-sand-11">
+            Repêche les meilleurs {{ nextRankLabel }} de poule, toutes poules confondues (0 = aucun
+            repêchage).
+          </p>
+          <p v-if="form.errors.bestRunnersUp" class="mt-1 text-sm text-red-700">
+            {{ form.errors.bestRunnersUp }}
           </p>
         </div>
 

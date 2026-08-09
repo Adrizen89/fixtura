@@ -20,6 +20,7 @@ const initial: TournamentFormData = {
   format: 'championship',
   numPools: null,
   qualifiersPerPool: null,
+  bestRunnersUp: null,
   thirdPlace: false,
   swissRounds: null,
 }

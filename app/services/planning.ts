@@ -116,6 +116,17 @@ function awaySourceTypeOf(m: { awayTeamId: number | null; away: SlotSource | nul
   return m.away?.type ?? (m.awayTeamId !== null ? ('team' as const) : null)
 }
 
+/** Colonnes `*_source_pool` / `*_source_rank` / `*_source_index` d'une source. */
+function srcPool(s: SlotSource | null): string | null {
+  return s?.type === 'pool_rank' ? s.pool : null
+}
+function srcRank(s: SlotSource | null): number | null {
+  return s?.type === 'pool_rank' || s?.type === 'pool_best' ? s.rank : null
+}
+function srcIndex(s: SlotSource | null): number | null {
+  return s?.type === 'pool_best' ? s.index : null
+}
+
 /**
  * Persiste un planning multi-phases (remplace tout, `draft` → `scheduled`).
  *
@@ -150,12 +161,14 @@ export async function persistPhasedSchedule(
     bracketSlot: m.bracketSlot,
     homeSourceType: homeSourceTypeOf(m),
     homeSourceMatchId: null,
-    homeSourcePool: m.home?.type === 'pool_rank' ? m.home.pool : null,
-    homeSourceRank: m.home?.type === 'pool_rank' ? m.home.rank : null,
+    homeSourcePool: srcPool(m.home),
+    homeSourceRank: srcRank(m.home),
+    homeSourceIndex: srcIndex(m.home),
     awaySourceType: awaySourceTypeOf(m),
     awaySourceMatchId: null,
-    awaySourcePool: m.away?.type === 'pool_rank' ? m.away.pool : null,
-    awaySourceRank: m.away?.type === 'pool_rank' ? m.away.rank : null,
+    awaySourcePool: srcPool(m.away),
+    awaySourceRank: srcRank(m.away),
+    awaySourceIndex: srcIndex(m.away),
   }))
 
   await db.transaction(async (trx) => {
@@ -302,6 +315,13 @@ function poolRankLabel(pool: string | null, rank: number | null): string {
   return `${r} Poule ${pool ?? '?'}`
 }
 
+/** « 1er meilleur 2e » — repêchage inter-poules (#107). */
+function poolBestLabel(rank: number | null, index: number | null): string {
+  const r = rank === 1 ? '1er' : `${rank ?? '?'}e`
+  const i = index === 1 ? '1er' : `${index ?? '?'}e`
+  return `${i} meilleur ${r}`
+}
+
 /**
  * Vue d'aperçu d'un planning **multi-phases** (non persisté). Les participants
  * différés (bracket / hybride) sont nommés lisiblement (« Vainqueur Quart #1 »,
@@ -332,6 +352,8 @@ export function viewFromPhased(
         return `Perdant ${labelById.get(s.matchId) ?? s.matchId}`
       case 'pool_rank':
         return poolRankLabel(s.pool, s.rank)
+      case 'pool_best':
+        return poolBestLabel(s.rank, s.index)
     }
   }
   const participant = (teamId: number | null, source: SlotSource | null): string =>
@@ -378,7 +400,8 @@ export function viewFromMatches(matches: Match[], matchDurationMin: number): Pla
     type: string | null,
     matchId: number | null,
     pool: string | null,
-    rank: number | null
+    rank: number | null,
+    index: number | null
   ): string => {
     if (teamId !== null && team) return team.name
     if (type === 'match_winner' || type === 'match_loser') {
@@ -387,6 +410,7 @@ export function viewFromMatches(matches: Match[], matchDurationMin: number): Pla
       return `${who} ${ref ? labelOfMatch(ref) : '?'}`
     }
     if (type === 'pool_rank') return poolRankLabel(pool, rank)
+    if (type === 'pool_best') return poolBestLabel(rank, index)
     return 'À définir'
   }
 
@@ -404,7 +428,8 @@ export function viewFromMatches(matches: Match[], matchDurationMin: number): Pla
             m.homeSourceType,
             m.homeSourceMatchId,
             m.homeSourcePool,
-            m.homeSourceRank
+            m.homeSourceRank,
+            m.homeSourceIndex
           ),
           awayTeam: side(
             m.awayTeamId,
@@ -412,7 +437,8 @@ export function viewFromMatches(matches: Match[], matchDurationMin: number): Pla
             m.awaySourceType,
             m.awaySourceMatchId,
             m.awaySourcePool,
-            m.awaySourceRank
+            m.awaySourceRank,
+            m.awaySourceIndex
           ),
           homeScore: m.homeScore,
           awayScore: m.awayScore,

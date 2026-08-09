@@ -33,6 +33,13 @@ export function poolRankLabel(pool: string | null, rank: number | null): string 
   return `${r} Poule ${pool ?? '?'}`
 }
 
+/** Repêchage inter-poules (#107) : « 1er meilleur 2e », « 2e meilleur 2e »… */
+export function poolBestLabel(rank: number | null, index: number | null): string {
+  const r = rank === 1 ? '1er' : `${rank ?? '?'}e`
+  const i = index === 1 ? '1er' : `${index ?? '?'}e`
+  return `${i} meilleur ${r}`
+}
+
 /** Étiquette d'un match de bracket (« Quart #1 »), pour référencer un slot différé. */
 function matchTag(m: { bracketRound: string | null; bracketSlot: number | null }): string {
   return `${bracketRoundShort(m.bracketRound)} #${(m.bracketSlot ?? 0) + 1}`
@@ -57,6 +64,7 @@ export function participantLabel(
   const matchId = side === 'home' ? m.homeSourceMatchId : m.awaySourceMatchId
   const pool = side === 'home' ? m.homeSourcePool : m.awaySourcePool
   const rank = side === 'home' ? m.homeSourceRank : m.awaySourceRank
+  const index = side === 'home' ? m.homeSourceIndex : m.awaySourceIndex
 
   if (type === 'match_winner' || type === 'match_loser') {
     const ref = matchId !== null ? byId.get(matchId) : undefined
@@ -64,6 +72,7 @@ export function participantLabel(
     return `${who} ${ref ? matchTag(ref) : '?'}`
   }
   if (type === 'pool_rank') return poolRankLabel(pool, rank)
+  if (type === 'pool_best') return poolBestLabel(rank, index)
 
   // Bye (système suisse, #110) : un seul côté est renseigné, l'autre est « exempt ».
   const otherTeamId = side === 'home' ? m.awayTeamId : m.homeTeamId
