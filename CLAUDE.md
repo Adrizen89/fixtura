@@ -207,6 +207,16 @@ final #106 alignés).
 - Écran public strictement **lecture seule**, accessible par `public_slug` non devinable.
 - Données minimales (nom d'équipe, email organisateur) → RGPD léger.
 - Fonts self-hostées (woff2), pas de CDN tiers traçant.
+- **Limitation de débit (issue #116)** : middleware nommé `throttle`
+  (`app/middleware/throttle_middleware.ts`) sur le limiteur **en mémoire**
+  `app/services/rate_limit.ts` (fenêtre glissante par IP). Appliqué aux endpoints
+  sensibles : login (anti-bruteforce, 10/5 min), inscription d'un club (5/h), écrans
+  publics `/t` `/e` (300/min, garde-fou anti-scraping), formulaire d'inscription
+  public en lecture (60/min). Dépassement → **429** + `Retry-After`, limites
+  généreuses pour ne pas gêner l'usage légitime (stade derrière une même IP). La
+  **soumission** d'inscription (#112) garde son anti-spam propre (honeypot +
+  rate-limit avec repli flash). Store mémoire (v1 instance unique, cf. §11) ; un
+  store Redis prendra le relais en cluster sans changer l'API.
 - **Conformité RGPD implémentée (issue #36)** : pages publiques `/mentions-legales`,
   `/cgu`, `/confidentialite` ; mention de consentement à la connexion ; portabilité
   (export JSON du club en libre-service pour l'`owner` via `/compte/export`, ou CLI

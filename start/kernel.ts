@@ -51,4 +51,6 @@ export const middleware = router.named({
   auth: () => import('#middleware/auth_middleware'),
   // Ouvre le contexte multi-tenant (club courant) — à chaîner après `auth`.
   tenant: () => import('#middleware/tenant_middleware'),
+  // Limitation de débit (anti-bruteforce / anti-abus) — issue #116.
+  throttle: () => import('#middleware/throttle_middleware'),
 })

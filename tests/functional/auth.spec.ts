@@ -2,6 +2,7 @@ import { test } from '@japa/runner'
 import testUtils from '@adonisjs/core/services/test_utils'
 import Club from '#models/club'
 import User from '#models/user'
+import { resetRateLimits } from '#services/rate_limit'
 
 /**
  * Tests fonctionnels de l'authentification (guard session « web »).
@@ -11,7 +12,10 @@ import User from '#models/user'
  * Chaque test est isolé par une transaction globale annulée à la fin.
  */
 test.group('Auth (fonctionnel)', (group) => {
-  group.each.setup(() => testUtils.db().truncate())
+  group.each.setup(() => {
+    resetRateLimits() // le login est rate-limité (#116) : on repart propre
+    return testUtils.db().truncate()
+  })
 
   async function createOwner() {
     const club = await Club.create({ name: 'Club Func', slug: 'club-func' })
