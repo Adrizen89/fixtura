@@ -123,14 +123,17 @@ export function editionResult(tournament: PalmaresTournamentInput): EditionResul
   const laureate = (id: number | undefined | null): Laureate | null =>
     id === undefined || id === null ? null : { teamId: id, teamName: nameOf.get(id) ?? `#${id}` }
 
-  // 1. Finale de tableau tranchée (élimination directe / hybride).
-  const final = tournament.matches.find((m) => m.stage === 'knockout' && m.bracketRound === 'final')
-  if (final) {
-    const oc = outcome(final)
+  // 1. Match décisif de tableau tranché : grande finale (`gf`, double élimination)
+  //    ou finale (`final`, élimination directe / hybride). Mutuellement exclusifs.
+  const decider = tournament.matches.find(
+    (m) => m.stage === 'knockout' && (m.bracketRound === 'gf' || m.bracketRound === 'final')
+  )
+  if (decider) {
+    const oc = outcome(decider)
     if (oc) {
       return { ...meta, winner: laureate(oc.winnerId), finalist: laureate(oc.loserId) }
     }
-    // Finale présente mais non tranchée (rare pour un tournoi terminé) → repli classement.
+    // Match décisif présent mais non tranché (rare pour un tournoi terminé) → repli classement.
   }
 
   // 2. Tête du classement général (championnat / poules).

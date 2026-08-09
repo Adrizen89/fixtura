@@ -123,6 +123,8 @@ Deux étapes :
 
 **Tests unitaires obligatoires** couvrant : nombre pair/impair d'équipes, 1 terrain vs plusieurs, contrainte de repos respectée, pause déjeuner, et cas infaisable (doit lever une erreur claire).
 
+**Formats v2/v3** (dispatch pur `app/services/scheduler/formats.ts`, colonne `tournaments.format`) : `championship`, `pools`, `knockout`, `hybrid`, et **`double_elimination`** (#111). Tous produisent des matchs **placés** à participants éventuellement **différés** (sources `match_winner` / `match_loser` / `pool_rank`), persistés puis résolus par la **progression** (`app/services/bracket_progression.ts`). La **double élimination** (`app/services/scheduler/double_elimination.ts`) construit un tableau principal (gagnants) + un repêchage (losers, alternance tours mineurs/majeurs, perdants descendus via `match_loser`) + une **grande finale unique** (pas de bracket reset en v1 — évolution possible) ; byes attribués aux têtes de série ; ordonnancement par bandes topologiques (comme l'élimination directe). Codes de tour : `wb-r{n}` / `lb-r{n}` / `gf`. Le vainqueur d'un tournoi à double élimination = vainqueur de la grande finale (palmarès #109, classement final #106 alignés).
+
 ## 7. Stratégie de développement — réalisée (historique)
 
 > **Toutes les étapes ci-dessous sont livrées.** L'ordre est conservé comme trace du déroulé

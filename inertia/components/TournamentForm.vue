@@ -108,6 +108,9 @@ function submit() {
             <option value="championship">Championnat — toutes les équipes se rencontrent</option>
             <option value="pools">Poules</option>
             <option value="knockout">Élimination directe</option>
+            <option value="double_elimination">
+              Double élimination — repêchage + grande finale
+            </option>
             <option value="hybrid">Hybride — poules puis phase finale</option>
           </select>
           <p v-if="form.errors.format" class="mt-1 text-sm text-red-700">

@@ -2,16 +2,31 @@
 import { computed } from 'vue'
 import type { ResultMatchRow } from '~/app/types'
 import { finalRanking, ordinalFr } from '~/composables/final_ranking'
+import DoubleEliminationBracket from '~/components/DoubleEliminationBracket.vue'
 
 /**
  * Arbre d'élimination directe — affichage **sobre** en colonnes par tour.
  * Lecture seule ; participants nommés (équipe connue ou libellé différé « Vainqueur
  * Quart #1 »), scores affichés une fois joués, vainqueur mis en avant. Défilement
  * horizontal sur mobile ; lisible de loin (écran public).
+ *
+ * La **double élimination** (#111) a une structure différente (tableau principal +
+ * repêchage + grande finale) : on délègue alors à `DoubleEliminationBracket`.
  */
 const props = defineProps<{ matches: ResultMatchRow[] }>()
 
 const sides = ['home', 'away'] as const
+
+/** Détecte un tableau à double élimination via ses codes de tour (`wb-`/`lb-`/`gf`). */
+const isDoubleElimination = computed(() =>
+  props.matches.some(
+    (m) =>
+      m.stage === 'knockout' &&
+      (m.bracketRound === 'gf' ||
+        m.bracketRound?.startsWith('wb-') === true ||
+        m.bracketRound?.startsWith('lb-') === true)
+  )
+)
 
 const ROUND_ORDER = ['r64', 'r32', 'r16', 'qf', 'sf', 'final']
 const ROUND_LABEL: Record<string, string> = {
@@ -75,7 +90,9 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
 </script>
 
 <template>
-  <div v-if="ko.length">
+  <DoubleEliminationBracket v-if="isDoubleElimination" :matches="matches" />
+
+  <div v-else-if="ko.length">
     <!-- Classement final (podium) une fois la finale jouée (issue #106). -->
     <div v-if="podium.length" class="mb-5">
       <h3 class="mb-2 text-xs font-semibold uppercase tracking-wide text-sand-9">

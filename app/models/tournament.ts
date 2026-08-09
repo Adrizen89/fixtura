@@ -12,7 +12,8 @@ import type { Scoring } from '#services/standings'
 export type TournamentStatus = 'draft' | 'scheduled' | 'live' | 'finished'
 
 /** Format de compétition (cf. #42 — championnat par défaut en v1). */
-export type TournamentFormat = 'championship' | 'pools' | 'knockout' | 'hybrid'
+export type TournamentFormat =
+  'championship' | 'pools' | 'knockout' | 'hybrid' | 'double_elimination'
 
 /** Paramètres propres au format, stockés en JSON (`format_config`). */
 export interface TournamentFormatConfig {

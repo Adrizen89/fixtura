@@ -73,6 +73,8 @@ export function formatLabel(format: TournamentFormat): string {
       return 'Poules'
     case 'knockout':
       return 'Élimination directe'
+    case 'double_elimination':
+      return 'Double élimination'
     case 'hybrid':
       return 'Poules + élimination'
     default:

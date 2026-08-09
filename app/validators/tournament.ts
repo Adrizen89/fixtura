@@ -30,7 +30,7 @@ export const tournamentValidator = vine.compile(
     // Format v2 (défaut championnat). La cohérence fine (numPools requis en
     // poules/hybride, qualifiés ≤ taille de poule…) est vérifiée à la génération
     // du planning par le scheduler, qui renvoie une erreur explicite.
-    format: vine.enum(['championship', 'pools', 'knockout', 'hybrid']),
+    format: vine.enum(['championship', 'pools', 'knockout', 'hybrid', 'double_elimination']),
     numPools: vine.number().min(2).max(64).nullable().optional(),
     qualifiersPerPool: vine.number().min(1).max(32).nullable().optional(),
     thirdPlace: vine.boolean().optional(),

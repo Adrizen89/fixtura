@@ -291,9 +291,15 @@ function bracketRoundShort(code: string | null): string {
       return '8e'
     case 'r32':
       return '16e'
-    default:
-      return code ?? 'Tour'
+    case 'gf':
+      return 'Grande finale'
   }
+  // Double élimination : tableau principal `wb-r{n}` / repêchage `lb-r{n}`.
+  const wb = /^wb-r(\d+)$/.exec(code ?? '')
+  if (wb) return `Principal T${wb[1]}`
+  const lb = /^lb-r(\d+)$/.exec(code ?? '')
+  if (lb) return `Repêchage T${lb[1]}`
+  return code ?? 'Tour'
 }
 
 /** « 1er Poule A », « 2e Poule B ». */

@@ -37,7 +37,10 @@ const showPools = computed(
   () => active.value?.format === 'pools' || active.value?.format === 'hybrid'
 )
 const showBracket = computed(
-  () => active.value?.format === 'knockout' || active.value?.format === 'hybrid'
+  () =>
+    active.value?.format === 'knockout' ||
+    active.value?.format === 'hybrid' ||
+    active.value?.format === 'double_elimination'
 )
 
 /** Route chaque mise à jour SSE vers la catégorie correspondant à son canal. */
