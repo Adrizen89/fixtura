@@ -1,24 +1,39 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useForm } from '@inertiajs/vue3'
-import type { Tournament } from '~/app/types'
+import { computed, onMounted, ref } from 'vue'
+import { router, useForm } from '@inertiajs/vue3'
+import type { TeamRegistrationItem, Tournament } from '~/app/types'
 
 /**
- * Gestion des inscriptions en ligne d'un tournoi (issue #112) — côté organisateur.
- * Ouvre/ferme le formulaire public, fixe une capacité facultative et donne le lien
- * non devinable à partager. La « fermeture pleine » est dérivée du nombre d'équipes.
+ * Gestion des inscriptions en ligne d'un tournoi (issues #112 + #113) — côté
+ * organisateur. Ouvre/ferme le formulaire public, fixe une capacité facultative et
+ * donne le lien non devinable à partager. Depuis #113, les demandes reçues attendent
+ * une décision : valider (→ crée l'équipe) ou refuser (→ archive). La « fermeture
+ * pleine » est dérivée de l'occupation = équipes confirmées + demandes en attente.
  */
-const props = defineProps<{ tournament: Tournament }>()
+const props = defineProps<{ tournament: Tournament; registrations: TeamRegistrationItem[] }>()
 
 const teamsCount = computed(() => props.tournament.teams?.length ?? 0)
 const isOpen = computed(() => props.tournament.registrationOpen)
 const capacity = computed(() => props.tournament.registrationCapacity)
-const isFull = computed(() => capacity.value !== null && teamsCount.value >= capacity.value)
 
-/** URL absolue du lien public d'inscription (jeton non devinable). */
+const pending = computed(() => props.registrations.filter((r) => r.status === 'pending'))
+const decided = computed(() => props.registrations.filter((r) => r.status !== 'pending'))
+const pendingCount = computed(() => pending.value.length)
+
+/** Occupation = équipes confirmées + demandes en attente (miroir du serveur). */
+const occupancy = computed(() => teamsCount.value + pendingCount.value)
+const isFull = computed(() => capacity.value !== null && occupancy.value >= capacity.value)
+
+/**
+ * URL du lien public d'inscription (jeton non devinable). L'origine est lue au montage
+ * côté client (`window` n'existe pas au rendu SSR) : en SSR l'URL reste relative, puis
+ * elle devient absolue après hydratation — copiable/partageable.
+ */
+const origin = ref('')
+onMounted(() => (origin.value = window.location.origin))
 const publicUrl = computed(() =>
   props.tournament.registrationToken
-    ? `${window.location.origin}/inscription/${props.tournament.registrationToken}`
+    ? `${origin.value}/inscription/${props.tournament.registrationToken}`
     : null
 )
 
@@ -36,6 +51,20 @@ function toggle(open: boolean) {
   submit()
 }
 
+/** Décision sur une demande (#113). `deciding` verrouille les boutons de la ligne. */
+const deciding = ref<number | null>(null)
+function decide(registration: TeamRegistrationItem, action: 'approve' | 'reject') {
+  deciding.value = registration.id
+  router.post(
+    `/tournaments/${props.tournament.id}/registrations/${registration.id}/${action}`,
+    {},
+    {
+      preserveScroll: true,
+      onFinish: () => (deciding.value = null),
+    }
+  )
+}
+
 const copied = ref(false)
 async function copyLink() {
   if (!publicUrl.value) return
@@ -46,6 +75,16 @@ async function copyLink() {
   } catch {
     copied.value = false
   }
+}
+
+function formatDate(iso: string | null) {
+  if (!iso) return ''
+  return new Date(iso).toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 </script>
 
@@ -71,11 +110,12 @@ async function copyLink() {
     </div>
 
     <p class="mb-4 text-sm text-sand-11">
-      Partagez un lien public pour que les équipes s'inscrivent elles-mêmes (sans compte).
+      Partagez un lien public pour que les équipes demandent leur inscription (sans compte). Vous
+      validez ou refusez chaque demande ci-dessous.
       <template v-if="capacity !== null">
-        {{ teamsCount }} / {{ capacity }} équipe(s) inscrite(s).
+        {{ occupancy }} / {{ capacity }} place(s) occupée(s).
       </template>
-      <template v-else> {{ teamsCount }} équipe(s) inscrite(s). </template>
+      <template v-else> {{ teamsCount }} équipe(s) confirmée(s). </template>
     </p>
 
     <!-- Réglages : capacité + ouverture -->
@@ -164,6 +204,90 @@ async function copyLink() {
       <p v-if="!isOpen" class="mt-2 text-xs text-sand-10">
         Les inscriptions sont fermées : ce lien affiche « fermé » tant que vous ne les rouvrez pas.
       </p>
+    </div>
+
+    <!-- Demandes d'inscription à traiter (#113) -->
+    <div class="mt-4 border-t border-sand-4 pt-4">
+      <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-sand-12">
+        Demandes d'inscription
+        <span
+          v-if="pendingCount"
+          class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800"
+        >
+          {{ pendingCount }} en attente
+        </span>
+      </h3>
+
+      <p v-if="registrations.length === 0" class="text-sm text-sand-10">
+        Aucune demande pour l'instant. Partagez le lien ci-dessus pour recevoir des inscriptions.
+      </p>
+
+      <!-- En attente : validables / refusables -->
+      <ul v-if="pending.length" class="space-y-2">
+        <li
+          v-for="reg in pending"
+          :key="reg.id"
+          class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-sand-6 bg-sand-1 px-3 py-2"
+        >
+          <div class="min-w-0">
+            <p class="truncate text-sm font-medium text-sand-12">{{ reg.teamName }}</p>
+            <p class="truncate text-xs text-sand-10">
+              {{ reg.contactEmail }} · {{ formatDate(reg.createdAt) }}
+            </p>
+          </div>
+          <div class="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              :disabled="deciding === reg.id"
+              class="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-primary-700 disabled:opacity-60"
+              @click="decide(reg, 'approve')"
+            >
+              Valider
+            </button>
+            <button
+              type="button"
+              :disabled="deciding === reg.id"
+              class="rounded-lg border border-sand-7 px-3 py-1.5 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12 disabled:opacity-60"
+              @click="decide(reg, 'reject')"
+            >
+              Refuser
+            </button>
+          </div>
+        </li>
+      </ul>
+
+      <!-- Traitées : historique (validées / refusées) -->
+      <div v-if="decided.length" class="mt-3">
+        <details class="text-sm">
+          <summary class="cursor-pointer text-sand-11 hover:text-sand-12">
+            {{ decided.length }} demande(s) traitée(s)
+          </summary>
+          <ul class="mt-2 space-y-1.5">
+            <li
+              v-for="reg in decided"
+              :key="reg.id"
+              class="flex flex-wrap items-center justify-between gap-2 px-1 text-sm"
+            >
+              <span class="min-w-0 truncate text-sand-11">
+                {{ reg.teamName }}
+                <span class="text-xs text-sand-9">· {{ reg.contactEmail }}</span>
+              </span>
+              <span
+                v-if="reg.status === 'approved'"
+                class="shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800"
+              >
+                Validée
+              </span>
+              <span
+                v-else
+                class="shrink-0 rounded-full bg-sand-3 px-2 py-0.5 text-xs font-medium text-sand-11"
+              >
+                Refusée
+              </span>
+            </li>
+          </ul>
+        </details>
+      </div>
     </div>
   </section>
 </template>

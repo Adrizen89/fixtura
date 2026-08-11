@@ -7,9 +7,13 @@ import TeamsManager from '~/components/TeamsManager.vue'
 import TeamsImport from '~/components/TeamsImport.vue'
 import RegistrationManager from '~/components/RegistrationManager.vue'
 import PlanningGrid from '~/components/PlanningGrid.vue'
-import type { PlanningView, Tournament } from '~/app/types'
+import type { PlanningView, TeamRegistrationItem, Tournament } from '~/app/types'
 
-const props = defineProps<{ tournament: Tournament; planning: PlanningView | null }>()
+const props = defineProps<{
+  tournament: Tournament
+  planning: PlanningView | null
+  registrations: TeamRegistrationItem[]
+}>()
 
 const teams = computed(() => props.tournament.teams ?? [])
 const canGenerate = computed(() => teams.value.length >= 2)
@@ -150,8 +154,8 @@ function hhmm(v: string | null) {
       </div>
     </section>
 
-    <!-- Inscriptions en ligne des équipes (#112) -->
-    <RegistrationManager class="mt-6" :tournament="tournament" />
+    <!-- Inscriptions en ligne des équipes (#112) + demandes à valider (#113) -->
+    <RegistrationManager class="mt-6" :tournament="tournament" :registrations="registrations" />
 
     <!-- Planning -->
     <section class="mt-6 rounded-2xl border border-sand-6 bg-white p-6">

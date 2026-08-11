@@ -55,6 +55,20 @@ export interface Team {
   contactEmail?: string | null
 }
 
+/** État d'une demande d'inscription en ligne (issue #113). */
+export type RegistrationRequestStatus = 'pending' | 'approved' | 'rejected'
+
+/** Une demande d'inscription telle qu'affichée côté organisateur (#113). */
+export interface TeamRegistrationItem {
+  id: number
+  teamName: string
+  /** Contact de l'équipe — admin uniquement, jamais exposé en public (§10). */
+  contactEmail: string
+  status: RegistrationRequestStatus
+  createdAt: string | null
+  decidedAt: string | null
+}
+
 export interface Tournament {
   id: number
   name: string

@@ -8,8 +8,9 @@ import db from '@adonisjs/lucid/services/db'
  * (`start/validator.ts`).
  *
  * L'unicité du nom dans le tournoi est vérifiée ici pour un retour clair à l'usager
- * (le service `team_registration` la revérifie en transaction — garde anti-concurrence).
- * Requiert les métadonnées { tournamentId } au moment de la validation.
+ * — parmi les équipes confirmées **et** les demandes déjà en attente (#113), pour
+ * éviter deux demandes homonymes. Le service `team_registration` la revérifie en
+ * transaction (garde anti-concurrence). Requiert les métadonnées { tournamentId }.
  */
 const uniqueTeamName = vine.createRule(
   async (value: unknown, _options: undefined, field: FieldContext) => {
@@ -18,15 +19,24 @@ const uniqueTeamName = vine.createRule(
     }
 
     const { tournamentId } = field.meta as { tournamentId: number }
+    const lower = value.trim().toLowerCase()
 
-    const existing = await db
+    const existingTeam = await db
       .from('teams')
       .where('tournament_id', tournamentId)
-      .whereRaw('lower(name) = ?', [value.trim().toLowerCase()])
+      .whereRaw('lower(name) = ?', [lower])
       .select('id')
       .first()
 
-    if (existing) {
+    const pendingRequest = await db
+      .from('team_registrations')
+      .where('tournament_id', tournamentId)
+      .where('status', 'pending')
+      .whereRaw('lower(team_name) = ?', [lower])
+      .select('id')
+      .first()
+
+    if (existingTeam || pendingRequest) {
       field.report('Une équipe porte déjà ce nom dans ce tournoi.', 'database.unique', field)
     }
   }

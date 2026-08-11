@@ -2,7 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Tournament from '#models/tournament'
 import { teamRegistrationValidator } from '#validators/team_registration'
 import {
-  registerTeam,
+  submitRegistration,
   registrationStatusFor,
   remainingSlots,
   RegistrationClosedError,
@@ -27,8 +27,20 @@ export default class PublicRegistrationController {
     return Tournament.query()
       .where('registration_token', token)
       .withCount('teams')
+      .withCount('registrations', (q) => q.where('status', 'pending'))
       .preload('club')
       .first()
+  }
+
+  /**
+   * Occupation courante = équipes confirmées + demandes en attente (#113). La
+   * « fermeture pleine » en découle : une demande non encore validée réserve une place.
+   */
+  private occupancyOf(tournament: Tournament): number {
+    return (
+      Number(tournament.$extras.teams_count ?? 0) +
+      Number(tournament.$extras.registrations_count ?? 0)
+    )
   }
 
   /** Vue publique du formulaire (ou état « fermé » / « complet »). */
@@ -38,8 +50,10 @@ export default class PublicRegistrationController {
       return inertia.render('public/registration_invalid', {})
     }
 
-    const teamsCount = Number(tournament.$extras.teams_count ?? 0)
-    return inertia.render('public/register', this.viewData(tournament, teamsCount))
+    return inertia.render(
+      'public/register',
+      this.viewData(tournament, this.occupancyOf(tournament))
+    )
   }
 
   /** Enregistre une inscription (honeypot + rate-limit + validation + service). */
@@ -68,7 +82,7 @@ export default class PublicRegistrationController {
     })
 
     try {
-      await registerTeam(tournament, { name: data.name, contactEmail: data.contactEmail })
+      await submitRegistration(tournament, { name: data.name, contactEmail: data.contactEmail })
     } catch (error) {
       if (
         error instanceof RegistrationClosedError ||
@@ -81,12 +95,16 @@ export default class PublicRegistrationController {
       throw error
     }
 
-    session.flash('success', `L'équipe « ${data.name.trim()} » est inscrite. À bientôt !`)
+    session.flash(
+      'success',
+      `La demande d'inscription de l'équipe « ${data.name.trim()} » a bien été envoyée. ` +
+        `L'organisateur la validera avant le tournoi.`
+    )
     return response.redirect().toRoute('public.registration', { token: params.token })
   }
 
   /** Données publiques passées à la page (aucune donnée personnelle). */
-  private viewData(tournament: Tournament, teamsCount: number) {
+  private viewData(tournament: Tournament, occupancy: number) {
     return {
       tournament: {
         name: tournament.name,
@@ -94,8 +112,8 @@ export default class PublicRegistrationController {
         eventDate: tournament.eventDate.toISODate(),
       },
       club: { name: tournament.club.name },
-      status: registrationStatusFor(tournament, teamsCount),
-      remaining: remainingSlots(tournament, teamsCount),
+      status: registrationStatusFor(tournament, occupancy),
+      remaining: remainingSlots(tournament, occupancy),
     }
   }
 }

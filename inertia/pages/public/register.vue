@@ -103,6 +103,10 @@ function formatDate(iso: string | null) {
             <p v-if="remaining !== null" class="text-sm text-sand-11">
               {{ remaining }} place(s) restante(s).
             </p>
+            <p class="rounded-md bg-sand-2 px-3 py-2 text-xs text-sand-11">
+              Votre demande sera validée par l'organisateur avant le tournoi. Vous serez informé(e)
+              par e-mail de sa décision.
+            </p>
 
             <div>
               <label for="name" class="mb-1 block text-sm font-medium text-sand-12">

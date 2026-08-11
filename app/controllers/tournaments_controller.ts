@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import Tournament from '#models/tournament'
 import type { TournamentFormat, TournamentFormatConfig } from '#models/tournament'
 import Match from '#models/match'
+import TeamRegistration from '#models/team_registration'
 import { tournamentValidator } from '#validators/tournament'
 import { generatePublicSlug } from '#services/public_slug'
 import { viewFromMatches } from '#services/planning'
@@ -103,7 +104,7 @@ export default class TournamentsController {
     return response.redirect().toRoute('tournaments.show', { id: tournament.id })
   }
 
-  /** Détail d'un tournoi (+ équipes + planning persisté le cas échéant). */
+  /** Détail d'un tournoi (+ équipes + demandes d'inscription + planning persisté). */
   async show({ inertia, params }: HttpContext) {
     const tournament = await this.query()
       .where('id', params.id)
@@ -119,8 +120,22 @@ export default class TournamentsController {
 
     const planning = matches.length ? viewFromMatches(matches, tournament.matchDurationMin) : null
 
+    // Demandes d'inscription en ligne (#113), requête à part pour ne pas alourdir la
+    // sérialisation du tournoi. Le contact n'est exposé qu'ici (admin), jamais en public.
+    const registrations = await TeamRegistration.query()
+      .where('tournament_id', tournament.id)
+      .orderBy('created_at', 'desc')
+
     return inertia.render('tournaments/show', {
       tournament: tournament.serialize(),
+      registrations: registrations.map((r) => ({
+        id: r.id,
+        teamName: r.teamName,
+        contactEmail: r.contactEmail,
+        status: r.status,
+        createdAt: r.createdAt.toISO(),
+        decidedAt: r.decidedAt?.toISO() ?? null,
+      })),
       planning,
     })
   }
