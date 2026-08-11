@@ -8,6 +8,7 @@ import { generatePublicSlug } from '#services/public_slug'
 import { viewFromMatches } from '#services/planning'
 import { TournamentPolicy } from '#policies/tournament_policy'
 import { deny } from '#policies/authorize'
+import { recordAudit, AUDIT_ACTIONS } from '#services/audit_log'
 
 /** Config de format à stocker (`format_config`) selon le format choisi ; null en championnat. */
 function formatConfigOf(data: {
@@ -158,13 +159,16 @@ export default class TournamentsController {
   }
 
   /** Supprime un tournoi (cascade équipes + matchs). Réservé au responsable (owner). */
-  async destroy({ response, params, auth, session }: HttpContext) {
+  async destroy({ request, response, params, auth, session }: HttpContext) {
     if (!TournamentPolicy.delete(auth.user!)) {
       return deny({ session, response })
     }
 
     const tournament = await this.query().where('id', params.id).firstOrFail()
     await tournament.delete()
+    await recordAudit(auth.user!, request.ip(), AUDIT_ACTIONS.TOURNAMENT_DELETED, {
+      target: tournament.name,
+    })
 
     session.flash('success', 'Tournoi supprimé.')
     return response.redirect().toRoute('tournaments.index')

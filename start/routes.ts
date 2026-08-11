@@ -35,6 +35,7 @@ const HistoryController = () => import('#controllers/history_controller')
 const PublicRegistrationController = () => import('#controllers/public_registration_controller')
 const RegistrationSettingsController = () => import('#controllers/registration_settings_controller')
 const PalmaresController = () => import('#controllers/palmares_controller')
+const AuditController = () => import('#controllers/audit_controller')
 
 /**
  * Fenêtres de limitation de débit (issue #116). Généreuses : elles bloquent l'abus
@@ -185,6 +186,9 @@ router
       .as('members.invitations.revoke')
     router.patch('/membres/:id/role', [MembersController, 'updateRole']).as('members.role')
     router.delete('/membres/:id', [MembersController, 'remove']).as('members.remove')
+
+    // Journal d'audit des actions sensibles (issue #117) — réservé au responsable.
+    router.get('/journal', [AuditController, 'index']).as('audit.index')
 
     // Personnalisation du club : logo + couleur sur l'écran public (issue #40).
     router.get('/club/apparence', [ClubController, 'edit']).as('club.appearance.edit')

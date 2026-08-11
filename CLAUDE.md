@@ -225,6 +225,15 @@ final #106 alignés).
   dans `app/services/club_data.ts`. Registre + procédures : **`docs/rgpd.md`**.
   Confirmé : **aucune ressource tierce traçante** (fonts self-hostées, ni analytics
   ni CDN externe ; cookies strictement nécessaires session + anti-CSRF).
+- **Journal d'audit (issue #117)** : table append-only `audit_logs` (`club_id`,
+  `user_id?`, `actor_email` instantané, `action`, `target?`, `metadata` JSON, `ip`,
+  `created_at`) tracant les actions sensibles — connexion, invitation / changement
+  de rôle / retrait d'un membre, révocation d'invitation, suppression
+  tournoi / événement / catégorie, export RGPD. Écriture **best-effort** via
+  `app/services/audit_log.ts` (`recordAudit` — n'échoue jamais l'action métier ;
+  logique isolée hors contrôleurs). Consultation `/journal` réservée au responsable
+  (`AuditPolicy.view`, owner), scopée club, paginée. **2FA owner : différé**
+  (marqué optionnel dans l'issue ; évolution possible).
 
 ## 11. Déploiement
 
