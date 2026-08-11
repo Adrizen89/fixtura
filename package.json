@@ -72,6 +72,7 @@
     "@adonisjs/transmit-client": "^1.1.0",
     "@adonisjs/vite": "^5.1.1",
     "@inertiajs/vue3": "^3.6.1",
+    "@sentry/node": "^10.70.0",
     "@vinejs/vine": "^4.4.0",
     "@vue/server-renderer": "^3.5.40",
     "edge.js": "^6.4.0",

@@ -35,6 +35,7 @@ const HistoryController = () => import('#controllers/history_controller')
 const PublicRegistrationController = () => import('#controllers/public_registration_controller')
 const RegistrationSettingsController = () => import('#controllers/registration_settings_controller')
 const PalmaresController = () => import('#controllers/palmares_controller')
+const HealthController = () => import('#controllers/health_controller')
 const AuditController = () => import('#controllers/audit_controller')
 
 /**
@@ -53,6 +54,15 @@ const HOUR = 60 * MINUTE
  * déjà publiques.
  */
 transmit.registerRoutes()
+
+/**
+ * Santé de l'application (issue #118, cf. CLAUDE.md §11) — **publiques, sans auth,
+ * sans donnée personnelle**, hors limitation de débit (sondes fréquentes légitimes).
+ * `/up` = liveness minimal (script de déploiement, reverse proxy) ; `/health` =
+ * readiness (connexion base + métriques de base, 503 si la base est injoignable).
+ */
+router.get('/up', [HealthController, 'up']).as('health.up')
+router.get('/health', [HealthController, 'health']).as('health.check')
 
 /**
  * Racine → liste des tournois. Si non connecté, le middleware `auth` renverra

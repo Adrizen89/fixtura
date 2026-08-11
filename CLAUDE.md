@@ -234,12 +234,32 @@ final #106 alignés).
   logique isolée hors contrôleurs). Consultation `/journal` réservée au responsable
   (`AuditPolicy.view`, owner), scopée club, paginée. **2FA owner : différé**
   (marqué optionnel dans l'issue ; évolution possible).
+- **Suivi des erreurs — Sentry serveur (issue #118)** : remontée des **erreurs
+  serveur (≥ 500)** vers Sentry, **désactivée par défaut** et **activée uniquement
+  par `SENTRY_DSN`**. Sans DSN (dev, CI, prod non configurée), le SDK `@sentry/node`
+  n'est **même pas chargé** (import dynamique dans `app/services/error_reporter.ts`)
+  et **aucune donnée n'est envoyée à un tiers**. Volontairement **serveur seul, pas
+  de traceur navigateur** : l'écran public reste **sans aucune ressource tierce
+  traçante** (cohérent avec l'engagement ci-dessus). Capture **minimale** : pas de
+  tracing (`tracesSampleRate: 0`), pas d'auto-instrumentation
+  (`defaultIntegrations: false`), et un filtre pur `scrubEvent` retire avant envoi
+  toute donnée potentiellement personnelle (cookies, en-têtes, corps/chaîne de
+  requête, utilisateur — `sendDefaultPii: false`). Câblage : provider
+  `providers/observability_provider.ts` (init au démarrage) + hook `report()` du
+  gestionnaire d'exceptions (`app/exceptions/handler.ts`) qui ne remonte que les
+  ≥ 500 avec un contexte non personnel (méthode + URL). Secret en `.env`
+  (`SENTRY_DSN`), rien en dur.
 
 ## 11. Déploiement
 
 - **Cible : Hostinger VPS** (Node LTS, PostgreSQL, PM2, nginx reverse proxy, SSL Let's Encrypt).
 - Build Adonis : `node ace build` → dossier `build/`, puis `node ace migration:run --force` en prod.
 - **Le déploiement est géré par Adrien lui-même.** Ne pas rédiger de procédure pas-à-pas VPS/SFTP ni de `DEPLOY.md` (préférence ADBDigital). Se limiter à lister les pré-requis techniques si on en manque.
+- **Endpoints de santé (issue #118)** : `GET /up` (**liveness** — 200 `{status:'ok'}`
+  minimal, sans base ni auth : sonde du reverse proxy et du script de déploiement, cf.
+  `.github/workflows/deploy.yml`) et `GET /health` (**readiness** — connexion base,
+  uptime, mémoire, environnement, version Node ; **503** si la base est injoignable).
+  Publics, sans auth, **sans donnée personnelle** (`app/controllers/health_controller.ts`).
 - **Scaling multi-instances (prérequis) — transport Redis pour transmit** (issue #37) : en instance unique (PM2 mode fork, v1), transmit garde les abonnements SSE en mémoire — aucun service externe requis. Pour passer **PM2 en cluster** (plusieurs instances, montée en charge / multi-club), il faut d'abord un **transport partagé** sinon les broadcasts SSE ne se diffusent pas entre instances. Activation : renseigner `REDIS_HOST` (+ `REDIS_PORT`/`REDIS_PASSWORD`) dans `build/.env` → `config/transmit.ts` bascule automatiquement sur le driver Redis (`@adonisjs/transmit/transports`, via `ioredis`) ; puis démarrer PM2 avec `PM2_INSTANCES=max` (cf. `ecosystem.config.cjs`). Redis reste **optionnel en local** (absent → repli en mémoire). Pré-requis VPS supplémentaire dans ce cas : un serveur Redis (local, non exposé).
 - **Sauvegardes DB & restauration (issue #119)** : commandes `node ace db:backup`
   (pg_dump format custom + rétention) et `node ace db:restore` (pg_restore/psql), sur

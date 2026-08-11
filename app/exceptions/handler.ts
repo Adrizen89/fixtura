@@ -1,6 +1,7 @@
 import app from '@adonisjs/core/services/app'
 import { type HttpContext, ExceptionHandler } from '@adonisjs/core/http'
 import type { StatusPageRange, StatusPageRenderer } from '@adonisjs/core/types/http'
+import { reportError } from '#services/error_reporter'
 
 export default class HttpExceptionHandler extends ExceptionHandler {
   /**
@@ -40,6 +41,15 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    * @note You should not attempt to send a response from this method.
    */
   async report(error: unknown, ctx: HttpContext) {
+    // Remontée au suivi d'erreurs (Sentry, issue #118) — uniquement les vraies
+    // erreurs serveur (>= 500). Les 4xx (validation, 404, non-autorisé) sont du
+    // ressort de l'utilisateur, pas des incidents à tracer. Contexte non
+    // personnel uniquement (méthode + URL), le reste étant filtré côté service
+    // (§10). No-op si `SENTRY_DSN` absent.
+    const status = (error as { status?: number })?.status ?? 500
+    if (status >= 500) {
+      reportError(error, { method: ctx.request.method(), url: ctx.request.url() })
+    }
     return super.report(error, ctx)
   }
 }

@@ -117,8 +117,9 @@ jobs:
 
             # Health check : l'app doit répondre après le reload, sinon on échoue
             # le déploiement (plutôt que de le découvrir via les utilisateurs).
+            # Sonde /up (liveness, 200 sans DB ni auth — issue #118).
             for i in $(seq 1 10); do
-              if curl -fsS "http://127.0.0.1:${PORT:-3333}/" -o /dev/null; then
+              if curl -fsS "http://127.0.0.1:${PORT:-3333}/up" -o /dev/null; then
                 echo "Health check OK (tentative $i)"
                 exit 0
               fi
