@@ -232,6 +232,14 @@ final #106 alignés).
 - Build Adonis : `node ace build` → dossier `build/`, puis `node ace migration:run --force` en prod.
 - **Le déploiement est géré par Adrien lui-même.** Ne pas rédiger de procédure pas-à-pas VPS/SFTP ni de `DEPLOY.md` (préférence ADBDigital). Se limiter à lister les pré-requis techniques si on en manque.
 - **Scaling multi-instances (prérequis) — transport Redis pour transmit** (issue #37) : en instance unique (PM2 mode fork, v1), transmit garde les abonnements SSE en mémoire — aucun service externe requis. Pour passer **PM2 en cluster** (plusieurs instances, montée en charge / multi-club), il faut d'abord un **transport partagé** sinon les broadcasts SSE ne se diffusent pas entre instances. Activation : renseigner `REDIS_HOST` (+ `REDIS_PORT`/`REDIS_PASSWORD`) dans `build/.env` → `config/transmit.ts` bascule automatiquement sur le driver Redis (`@adonisjs/transmit/transports`, via `ioredis`) ; puis démarrer PM2 avec `PM2_INSTANCES=max` (cf. `ecosystem.config.cjs`). Redis reste **optionnel en local** (absent → repli en mémoire). Pré-requis VPS supplémentaire dans ce cas : un serveur Redis (local, non exposé).
+- **Sauvegardes DB & restauration (issue #119)** : commandes `node ace db:backup`
+  (pg_dump format custom + rétention) et `node ace db:restore` (pg_restore/psql), sur
+  un cœur pur testé (`app/services/backup.ts`). Le déploiement prend déjà un dump de
+  **pré-migration** ; les sauvegardes **planifiées** (cron quotidien) sont
+  complémentaires. La restauration est **testée en continu** (aller-retour réel
+  pg_dump → base neuve → pg_restore, `tests/functional/backup_restore.spec.ts`).
+  Outillage + planification + procédure : **`docs/backups.md`**. Prérequis VPS :
+  `postgresql-client`.
 
 ## 12. Workflow ADBDigital
 
