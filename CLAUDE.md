@@ -197,8 +197,12 @@ final #106 alignés).
     gestion des équipes/inscriptions, membres, journal, historique, palmarès, apparence, pages
     d'erreur) + navigation/layout. Les **messages flash** admin passent par `messages.json`
     (`flash.admin.*`). Ajouter une chaîne = ajouter sa clé dans **les deux** catalogues (front `.ts`
-    et/ou serveur `.json`). Restent en FR : quelques messages d'erreur **issus des services purs**
-    (scheduler, incidents) affichés via `error.message`.
+    et/ou serveur `.json`). Les **dates/heures** suivent la langue via `dateLocale` (`useI18n()` :
+    `fr`→`fr-FR`, `en`→`en-GB`). Les erreurs métier **fréquentes** (nul en élimination, doublon /
+    déjà-traité d'une inscription) sont traduites (`flash.incident.*`, `flash.registration.*`).
+    Restent en FR : les messages **rares et paramétrés** des services purs (infaisabilité du
+    `scheduler`, conflit de progression de bracket) via `error.message` — le cas courant « ≥ 2
+    équipes » étant déjà intercepté en amont avec une clé i18n.
 
 ## 9. Points d'attention (à ne jamais oublier)
 

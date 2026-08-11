@@ -30,9 +30,19 @@ function interpolate(message: string, params?: Record<string, string | number>):
   )
 }
 
+/** Étiquette BCP-47 pour `toLocaleDateString`/`toLocaleTimeString` selon la locale. */
+const DATE_LOCALES: Record<string, string> = { fr: 'fr-FR', en: 'en-GB' }
+
 export function useI18n() {
   const page = usePage()
   const locale = computed(() => (page.props.locale as string | undefined) ?? 'fr')
+
+  /**
+   * Locale de formatage des dates/heures (Intl) dérivée de la langue active :
+   * `fr` → `fr-FR`, `en` → `en-GB`. À passer à `toLocaleDateString(...)` en lieu et
+   * place d'un code figé, pour que les dates s'affichent au format de la langue choisie.
+   */
+  const dateLocale = computed(() => DATE_LOCALES[locale.value] ?? 'fr-FR')
 
   function t(key: string, params?: Record<string, string | number>): string {
     const dict = catalogs[locale.value] ?? fr
@@ -41,5 +51,5 @@ export function useI18n() {
     return typeof resolved === 'string' ? interpolate(resolved, params) : key
   }
 
-  return { t, locale }
+  return { t, locale, dateLocale }
 }

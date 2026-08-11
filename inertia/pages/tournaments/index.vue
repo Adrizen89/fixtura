@@ -9,10 +9,10 @@ defineProps<{ tournaments: Tournament[] }>()
 
 // La variable de boucle `t` (Tournament) occupe déjà le nom `t` : on aliase donc la
 // fonction de traduction pour éviter toute collision.
-const { t: translate } = useI18n()
+const { t: translate, dateLocale } = useI18n()
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('fr-FR', {
+  return new Date(iso).toLocaleDateString(dateLocale.value, {
     day: '2-digit',
     month: 'long',
     year: 'numeric',

@@ -106,7 +106,7 @@ export default class ResultsController {
       })
     } catch (error) {
       if (error instanceof DrawNotAllowedError) {
-        session.flash('error', error.message)
+        session.flash('error', i18n.t('messages.flash.incident.drawNotAllowed'))
         return response.redirect().toRoute('tournaments.results', { id: tournament.id })
       }
       throw error

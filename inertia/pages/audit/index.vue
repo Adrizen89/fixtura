@@ -5,7 +5,7 @@ import AdminLayout from '~/layouts/AdminLayout.vue'
 import { useI18n } from '~/composables/i18n'
 import type { AuditLogEntry } from '~/app/types'
 
-const { t } = useI18n()
+const { t, dateLocale } = useI18n()
 
 /**
  * Journal d'audit du club (issue #117) — lecture seule, réservé au responsable.
@@ -35,7 +35,7 @@ function actionLabel(action: string): string {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString('fr-FR', {
+  return new Date(iso).toLocaleString(dateLocale.value, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

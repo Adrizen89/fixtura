@@ -4,7 +4,7 @@ import { router, useForm } from '@inertiajs/vue3'
 import type { TeamRegistrationItem, Tournament } from '~/app/types'
 import { useI18n } from '~/composables/i18n'
 
-const { t } = useI18n()
+const { t, dateLocale } = useI18n()
 
 /**
  * Gestion des inscriptions en ligne d'un tournoi (issues #112 + #113) — côté
@@ -82,7 +82,7 @@ async function copyLink() {
 
 function formatDate(iso: string | null) {
   if (!iso) return ''
-  return new Date(iso).toLocaleDateString('fr-FR', {
+  return new Date(iso).toLocaleDateString(dateLocale.value, {
     day: '2-digit',
     month: 'short',
     hour: '2-digit',

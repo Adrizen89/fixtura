@@ -10,7 +10,7 @@ const props = defineProps<{
   numTerrains: number
 }>()
 
-const { t } = useI18n()
+const { t, dateLocale } = useI18n()
 
 const base = computed(() => `/tournaments/${props.tournamentId}/matches/${props.match.id}`)
 
@@ -116,7 +116,7 @@ function declareForfeit(side: 'home' | 'away') {
 
 function formatTime(iso: string | null) {
   if (!iso) return ''
-  return new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+  return new Date(iso).toLocaleTimeString(dateLocale.value, { hour: '2-digit', minute: '2-digit' })
 }
 </script>
 

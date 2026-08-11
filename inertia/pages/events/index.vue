@@ -5,12 +5,12 @@ import StatusBadge from '~/components/StatusBadge.vue'
 import { useI18n } from '~/composables/i18n'
 import type { EventItem } from '~/app/types'
 
-const { t } = useI18n()
+const { t, dateLocale } = useI18n()
 
 defineProps<{ events: EventItem[] }>()
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('fr-FR', {
+  return new Date(iso).toLocaleDateString(dateLocale.value, {
     day: '2-digit',
     month: 'long',
     year: 'numeric',

@@ -38,7 +38,7 @@ const props = defineProps<{
   pools: PoolStanding[]
 }>()
 
-const { t } = useI18n()
+const { t, dateLocale } = useI18n()
 
 /**
  * Personnalisation du club (#40) : on surcharge les variables CSS de la couleur
@@ -139,7 +139,7 @@ const statusLabel = computed<Record<TournamentStatus, string>>(() => ({
 
 function formatDate(iso: string | null) {
   if (!iso) return ''
-  return new Date(iso).toLocaleDateString('fr-FR', {
+  return new Date(iso).toLocaleDateString(dateLocale.value, {
     weekday: 'long',
     day: '2-digit',
     month: 'long',

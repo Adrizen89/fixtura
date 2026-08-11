@@ -8,7 +8,7 @@ import { useLiveEvent } from '~/composables/use_live_event'
 import { useI18n } from '~/composables/i18n'
 import type { PublicEventCategory, TournamentStatus } from '~/app/types'
 
-const { t } = useI18n()
+const { t, dateLocale } = useI18n()
 
 /**
  * Écran public d'un **événement** multi-catégories (#32, cf. CLAUDE.md §5) — double
@@ -81,7 +81,7 @@ const statusLabel = computed<Record<TournamentStatus, string>>(() => ({
 
 function formatDate(iso: string | null) {
   if (!iso) return ''
-  return new Date(iso).toLocaleDateString('fr-FR', {
+  return new Date(iso).toLocaleDateString(dateLocale.value, {
     weekday: 'long',
     day: '2-digit',
     month: 'long',

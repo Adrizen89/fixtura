@@ -14,7 +14,11 @@
       "tooManyAttempts": "Too many attempts. Please try again in a few minutes.",
       "closed": "Registration is closed for this tournament.",
       "full": "The tournament is full.",
-      "duplicateName": "A team with this name is already registered for this tournament."
+      "duplicateName": "A team with this name is already registered for this tournament.",
+      "notPending": "This request has already been processed."
+    },
+    "incident": {
+      "drawNotAllowed": "Draw in a knockout match: designate the winner (penalty shootout)."
     },
     "admin": {
       "tournamentCreated": "Tournament created.",

@@ -14,7 +14,11 @@
       "tooManyAttempts": "Trop de tentatives. Réessayez dans quelques minutes.",
       "closed": "Les inscriptions sont fermées pour ce tournoi.",
       "full": "Le tournoi est complet.",
-      "duplicateName": "Une équipe porte déjà ce nom dans ce tournoi."
+      "duplicateName": "Une équipe porte déjà ce nom dans ce tournoi.",
+      "notPending": "Cette demande a déjà été traitée."
+    },
+    "incident": {
+      "drawNotAllowed": "Match nul en élimination directe : désignez le vainqueur (tirs au but)."
     },
     "admin": {
       "tournamentCreated": "Tournoi créé.",

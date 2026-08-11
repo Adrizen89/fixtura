@@ -16,7 +16,7 @@ const props = defineProps<{
   registrations: TeamRegistrationItem[]
 }>()
 
-const { t } = useI18n()
+const { t, dateLocale } = useI18n()
 
 const teams = computed(() => props.tournament.teams ?? [])
 const canGenerate = computed(() => teams.value.length >= 2)
@@ -31,7 +31,7 @@ const tvHref = `/t/${props.tournament.publicSlug}?tv=1`
 const qrHref = `/tournaments/${props.tournament.id}/qrcode`
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('fr-FR', {
+  return new Date(iso).toLocaleDateString(dateLocale.value, {
     weekday: 'long',
     day: '2-digit',
     month: 'long',

@@ -6,7 +6,7 @@ import StatusBadge from '~/components/StatusBadge.vue'
 import { useI18n } from '~/composables/i18n'
 import type { EventItem, Tournament } from '~/app/types'
 
-const { t } = useI18n()
+const { t, dateLocale } = useI18n()
 
 /**
  * Historique (issue #108) — archives du club en **lecture seule**. Liste les
@@ -19,7 +19,7 @@ const props = defineProps<{ events: EventItem[]; tournaments: Tournament[] }>()
 const isEmpty = computed(() => props.events.length === 0 && props.tournaments.length === 0)
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('fr-FR', {
+  return new Date(iso).toLocaleDateString(dateLocale.value, {
     day: '2-digit',
     month: 'long',
     year: 'numeric',

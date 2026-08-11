@@ -43,8 +43,10 @@ export default class RegistrationRequestsController {
       await deliverRegistrationDecision(registration, tournament.name, 'approved')
       session.flash('success', i18n.t('messages.flash.admin.requestApproved', { team: team.name }))
     } catch (error) {
-      if (error instanceof DuplicateTeamNameError || error instanceof RegistrationNotPendingError) {
-        session.flash('error', error.message)
+      if (error instanceof DuplicateTeamNameError) {
+        session.flash('error', i18n.t('messages.flash.registration.duplicateName'))
+      } else if (error instanceof RegistrationNotPendingError) {
+        session.flash('error', i18n.t('messages.flash.registration.notPending'))
       } else {
         throw error
       }
@@ -69,7 +71,7 @@ export default class RegistrationRequestsController {
       )
     } catch (error) {
       if (error instanceof RegistrationNotPendingError) {
-        session.flash('error', error.message)
+        session.flash('error', i18n.t('messages.flash.registration.notPending'))
       } else {
         throw error
       }

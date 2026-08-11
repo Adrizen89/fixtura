@@ -5,7 +5,7 @@ import SiteFooter from '~/components/SiteFooter.vue'
 import { useI18n } from '~/composables/i18n'
 import type { FlashMessages } from '~/app/types'
 
-const { t } = useI18n()
+const { t, dateLocale } = useI18n()
 
 /**
  * Formulaire public d'inscription d'une équipe à un tournoi (issue #112).
@@ -38,7 +38,7 @@ function submit() {
 
 function formatDate(iso: string | null) {
   if (!iso) return ''
-  return new Date(iso).toLocaleDateString('fr-FR', {
+  return new Date(iso).toLocaleDateString(dateLocale.value, {
     weekday: 'long',
     day: '2-digit',
     month: 'long',

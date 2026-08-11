@@ -5,7 +5,7 @@ import AdminLayout from '~/layouts/AdminLayout.vue'
 import { useI18n } from '~/composables/i18n'
 import type { EditionResult, TeamRecord, TournamentFormat } from '~/app/types'
 
-const { t } = useI18n()
+const { t, dateLocale } = useI18n()
 
 /**
  * Palmarès (issue #109) — vue admin agrégée sur l'historique du club :
@@ -32,7 +32,7 @@ function formatLabel(format: TournamentFormat): string {
 
 function formatDate(iso: string | null) {
   if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('fr-FR', {
+  return new Date(iso).toLocaleDateString(dateLocale.value, {
     day: '2-digit',
     month: 'short',
     year: 'numeric',

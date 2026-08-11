@@ -5,7 +5,7 @@ import AdminLayout from '~/layouts/AdminLayout.vue'
 import { useI18n } from '~/composables/i18n'
 import type { UserRole } from '~/app/types'
 
-const { t } = useI18n()
+const { t, dateLocale } = useI18n()
 
 /**
  * Gestion des membres du club (issue #35) — réservé au responsable (`owner`).
@@ -71,7 +71,7 @@ function roleLabel(role: UserRole) {
 
 function formatDate(iso: string | null) {
   if (!iso) return ''
-  return new Date(iso).toLocaleDateString('fr-FR', {
+  return new Date(iso).toLocaleDateString(dateLocale.value, {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
