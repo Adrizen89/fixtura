@@ -225,6 +225,15 @@ final #106 alignés).
   dans `app/services/club_data.ts`. Registre + procédures : **`docs/rgpd.md`**.
   Confirmé : **aucune ressource tierce traçante** (fonts self-hostées, ni analytics
   ni CDN externe ; cookies strictement nécessaires session + anti-CSRF).
+- **Journal d'audit (issue #117)** : table append-only `audit_logs` (`club_id`,
+  `user_id?`, `actor_email` instantané, `action`, `target?`, `metadata` JSON, `ip`,
+  `created_at`) tracant les actions sensibles — connexion, invitation / changement
+  de rôle / retrait d'un membre, révocation d'invitation, suppression
+  tournoi / événement / catégorie, export RGPD. Écriture **best-effort** via
+  `app/services/audit_log.ts` (`recordAudit` — n'échoue jamais l'action métier ;
+  logique isolée hors contrôleurs). Consultation `/journal` réservée au responsable
+  (`AuditPolicy.view`, owner), scopée club, paginée. **2FA owner : différé**
+  (marqué optionnel dans l'issue ; évolution possible).
 - **Suivi des erreurs — Sentry serveur (issue #118)** : remontée des **erreurs
   serveur (≥ 500)** vers Sentry, **désactivée par défaut** et **activée uniquement
   par `SENTRY_DSN`**. Sans DSN (dev, CI, prod non configurée), le SDK `@sentry/node`
@@ -252,6 +261,14 @@ final #106 alignés).
   uptime, mémoire, environnement, version Node ; **503** si la base est injoignable).
   Publics, sans auth, **sans donnée personnelle** (`app/controllers/health_controller.ts`).
 - **Scaling multi-instances (prérequis) — transport Redis pour transmit** (issue #37) : en instance unique (PM2 mode fork, v1), transmit garde les abonnements SSE en mémoire — aucun service externe requis. Pour passer **PM2 en cluster** (plusieurs instances, montée en charge / multi-club), il faut d'abord un **transport partagé** sinon les broadcasts SSE ne se diffusent pas entre instances. Activation : renseigner `REDIS_HOST` (+ `REDIS_PORT`/`REDIS_PASSWORD`) dans `build/.env` → `config/transmit.ts` bascule automatiquement sur le driver Redis (`@adonisjs/transmit/transports`, via `ioredis`) ; puis démarrer PM2 avec `PM2_INSTANCES=max` (cf. `ecosystem.config.cjs`). Redis reste **optionnel en local** (absent → repli en mémoire). Pré-requis VPS supplémentaire dans ce cas : un serveur Redis (local, non exposé).
+- **Sauvegardes DB & restauration (issue #119)** : commandes `node ace db:backup`
+  (pg_dump format custom + rétention) et `node ace db:restore` (pg_restore/psql), sur
+  un cœur pur testé (`app/services/backup.ts`). Le déploiement prend déjà un dump de
+  **pré-migration** ; les sauvegardes **planifiées** (cron quotidien) sont
+  complémentaires. La restauration est **testée en continu** (aller-retour réel
+  pg_dump → base neuve → pg_restore, `tests/functional/backup_restore.spec.ts`).
+  Outillage + planification + procédure : **`docs/backups.md`**. Prérequis VPS :
+  `postgresql-client`.
 
 ## 12. Workflow ADBDigital
 

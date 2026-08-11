@@ -8,6 +8,7 @@ import { generatePublicSlug } from '#services/public_slug'
 import { buildPersistedEventPlanning } from '#services/event_planning'
 import { EventPolicy } from '#policies/event_policy'
 import { deny } from '#policies/authorize'
+import { recordAudit, AUDIT_ACTIONS } from '#services/audit_log'
 
 /**
  * Événements multi-catégories (#32) — CRUD + gestion des catégories.
@@ -125,13 +126,16 @@ export default class EventsController {
    * Supprime un événement (ses catégories sont détachées, jamais supprimées).
    * Réservé au responsable du club (owner).
    */
-  async destroy({ response, params, auth, session }: HttpContext) {
+  async destroy({ request, response, params, auth, session }: HttpContext) {
     if (!EventPolicy.delete(auth.user!)) {
       return deny({ session, response })
     }
 
     const event = await this.query().where('id', params.id).firstOrFail()
     await event.delete()
+    await recordAudit(auth.user!, request.ip(), AUDIT_ACTIONS.EVENT_DELETED, {
+      target: event.name,
+    })
 
     session.flash('success', 'Événement supprimé. Les catégories restent accessibles en tournois.')
     return response.redirect().toRoute('events.index')
@@ -180,7 +184,7 @@ export default class EventsController {
    * Détache et supprime une catégorie de l'événement (cascade équipes + matchs).
    * Réservé au responsable du club (owner).
    */
-  async destroyCategory({ response, params, auth, session }: HttpContext) {
+  async destroyCategory({ request, response, params, auth, session }: HttpContext) {
     if (!EventPolicy.deleteCategory(auth.user!)) {
       return deny({ session, response })
     }
@@ -191,6 +195,9 @@ export default class EventsController {
       .where('event_id', event.id)
       .firstOrFail()
     await category.delete()
+    await recordAudit(auth.user!, request.ip(), AUDIT_ACTIONS.CATEGORY_DELETED, {
+      target: category.name,
+    })
 
     session.flash('success', 'Catégorie supprimée.')
     return response.redirect().toRoute('events.show', { id: event.id })

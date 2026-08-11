@@ -8,6 +8,7 @@ import { createInvitation } from '#services/invitations'
 import { deliverInvitation } from '#services/invitation_delivery'
 import { MemberPolicy } from '#policies/member_policy'
 import { deny } from '#policies/authorize'
+import { recordAudit, AUDIT_ACTIONS } from '#services/audit_log'
 
 /**
  * Gestion des membres d'un club (issue #35) — réservé au responsable (`owner`).
@@ -103,19 +104,26 @@ export default class MembersController {
     })
 
     await deliverInvitation(invitation, this.acceptUrl(request, invitation.token))
+    await recordAudit(auth.user!, request.ip(), AUDIT_ACTIONS.MEMBER_INVITED, {
+      target: email,
+      metadata: { role: data.role },
+    })
 
     session.flash('success', `Invitation créée pour ${email}. Le lien est prêt à être partagé.`)
     return response.redirect().toRoute('members.index')
   }
 
   /** Révoque une invitation en attente (scopée au club). */
-  async revokeInvitation({ params, response, auth, session }: HttpContext) {
+  async revokeInvitation({ params, request, response, auth, session }: HttpContext) {
     if (!MemberPolicy.manage(auth.user!)) {
       return deny({ session, response })
     }
 
     const invitation = await Invitation.query().where('id', params.id).firstOrFail()
     await invitation.delete()
+    await recordAudit(auth.user!, request.ip(), AUDIT_ACTIONS.INVITATION_REVOKED, {
+      target: invitation.email,
+    })
 
     session.flash('success', 'Invitation révoquée.')
     return response.redirect().toRoute('members.index')
@@ -137,15 +145,20 @@ export default class MembersController {
       return response.redirect().toRoute('members.index')
     }
 
+    const previousRole = member.role
     member.role = role
     await member.save()
+    await recordAudit(auth.user!, request.ip(), AUDIT_ACTIONS.MEMBER_ROLE_CHANGED, {
+      target: member.email,
+      metadata: { from: previousRole, to: role },
+    })
 
     session.flash('success', 'Rôle mis à jour.')
     return response.redirect().toRoute('members.index')
   }
 
   /** Retire un membre du club (pas soi-même ; jamais le dernier responsable). */
-  async remove({ params, response, auth, session }: HttpContext) {
+  async remove({ params, request, response, auth, session }: HttpContext) {
     if (!MemberPolicy.manage(auth.user!)) {
       return deny({ session, response })
     }
@@ -163,6 +176,9 @@ export default class MembersController {
     }
 
     await member.delete()
+    await recordAudit(auth.user!, request.ip(), AUDIT_ACTIONS.MEMBER_REMOVED, {
+      target: member.email,
+    })
 
     session.flash('success', `${member.email} a été retiré du club.`)
     return response.redirect().toRoute('members.index')

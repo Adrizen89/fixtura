@@ -8,6 +8,7 @@ export type ScannedRoutes = {
     'subscribe': { paramsTuple?: []; params?: {} }
     'unsubscribe': { paramsTuple?: []; params?: {} }
     'public.tournament': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'public.tournament.ical': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'public.event': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'public.registration': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'public.registration.submit': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
@@ -38,6 +39,7 @@ export type ScannedRoutes = {
     'members.invitations.revoke': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'members.role': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'members.remove': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'audit.index': { paramsTuple?: []; params?: {} }
     'club.appearance.edit': { paramsTuple?: []; params?: {} }
     'club.appearance.update': { paramsTuple?: []; params?: {} }
     'history.index': { paramsTuple?: []; params?: {} }
@@ -67,6 +69,7 @@ export type ScannedRoutes = {
   GET: {
     'event_stream': { paramsTuple?: []; params?: {} }
     'public.tournament': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'public.tournament.ical': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'public.event': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'public.registration': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'legal.mentions': { paramsTuple?: []; params?: {} }
@@ -82,6 +85,7 @@ export type ScannedRoutes = {
     'events.planning.preview': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'account.export': { paramsTuple?: []; params?: {} }
     'members.index': { paramsTuple?: []; params?: {} }
+    'audit.index': { paramsTuple?: []; params?: {} }
     'club.appearance.edit': { paramsTuple?: []; params?: {} }
     'history.index': { paramsTuple?: []; params?: {} }
     'palmares.index': { paramsTuple?: []; params?: {} }
@@ -99,6 +103,7 @@ export type ScannedRoutes = {
   HEAD: {
     'event_stream': { paramsTuple?: []; params?: {} }
     'public.tournament': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
+    'public.tournament.ical': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'public.event': { paramsTuple: [ParamValue]; params: {'slug': ParamValue} }
     'public.registration': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'legal.mentions': { paramsTuple?: []; params?: {} }
@@ -114,6 +119,7 @@ export type ScannedRoutes = {
     'events.planning.preview': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'account.export': { paramsTuple?: []; params?: {} }
     'members.index': { paramsTuple?: []; params?: {} }
+    'audit.index': { paramsTuple?: []; params?: {} }
     'club.appearance.edit': { paramsTuple?: []; params?: {} }
     'history.index': { paramsTuple?: []; params?: {} }
     'palmares.index': { paramsTuple?: []; params?: {} }

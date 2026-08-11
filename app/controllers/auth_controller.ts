@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import { loginValidator } from '#validators/auth'
+import { recordAudit, AUDIT_ACTIONS } from '#services/audit_log'
 
 export default class AuthController {
   /**
@@ -19,6 +20,8 @@ export default class AuthController {
     try {
       const user = await User.verifyCredentials(email, password)
       await auth.use('web').login(user)
+      // Journal d'audit : connexion réussie (issue #117).
+      await recordAudit(user, request.ip(), AUDIT_ACTIONS.LOGIN)
     } catch {
       session.flash('error', 'Identifiants invalides.')
       // On re-flash l'email saisi pour ne pas le perdre, jamais le mot de passe.
