@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Tournament from '#models/tournament'
 import Match from '#models/match'
 import { SchedulerError } from '#services/scheduler/index'
+import { translateSchedulerError } from '#services/scheduler_i18n'
 import {
   generateFor,
   persistSchedule,
@@ -56,7 +57,7 @@ export default class PlanningController {
       })
     } catch (error) {
       if (error instanceof SchedulerError) {
-        session.flash('error', error.message)
+        session.flash('error', translateSchedulerError(i18n, error))
         return response.redirect().toRoute('tournaments.show', { id: tournament.id })
       }
       throw error
@@ -86,7 +87,7 @@ export default class PlanningController {
       session.flash('success', i18n.t('messages.flash.admin.planningGenerated'))
     } catch (error) {
       if (error instanceof SchedulerError) {
-        session.flash('error', error.message)
+        session.flash('error', translateSchedulerError(i18n, error))
       } else {
         throw error
       }

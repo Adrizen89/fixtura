@@ -18,7 +18,8 @@
       "notPending": "This request has already been processed."
     },
     "incident": {
-      "drawNotAllowed": "Draw in a knockout match: designate the winner (penalty shootout)."
+      "drawNotAllowed": "Draw in a knockout match: designate the winner (penalty shootout).",
+      "progressionConflict": "Cannot correct: a later match in the bracket has already been played. Its participants cannot be changed retroactively — correct the downstream match first."
     },
     "admin": {
       "tournamentCreated": "Tournament created.",

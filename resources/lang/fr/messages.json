@@ -18,7 +18,8 @@
       "notPending": "Cette demande a déjà été traitée."
     },
     "incident": {
-      "drawNotAllowed": "Match nul en élimination directe : désignez le vainqueur (tirs au but)."
+      "drawNotAllowed": "Match nul en élimination directe : désignez le vainqueur (tirs au but).",
+      "progressionConflict": "Correction impossible : un match suivant du tableau est déjà joué. Impossible de changer rétroactivement qui y participe — corrigez d'abord le match aval."
     },
     "admin": {
       "tournamentCreated": "Tournoi créé.",

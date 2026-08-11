@@ -198,11 +198,14 @@ final #106 alignés).
     d'erreur) + navigation/layout. Les **messages flash** admin passent par `messages.json`
     (`flash.admin.*`). Ajouter une chaîne = ajouter sa clé dans **les deux** catalogues (front `.ts`
     et/ou serveur `.json`). Les **dates/heures** suivent la langue via `dateLocale` (`useI18n()` :
-    `fr`→`fr-FR`, `en`→`en-GB`). Les erreurs métier **fréquentes** (nul en élimination, doublon /
-    déjà-traité d'une inscription) sont traduites (`flash.incident.*`, `flash.registration.*`).
-    Restent en FR : les messages **rares et paramétrés** des services purs (infaisabilité du
-    `scheduler`, conflit de progression de bracket) via `error.message` — le cas courant « ≥ 2
-    équipes » étant déjà intercepté en amont avec une clé i18n.
+    `fr`→`fr-FR`, `en`→`en-GB`). Les **erreurs métier** sont aussi localisées : incidents (nul en
+    élimination, conflit de progression de bracket → `flash.incident.*`), inscription
+    (`flash.registration.*`), et les messages du **`scheduler`** (cœur pur **non modifié**) traduits
+    en aval par `app/services/scheduler_i18n.ts` — mappage message→clé (`resources/lang/en/scheduler.json`,
+    statique + regex pour les paramétrés) avec **repli sur le message FR** (seul le catalogue EN
+    existe : une requête FR reçoit exactement le message d'origine, zéro dérive). Couverture
+    verrouillée par `tests/unit/scheduler_i18n.spec.ts` (dont un garde anti-dérive déclenchant de
+    vraies erreurs).
 
 ## 9. Points d'attention (à ne jamais oublier)
 
