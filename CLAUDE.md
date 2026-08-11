@@ -72,7 +72,11 @@ Un club de foot organise plusieurs tournois par an, aujourd'hui gérés dans un 
 | Fonts | **Self-hostées (woff2 locaux)** | RGPD : pas de Google Fonts CDN sur les livrables (préférence ADBDigital). |
 | Hébergement | **Hostinger VPS** + PM2 + nginx (reverse proxy) + Let's Encrypt | Imposé par Adonis (serveur Node persistant). Débloque SSE + Postgres. |
 
-> **Node** : LTS ≥ 20. **Gestionnaire** : npm (sauf indication contraire).
+> **Node** : **24** (épinglé via `.nvmrc`, min **22.18**). Le runtime TS d'Adonis
+> (`@poppinss/ts-exec`) exige la reconnaissance **native** des fichiers `.ts` par Node,
+> activée par défaut à partir de 22.18 / 24 — sur **Node 20**, `node ace …` échoue avec
+> `ERR_UNKNOWN_FILE_EXTENSION: ".ts"`. Gate `engines` dans `package.json` (avertissement
+> `npm install`). **Gestionnaire** : npm (sauf indication contraire).
 
 ## 5. Architecture & modèle de données
 

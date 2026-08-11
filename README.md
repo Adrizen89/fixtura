@@ -18,7 +18,11 @@ Produit développé par **ADBDigital**. v1 mono-club, architecture prête pour l
 
 ## Prérequis
 
-- Node.js LTS ≥ 20
+- **Node.js 24** — épinglé par le dépôt via `.nvmrc` (`nvm use` le sélectionne). Minimum
+  **22.18** : le runtime TypeScript d'AdonisJS (`@poppinss/ts-exec`) s'appuie sur la
+  reconnaissance native des fichiers `.ts` par Node, activée **par défaut seulement à partir
+  de Node 22.18 / 24**. Sur **Node 20**, `node ace …` échoue avec
+  `TypeError [ERR_UNKNOWN_FILE_EXTENSION]: Unknown file extension ".ts"` — passez sur Node 24.
 - PostgreSQL ≥ 14 — ou **Docker** pour la lancer sans rien installer (cf. « Démarrage rapide » ci-dessous)
 - npm
 
@@ -40,8 +44,9 @@ Le plus simple pour lancer l'application en local : **PostgreSQL via Docker**, l
 fournit une base déjà alignée sur `.env.example` — aucune variable de connexion à modifier.
 
 ```bash
+nvm use                     # 0) Node 24 via .nvmrc — indispensable, `node ace` échoue sur Node 20
 docker compose up -d        # 1) PostgreSQL (prêt en ~3 s, sans mot de passe en dev)
-npm install                 # 2) dépendances (Node ≥ 20)
+npm install                 # 2) dépendances (Node 24)
 cp .env.example .env        # 3) config (déjà alignée sur le conteneur)
 node ace generate:key       #    → renseigne APP_KEY dans .env
 node ace migration:run      # 4) tables
