@@ -23,7 +23,7 @@ export default class ClubController {
   }
 
   /** Enregistre le logo (data-URI) et/ou la couleur — vide = valeur retirée. */
-  async update({ request, response, auth, session }: HttpContext) {
+  async update({ request, response, auth, session, i18n }: HttpContext) {
     const user = auth.user!
     if (user.role !== 'owner') {
       return response.forbidden({ message: 'Réservé au responsable du club.' })
@@ -37,7 +37,7 @@ export default class ClubController {
     club.primaryColor = primaryColor ? primaryColor : null
     await club.save()
 
-    session.flash('success', 'Apparence du club mise à jour.')
+    session.flash('success', i18n.t('messages.flash.admin.appearanceUpdated'))
     return response.redirect().toPath('/club/apparence')
   }
 }

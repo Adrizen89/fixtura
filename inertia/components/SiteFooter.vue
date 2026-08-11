@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Link, usePage } from '@inertiajs/vue3'
+import LocaleSwitcher from '~/components/LocaleSwitcher.vue'
+import { useI18n } from '~/composables/i18n'
 import type { AuthUser } from '~/app/types'
+
+const { t } = useI18n()
 
 /**
  * Pied de page commun (admin, connexion, écran public) — donne accès aux pages
@@ -33,27 +37,28 @@ const year = new Date().getFullYear()
     <div
       class="mx-auto flex max-w-6xl flex-col items-center gap-2 px-4 py-4 text-center text-xs sm:flex-row sm:justify-between sm:text-left"
     >
-      <p>© {{ year }} Fixtura — ADBDigital. Tous droits réservés.</p>
+      <p>{{ t('footer.rights', { year }) }}</p>
 
       <nav
-        aria-label="Liens légaux"
+        :aria-label="t('footer.legalLinks')"
         class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1"
       >
         <Link href="/mentions-legales" class="hover:text-sand-12 hover:underline">
-          Mentions légales
+          {{ t('footer.mentions') }}
         </Link>
-        <Link href="/cgu" class="hover:text-sand-12 hover:underline">CGU</Link>
+        <Link href="/cgu" class="hover:text-sand-12 hover:underline">{{ t('footer.cgu') }}</Link>
         <Link href="/confidentialite" class="hover:text-sand-12 hover:underline">
-          Confidentialité
+          {{ t('footer.privacy') }}
         </Link>
         <a
           v-if="isOwner"
           href="/compte/export"
           class="hover:text-sand-12 hover:underline"
-          title="Télécharger toutes les données de votre club (JSON)"
+          :title="t('footer.exportTitle')"
         >
-          Exporter mes données
+          {{ t('footer.exportData') }}
         </a>
+        <LocaleSwitcher />
       </nav>
     </div>
   </footer>

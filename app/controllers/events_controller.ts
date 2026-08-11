@@ -53,7 +53,7 @@ export default class EventsController {
   }
 
   /** Persiste un nouvel événement. */
-  async store({ request, response, auth, session }: HttpContext) {
+  async store({ request, response, auth, session, i18n }: HttpContext) {
     const data = await request.validateUsing(eventValidator)
 
     const event = await Event.create({
@@ -70,7 +70,7 @@ export default class EventsController {
       publicSlug: generatePublicSlug(data.name),
     })
 
-    session.flash('success', 'Événement créé. Ajoutez maintenant vos catégories.')
+    session.flash('success', i18n.t('messages.flash.admin.eventCreated'))
     return response.redirect().toRoute('events.show', { id: event.id })
   }
 
@@ -102,7 +102,7 @@ export default class EventsController {
   }
 
   /** Met à jour un événement. */
-  async update({ request, response, params, session }: HttpContext) {
+  async update({ request, response, params, session, i18n }: HttpContext) {
     const event = await this.query().where('id', params.id).firstOrFail()
     const data = await request.validateUsing(eventValidator)
 
@@ -118,7 +118,7 @@ export default class EventsController {
     })
     await event.save()
 
-    session.flash('success', 'Événement mis à jour.')
+    session.flash('success', i18n.t('messages.flash.admin.eventUpdated'))
     return response.redirect().toRoute('events.show', { id: event.id })
   }
 
@@ -126,7 +126,7 @@ export default class EventsController {
    * Supprime un événement (ses catégories sont détachées, jamais supprimées).
    * Réservé au responsable du club (owner).
    */
-  async destroy({ request, response, params, auth, session }: HttpContext) {
+  async destroy({ request, response, params, auth, session, i18n }: HttpContext) {
     if (!EventPolicy.delete(auth.user!)) {
       return deny({ session, response })
     }
@@ -137,7 +137,7 @@ export default class EventsController {
       target: event.name,
     })
 
-    session.flash('success', 'Événement supprimé. Les catégories restent accessibles en tournois.')
+    session.flash('success', i18n.t('messages.flash.admin.eventDeleted'))
     return response.redirect().toRoute('events.index')
   }
 
@@ -147,7 +147,7 @@ export default class EventsController {
    * compatibles avec les écrans de tournoi existants ; la génération du planning de
    * l'événement fait autorité sur la grille partagée).
    */
-  async storeCategory({ request, response, params, session }: HttpContext) {
+  async storeCategory({ request, response, params, session, i18n }: HttpContext) {
     const event = await this.query().where('id', params.id).firstOrFail()
     const data = await request.validateUsing(eventCategoryValidator)
 
@@ -176,7 +176,7 @@ export default class EventsController {
       formatConfig,
     })
 
-    session.flash('success', 'Catégorie ajoutée.')
+    session.flash('success', i18n.t('messages.flash.admin.categoryAdded'))
     return response.redirect().toRoute('events.show', { id: event.id })
   }
 
@@ -184,7 +184,7 @@ export default class EventsController {
    * Détache et supprime une catégorie de l'événement (cascade équipes + matchs).
    * Réservé au responsable du club (owner).
    */
-  async destroyCategory({ request, response, params, auth, session }: HttpContext) {
+  async destroyCategory({ request, response, params, auth, session, i18n }: HttpContext) {
     if (!EventPolicy.deleteCategory(auth.user!)) {
       return deny({ session, response })
     }
@@ -199,7 +199,7 @@ export default class EventsController {
       target: category.name,
     })
 
-    session.flash('success', 'Catégorie supprimée.')
+    session.flash('success', i18n.t('messages.flash.admin.categoryDeleted'))
     return response.redirect().toRoute('events.show', { id: event.id })
   }
 }

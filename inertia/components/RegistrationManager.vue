@@ -1,24 +1,42 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useForm } from '@inertiajs/vue3'
-import type { Tournament } from '~/app/types'
+import { computed, onMounted, ref } from 'vue'
+import { router, useForm } from '@inertiajs/vue3'
+import type { TeamRegistrationItem, Tournament } from '~/app/types'
+import { useI18n } from '~/composables/i18n'
+
+const { t, dateLocale } = useI18n()
 
 /**
- * Gestion des inscriptions en ligne d'un tournoi (issue #112) — côté organisateur.
- * Ouvre/ferme le formulaire public, fixe une capacité facultative et donne le lien
- * non devinable à partager. La « fermeture pleine » est dérivée du nombre d'équipes.
+ * Gestion des inscriptions en ligne d'un tournoi (issues #112 + #113) — côté
+ * organisateur. Ouvre/ferme le formulaire public, fixe une capacité facultative et
+ * donne le lien non devinable à partager. Depuis #113, les demandes reçues attendent
+ * une décision : valider (→ crée l'équipe) ou refuser (→ archive). La « fermeture
+ * pleine » est dérivée de l'occupation = équipes confirmées + demandes en attente.
  */
-const props = defineProps<{ tournament: Tournament }>()
+const props = defineProps<{ tournament: Tournament; registrations: TeamRegistrationItem[] }>()
 
 const teamsCount = computed(() => props.tournament.teams?.length ?? 0)
 const isOpen = computed(() => props.tournament.registrationOpen)
 const capacity = computed(() => props.tournament.registrationCapacity)
-const isFull = computed(() => capacity.value !== null && teamsCount.value >= capacity.value)
 
-/** URL absolue du lien public d'inscription (jeton non devinable). */
+const pending = computed(() => props.registrations.filter((r) => r.status === 'pending'))
+const decided = computed(() => props.registrations.filter((r) => r.status !== 'pending'))
+const pendingCount = computed(() => pending.value.length)
+
+/** Occupation = équipes confirmées + demandes en attente (miroir du serveur). */
+const occupancy = computed(() => teamsCount.value + pendingCount.value)
+const isFull = computed(() => capacity.value !== null && occupancy.value >= capacity.value)
+
+/**
+ * URL du lien public d'inscription (jeton non devinable). L'origine est lue au montage
+ * côté client (`window` n'existe pas au rendu SSR) : en SSR l'URL reste relative, puis
+ * elle devient absolue après hydratation — copiable/partageable.
+ */
+const origin = ref('')
+onMounted(() => (origin.value = window.location.origin))
 const publicUrl = computed(() =>
   props.tournament.registrationToken
-    ? `${window.location.origin}/inscription/${props.tournament.registrationToken}`
+    ? `${origin.value}/inscription/${props.tournament.registrationToken}`
     : null
 )
 
@@ -36,6 +54,20 @@ function toggle(open: boolean) {
   submit()
 }
 
+/** Décision sur une demande (#113). `deciding` verrouille les boutons de la ligne. */
+const deciding = ref<number | null>(null)
+function decide(registration: TeamRegistrationItem, action: 'approve' | 'reject') {
+  deciding.value = registration.id
+  router.post(
+    `/tournaments/${props.tournament.id}/registrations/${registration.id}/${action}`,
+    {},
+    {
+      preserveScroll: true,
+      onFinish: () => (deciding.value = null),
+    }
+  )
+}
+
 const copied = ref(false)
 async function copyLink() {
   if (!publicUrl.value) return
@@ -47,42 +79,53 @@ async function copyLink() {
     copied.value = false
   }
 }
+
+function formatDate(iso: string | null) {
+  if (!iso) return ''
+  return new Date(iso).toLocaleDateString(dateLocale.value, {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
 </script>
 
 <template>
   <section class="rounded-2xl border border-sand-6 bg-white p-6">
     <div class="mb-4 flex items-center justify-between gap-3">
-      <h2 class="text-base font-semibold text-sand-12">Inscriptions en ligne</h2>
+      <h2 class="text-base font-semibold text-sand-12">{{ t('registrationManager.title') }}</h2>
       <span
         v-if="isOpen && isFull"
         class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800"
       >
-        Complet
+        {{ t('registrationManager.full') }}
       </span>
       <span
         v-else-if="isOpen"
         class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800"
       >
-        Ouvertes
+        {{ t('registrationManager.open') }}
       </span>
       <span v-else class="rounded-full bg-sand-3 px-2 py-0.5 text-xs font-medium text-sand-11">
-        Fermées
+        {{ t('registrationManager.closed') }}
       </span>
     </div>
 
     <p class="mb-4 text-sm text-sand-11">
-      Partagez un lien public pour que les équipes s'inscrivent elles-mêmes (sans compte).
+      {{ t('registrationManager.intro') }}
       <template v-if="capacity !== null">
-        {{ teamsCount }} / {{ capacity }} équipe(s) inscrite(s).
+        {{ t('registrationManager.occupancy', { occupancy, capacity }) }}
       </template>
-      <template v-else> {{ teamsCount }} équipe(s) inscrite(s). </template>
+      <template v-else> {{ t('registrationManager.confirmed', { count: teamsCount }) }} </template>
     </p>
 
     <!-- Réglages : capacité + ouverture -->
     <form class="space-y-3" @submit.prevent="submit">
       <div>
         <label for="reg-capacity" class="mb-1 block text-sm font-medium text-sand-12">
-          Capacité maximale <span class="font-normal text-sand-10">(laisser vide = illimité)</span>
+          {{ t('registrationManager.capacityLabel') }}
+          <span class="font-normal text-sand-10">{{ t('registrationManager.capacityHint') }}</span>
         </label>
         <input
           id="reg-capacity"
@@ -90,7 +133,7 @@ async function copyLink() {
           type="number"
           min="1"
           max="1000"
-          placeholder="Illimité"
+          :placeholder="t('registrationManager.unlimited')"
           class="w-40 rounded-lg border border-sand-7 px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
           :class="{ 'border-red-400': form.errors.capacity }"
         />
@@ -107,7 +150,7 @@ async function copyLink() {
           class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700 disabled:opacity-60"
           @click="toggle(true)"
         >
-          Ouvrir les inscriptions
+          {{ t('registrationManager.openRegistration') }}
         </button>
         <template v-else>
           <button
@@ -115,7 +158,7 @@ async function copyLink() {
             :disabled="form.processing"
             class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700 disabled:opacity-60"
           >
-            Enregistrer la capacité
+            {{ t('registrationManager.saveCapacity') }}
           </button>
           <button
             type="button"
@@ -123,7 +166,7 @@ async function copyLink() {
             class="rounded-lg border border-sand-7 px-4 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12 disabled:opacity-60"
             @click="toggle(false)"
           >
-            Fermer les inscriptions
+            {{ t('registrationManager.closeRegistration') }}
           </button>
         </template>
       </div>
@@ -135,7 +178,7 @@ async function copyLink() {
         for="reg-link"
         class="mb-1 block text-xs font-semibold uppercase tracking-wide text-sand-9"
       >
-        Lien d'inscription
+        {{ t('registrationManager.linkLabel') }}
       </label>
       <div class="flex flex-wrap items-center gap-2">
         <input
@@ -150,7 +193,7 @@ async function copyLink() {
           class="shrink-0 rounded-lg border border-sand-7 px-3 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
           @click="copyLink"
         >
-          {{ copied ? 'Copié ✓' : 'Copier' }}
+          {{ copied ? t('registrationManager.copied') : t('registrationManager.copy') }}
         </button>
         <a
           :href="publicUrl"
@@ -158,12 +201,96 @@ async function copyLink() {
           rel="noopener"
           class="shrink-0 rounded-lg border border-sand-7 px-3 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
         >
-          Ouvrir ↗
+          {{ t('registrationManager.openLink') }} ↗
         </a>
       </div>
       <p v-if="!isOpen" class="mt-2 text-xs text-sand-10">
-        Les inscriptions sont fermées : ce lien affiche « fermé » tant que vous ne les rouvrez pas.
+        {{ t('registrationManager.closedHint') }}
       </p>
+    </div>
+
+    <!-- Demandes d'inscription à traiter (#113) -->
+    <div class="mt-4 border-t border-sand-4 pt-4">
+      <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-sand-12">
+        {{ t('registrationManager.requestsTitle') }}
+        <span
+          v-if="pendingCount"
+          class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800"
+        >
+          {{ t('registrationManager.pendingBadge', { count: pendingCount }) }}
+        </span>
+      </h3>
+
+      <p v-if="registrations.length === 0" class="text-sm text-sand-10">
+        {{ t('registrationManager.noRequests') }}
+      </p>
+
+      <!-- En attente : validables / refusables -->
+      <ul v-if="pending.length" class="space-y-2">
+        <li
+          v-for="reg in pending"
+          :key="reg.id"
+          class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-sand-6 bg-sand-1 px-3 py-2"
+        >
+          <div class="min-w-0">
+            <p class="truncate text-sm font-medium text-sand-12">{{ reg.teamName }}</p>
+            <p class="truncate text-xs text-sand-10">
+              {{ reg.contactEmail }} · {{ formatDate(reg.createdAt) }}
+            </p>
+          </div>
+          <div class="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              :disabled="deciding === reg.id"
+              class="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-primary-700 disabled:opacity-60"
+              @click="decide(reg, 'approve')"
+            >
+              {{ t('registrationManager.approve') }}
+            </button>
+            <button
+              type="button"
+              :disabled="deciding === reg.id"
+              class="rounded-lg border border-sand-7 px-3 py-1.5 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12 disabled:opacity-60"
+              @click="decide(reg, 'reject')"
+            >
+              {{ t('registrationManager.reject') }}
+            </button>
+          </div>
+        </li>
+      </ul>
+
+      <!-- Traitées : historique (validées / refusées) -->
+      <div v-if="decided.length" class="mt-3">
+        <details class="text-sm">
+          <summary class="cursor-pointer text-sand-11 hover:text-sand-12">
+            {{ t('registrationManager.processed', { count: decided.length }) }}
+          </summary>
+          <ul class="mt-2 space-y-1.5">
+            <li
+              v-for="reg in decided"
+              :key="reg.id"
+              class="flex flex-wrap items-center justify-between gap-2 px-1 text-sm"
+            >
+              <span class="min-w-0 truncate text-sand-11">
+                {{ reg.teamName }}
+                <span class="text-xs text-sand-9">· {{ reg.contactEmail }}</span>
+              </span>
+              <span
+                v-if="reg.status === 'approved'"
+                class="shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800"
+              >
+                {{ t('registrationManager.approved') }}
+              </span>
+              <span
+                v-else
+                class="shrink-0 rounded-full bg-sand-3 px-2 py-0.5 text-xs font-medium text-sand-11"
+              >
+                {{ t('registrationManager.rejected') }}
+              </span>
+            </li>
+          </ul>
+        </details>
+      </div>
     </div>
   </section>
 </template>

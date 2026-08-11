@@ -2,7 +2,10 @@
 import { computed } from 'vue'
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3'
 import SiteFooter from '~/components/SiteFooter.vue'
+import { useI18n } from '~/composables/i18n'
 import type { FlashMessages } from '~/app/types'
+
+const { t } = useI18n()
 
 const page = usePage()
 const flashError = computed(() => (page.props.flash as FlashMessages | undefined)?.error ?? null)
@@ -20,7 +23,7 @@ function submit() {
 </script>
 
 <template>
-  <Head title="Connexion" />
+  <Head :title="t('auth.loginTitle')" />
 
   <div class="flex min-h-screen flex-col bg-sand-2">
     <div class="flex flex-1 items-center justify-center px-4 py-12">
@@ -32,7 +35,7 @@ function submit() {
             F
           </span>
           <h1 class="text-2xl font-bold tracking-tight text-sand-12">Fixtura</h1>
-          <p class="mt-1 text-sm text-sand-11">Espace organisateurs</p>
+          <p class="mt-1 text-sm text-sand-11">{{ t('auth.organizersArea') }}</p>
         </div>
 
         <form
@@ -49,7 +52,7 @@ function submit() {
 
           <div>
             <label for="email" class="mb-1 block text-sm font-medium text-sand-12">
-              Adresse e-mail
+              {{ t('auth.emailLabel') }}
             </label>
             <input
               id="email"
@@ -68,7 +71,7 @@ function submit() {
 
           <div>
             <label for="password" class="mb-1 block text-sm font-medium text-sand-12">
-              Mot de passe
+              {{ t('auth.passwordLabel') }}
             </label>
             <input
               id="password"
@@ -89,23 +92,25 @@ function submit() {
             :disabled="form.processing"
             class="w-full rounded-lg bg-primary px-4 py-2.5 font-semibold text-white transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {{ form.processing ? 'Connexion…' : 'Se connecter' }}
+            {{ form.processing ? t('auth.signingIn') : t('auth.signIn') }}
           </button>
 
           <p class="text-center text-xs leading-relaxed text-sand-10">
-            En vous connectant, vous acceptez les
-            <Link href="/cgu" class="font-medium text-primary hover:underline">CGU</Link>
-            et la
+            {{ t('auth.loginConsentBefore') }}
+            <Link href="/cgu" class="font-medium text-primary hover:underline">{{
+              t('footer.cgu')
+            }}</Link>
+            {{ t('auth.consentAnd') }}
             <Link href="/confidentialite" class="font-medium text-primary hover:underline">
-              politique de confidentialité </Link
+              {{ t('auth.privacyPolicy') }} </Link
             >.
           </p>
         </form>
 
         <p class="mt-6 text-center text-sm text-sand-11">
-          Pas encore de club ?
+          {{ t('auth.noClubYet') }}
           <Link href="/register" class="font-semibold text-primary hover:underline">
-            Créer un club
+            {{ t('auth.createClub') }}
           </Link>
         </p>
       </div>

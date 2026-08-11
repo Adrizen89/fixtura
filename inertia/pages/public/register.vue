@@ -2,7 +2,10 @@
 import { computed } from 'vue'
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3'
 import SiteFooter from '~/components/SiteFooter.vue'
+import { useI18n } from '~/composables/i18n'
 import type { FlashMessages } from '~/app/types'
+
+const { t, dateLocale } = useI18n()
 
 /**
  * Formulaire public d'inscription d'une équipe à un tournoi (issue #112).
@@ -35,7 +38,7 @@ function submit() {
 
 function formatDate(iso: string | null) {
   if (!iso) return ''
-  return new Date(iso).toLocaleDateString('fr-FR', {
+  return new Date(iso).toLocaleDateString(dateLocale.value, {
     weekday: 'long',
     day: '2-digit',
     month: 'long',
@@ -45,7 +48,7 @@ function formatDate(iso: string | null) {
 </script>
 
 <template>
-  <Head :title="`Inscription — ${tournament.name}`" />
+  <Head :title="t('publicRegister.headTitle', { name: tournament.name })" />
 
   <div class="flex min-h-screen flex-col bg-sand-2">
     <div class="flex flex-1 items-center justify-center px-4 py-12">
@@ -63,7 +66,9 @@ function formatDate(iso: string | null) {
               · {{ formatDate(tournament.eventDate) }}</template
             >
             <br />
-            <span class="text-sand-10">Organisé par {{ club.name }}</span>
+            <span class="text-sand-10">{{
+              t('publicRegister.organizedBy', { club: club.name })
+            }}</span>
           </p>
         </div>
 
@@ -86,27 +91,30 @@ function formatDate(iso: string | null) {
 
           <!-- Inscriptions fermées -->
           <div v-if="status === 'closed'" class="py-6 text-center">
-            <p class="text-sand-12">Les inscriptions ne sont pas ouvertes pour ce tournoi.</p>
-            <p class="mt-1 text-sm text-sand-11">Revenez plus tard ou contactez l'organisateur.</p>
+            <p class="text-sand-12">{{ t('publicRegister.closedTitle') }}</p>
+            <p class="mt-1 text-sm text-sand-11">{{ t('publicRegister.closedHint') }}</p>
           </div>
 
           <!-- Tournoi complet -->
           <div v-else-if="status === 'full'" class="py-6 text-center">
-            <p class="text-sand-12">Le tournoi est complet.</p>
+            <p class="text-sand-12">{{ t('publicRegister.fullTitle') }}</p>
             <p class="mt-1 text-sm text-sand-11">
-              Toutes les places sont prises. Contactez l'organisateur en cas de désistement.
+              {{ t('publicRegister.fullHint') }}
             </p>
           </div>
 
           <!-- Formulaire ouvert -->
           <form v-else class="space-y-4" @submit.prevent="submit">
             <p v-if="remaining !== null" class="text-sm text-sand-11">
-              {{ remaining }} place(s) restante(s).
+              {{ t('publicRegister.remaining', { count: remaining ?? 0 }) }}
+            </p>
+            <p class="rounded-md bg-sand-2 px-3 py-2 text-xs text-sand-11">
+              {{ t('publicRegister.pendingNotice') }}
             </p>
 
             <div>
               <label for="name" class="mb-1 block text-sm font-medium text-sand-12">
-                Nom de l'équipe
+                {{ t('publicRegister.nameLabel') }}
               </label>
               <input
                 id="name"
@@ -126,7 +134,7 @@ function formatDate(iso: string | null) {
 
             <div>
               <label for="contactEmail" class="mb-1 block text-sm font-medium text-sand-12">
-                E-mail de contact
+                {{ t('publicRegister.emailLabel') }}
               </label>
               <input
                 id="contactEmail"
@@ -159,15 +167,15 @@ function formatDate(iso: string | null) {
               :disabled="form.processing"
               class="w-full rounded-lg bg-primary px-4 py-2.5 font-semibold text-white transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {{ form.processing ? 'Inscription…' : 'Inscrire mon équipe' }}
+              {{ form.processing ? t('publicRegister.submitting') : t('publicRegister.submit') }}
             </button>
 
             <!-- Mention RGPD (§10) : données minimales + finalité + lien politique. -->
             <p class="text-xs leading-relaxed text-sand-10">
-              Le nom de l'équipe et l'e-mail de contact sont utilisés uniquement pour organiser ce
-              tournoi et vous informer. Voir notre
-              <Link href="/confidentialite" class="font-medium text-primary hover:underline">
-                politique de confidentialité</Link
+              {{ t('publicRegister.rgpdBefore') }}
+              <Link href="/confidentialite" class="font-medium text-primary hover:underline">{{
+                t('publicRegister.rgpdLink')
+              }}</Link
               >.
             </p>
           </form>

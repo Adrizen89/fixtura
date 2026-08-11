@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { router } from '@inertiajs/vue3'
+import { useI18n } from '~/composables/i18n'
+
+const { t } = useI18n()
 
 /**
  * Import d'équipes depuis un fichier CSV / Excel (issue #120).
@@ -36,12 +39,18 @@ const preview = ref<ImportPreview | null>(null)
 const previewUrl = `/tournaments/${props.tournamentId}/teams/import/preview`
 const importUrl = `/tournaments/${props.tournamentId}/teams/import`
 
-const STATUS_META: Record<ImportRowStatus, { label: string; class: string }> = {
-  ok: { label: 'À importer', class: 'bg-green-100 text-green-800' },
-  empty: { label: 'Vide', class: 'bg-sand-3 text-sand-11' },
-  too_long: { label: 'Trop long (> 60)', class: 'bg-amber-100 text-amber-800' },
-  duplicate_file: { label: 'Doublon (fichier)', class: 'bg-amber-100 text-amber-800' },
-  duplicate_existing: { label: 'Déjà présente', class: 'bg-sand-3 text-sand-11' },
+const STATUS_META: Record<ImportRowStatus, { labelKey: string; class: string }> = {
+  ok: { labelKey: 'teamsImport.status.ok', class: 'bg-green-100 text-green-800' },
+  empty: { labelKey: 'teamsImport.status.empty', class: 'bg-sand-3 text-sand-11' },
+  too_long: { labelKey: 'teamsImport.status.tooLong', class: 'bg-amber-100 text-amber-800' },
+  duplicate_file: {
+    labelKey: 'teamsImport.status.duplicateFile',
+    class: 'bg-amber-100 text-amber-800',
+  },
+  duplicate_existing: {
+    labelKey: 'teamsImport.status.duplicateExisting',
+    class: 'bg-sand-3 text-sand-11',
+  },
 }
 
 /** Jeton anti-CSRF déposé par Shield (cookie `XSRF-TOKEN`), pour le fetch d'aperçu. */
@@ -86,12 +95,12 @@ async function onFileChange(event: Event) {
     })
     const data = await res.json().catch(() => null)
     if (!res.ok) {
-      error.value = data?.error ?? 'Import impossible. Vérifiez le fichier (CSV ou XLSX, ≤ 5 Mo).'
+      error.value = data?.error ?? t('teamsImport.errorFile')
       return
     }
     preview.value = data as ImportPreview
   } catch {
-    error.value = 'Import impossible (erreur réseau).'
+    error.value = t('teamsImport.errorNetwork')
   } finally {
     loading.value = false
   }
@@ -123,9 +132,9 @@ function confirmImport() {
   <section class="rounded-2xl border border-sand-6 bg-white p-6">
     <div class="flex items-center justify-between">
       <div>
-        <h2 class="text-base font-semibold text-sand-12">Importer des équipes</h2>
+        <h2 class="text-base font-semibold text-sand-12">{{ t('teamsImport.title') }}</h2>
         <p class="mt-0.5 text-sm text-sand-11">
-          Depuis un fichier CSV ou Excel (une équipe par ligne).
+          {{ t('teamsImport.subtitle') }}
         </p>
       </div>
       <button
@@ -134,7 +143,7 @@ function confirmImport() {
         :aria-expanded="open"
         @click="toggleOpen"
       >
-        {{ open ? 'Fermer' : 'Importer' }}
+        {{ open ? t('teamsImport.close') : t('teamsImport.import') }}
       </button>
     </div>
 
@@ -142,7 +151,7 @@ function confirmImport() {
       <!-- Sélecteur de fichier -->
       <div>
         <label for="team-import-file" class="mb-1 block text-sm font-medium text-sand-12">
-          Fichier
+          {{ t('teamsImport.fileLabel') }}
         </label>
         <input
           id="team-import-file"
@@ -153,24 +162,26 @@ function confirmImport() {
           @change="onFileChange"
         />
         <p class="mt-1 text-xs text-sand-10">
-          En-tête facultative (« Nom », « Équipe »…). Colonnes supplémentaires ignorées.
+          {{ t('teamsImport.fileHint') }}
         </p>
       </div>
 
-      <p v-if="loading" class="text-sm text-sand-11">Analyse du fichier…</p>
+      <p v-if="loading" class="text-sm text-sand-11">{{ t('teamsImport.analyzing') }}</p>
       <p v-if="error" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{{ error }}</p>
 
       <!-- Aperçu -->
       <div v-if="preview" class="space-y-3">
         <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-          <span class="font-semibold text-sand-12">{{ preview.counts.ok }} à importer</span>
+          <span class="font-semibold text-sand-12">{{
+            t('teamsImport.toImport', { count: preview.counts.ok })
+          }}</span>
           <span v-if="preview.counts.skipped > 0" class="text-sand-11">
-            {{ preview.counts.skipped }} ignorée{{ preview.counts.skipped > 1 ? 's' : '' }}
+            {{ t('teamsImport.skipped', { count: preview.counts.skipped }) }}
           </span>
         </div>
 
         <p v-if="preview.truncated" class="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
-          Fichier volumineux : seules les 500 premières lignes ont été analysées.
+          {{ t('teamsImport.truncated') }}
         </p>
 
         <div
@@ -182,9 +193,11 @@ function confirmImport() {
               class="sticky top-0 bg-sand-2 text-left text-xs uppercase tracking-wide text-sand-10"
             >
               <tr>
-                <th scope="col" class="px-3 py-2 font-semibold">Ligne</th>
-                <th scope="col" class="px-3 py-2 font-semibold">Nom</th>
-                <th scope="col" class="px-3 py-2 font-semibold">État</th>
+                <th scope="col" class="px-3 py-2 font-semibold">{{ t('teamsImport.colLine') }}</th>
+                <th scope="col" class="px-3 py-2 font-semibold">{{ t('teamsImport.colName') }}</th>
+                <th scope="col" class="px-3 py-2 font-semibold">
+                  {{ t('teamsImport.colStatus') }}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -192,14 +205,14 @@ function confirmImport() {
                 <td class="px-3 py-1.5 text-sand-10 tabular-nums">{{ row.line }}</td>
                 <td class="px-3 py-1.5 text-sand-12">
                   <span v-if="row.name">{{ row.name }}</span>
-                  <span v-else class="italic text-sand-10">(vide)</span>
+                  <span v-else class="italic text-sand-10">{{ t('teamsImport.emptyCell') }}</span>
                 </td>
                 <td class="px-3 py-1.5">
                   <span
                     class="inline-block rounded-full px-2 py-0.5 text-xs font-medium"
                     :class="STATUS_META[row.status].class"
                   >
-                    {{ STATUS_META[row.status].label }}
+                    {{ t(STATUS_META[row.status].labelKey) }}
                   </span>
                 </td>
               </tr>
@@ -208,7 +221,7 @@ function confirmImport() {
         </div>
 
         <p v-else class="rounded-lg bg-sand-2 px-3 py-4 text-center text-sm text-sand-11">
-          Aucune équipe détectée dans ce fichier.
+          {{ t('teamsImport.noneDetected') }}
         </p>
 
         <div class="flex items-center gap-3">
@@ -218,14 +231,14 @@ function confirmImport() {
             class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60"
             @click="confirmImport"
           >
-            Importer {{ preview.counts.ok }} équipe{{ preview.counts.ok > 1 ? 's' : '' }}
+            {{ t('teamsImport.importCount', { count: preview.counts.ok }) }}
           </button>
           <button
             type="button"
             class="text-sm font-medium text-sand-11 transition hover:text-sand-12"
             @click="reset"
           >
-            Annuler
+            {{ t('teamsImport.cancel') }}
           </button>
         </div>
       </div>

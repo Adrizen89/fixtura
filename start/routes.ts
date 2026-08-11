@@ -34,9 +34,11 @@ const QrController = () => import('#controllers/qr_controller')
 const HistoryController = () => import('#controllers/history_controller')
 const PublicRegistrationController = () => import('#controllers/public_registration_controller')
 const RegistrationSettingsController = () => import('#controllers/registration_settings_controller')
+const RegistrationRequestsController = () => import('#controllers/registration_requests_controller')
 const PalmaresController = () => import('#controllers/palmares_controller')
 const HealthController = () => import('#controllers/health_controller')
 const AuditController = () => import('#controllers/audit_controller')
+const LocaleController = () => import('#controllers/locale_controller')
 
 /**
  * Fenêtres de limitation de débit (issue #116). Généreuses : elles bloquent l'abus
@@ -137,6 +139,12 @@ router.get('/cgu', [LegalController, 'terms']).as('legal.terms')
 router.get('/confidentialite', [LegalController, 'privacy']).as('legal.privacy')
 
 /**
+ * Changement de langue (issue #123) — public, sans auth. Pose le cookie de préférence
+ * `locale` puis renvoie sur la page d'origine.
+ */
+router.get('/locale/:locale', [LocaleController, 'update']).as('locale.update')
+
+/**
  * Authentification — accessible aux invités uniquement.
  */
 router
@@ -214,6 +222,19 @@ router
     router
       .patch('/tournaments/:id/registration', [RegistrationSettingsController, 'update'])
       .as('tournaments.registration.update')
+    // Décision sur une demande d'inscription (#113) : valider (→ crée l'équipe) / refuser.
+    router
+      .post('/tournaments/:id/registrations/:registrationId/approve', [
+        RegistrationRequestsController,
+        'approve',
+      ])
+      .as('tournaments.registrations.approve')
+    router
+      .post('/tournaments/:id/registrations/:registrationId/reject', [
+        RegistrationRequestsController,
+        'reject',
+      ])
+      .as('tournaments.registrations.reject')
     // Équipes gérées depuis la page du tournoi (ajout / renommage / suppression).
     router.resource('tournaments.teams', TeamsController).only(['store', 'update', 'destroy'])
     // Import CSV/Excel : aperçu (JSON) puis confirmation d'insertion (issue #120).

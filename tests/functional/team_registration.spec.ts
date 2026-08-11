@@ -5,12 +5,14 @@ import Club from '#models/club'
 import User from '#models/user'
 import Tournament from '#models/tournament'
 import Team from '#models/team'
+import TeamRegistration from '#models/team_registration'
 import { resetRateLimits } from '#services/rate_limit'
 
 /**
  * Inscription publique d'une équipe à un tournoi (issue #112) — testé de bout en
  * bout via HTTP : ouverture/fermeture par l'orga, lien public, capacité et
- * fermeture auto, honeypot anti-spam, cloisonnement par club.
+ * fermeture auto, honeypot anti-spam, cloisonnement par club. Depuis #113, une
+ * soumission dépose une **demande** (`TeamRegistration`), pas directement une équipe.
  */
 test.group('Inscription publique d’une équipe (#112)', (group) => {
   group.each.setup(() => testUtils.db().truncate())
@@ -92,7 +94,10 @@ test.group('Inscription publique d’une équipe (#112)', (group) => {
     assert.include(res.text(), 'ne sont pas ouvertes')
   })
 
-  test('une équipe s’inscrit → créée avec son contact', async ({ client, assert }) => {
+  test('une équipe s’inscrit → demande en attente (pas encore d’équipe)', async ({
+    client,
+    assert,
+  }) => {
     const { club } = await makeClubOwner('Club A', 'club-a')
     const tournament = await makeTournament(club.id, { slug: 'a', open: true, token: 'tok-open' })
 
@@ -102,13 +107,18 @@ test.group('Inscription publique d’une équipe (#112)', (group) => {
       .redirects(0)
     res.assertStatus(302)
 
+    // Une demande en attente est créée ; aucune équipe tant qu'elle n'est pas validée.
+    const requests = await TeamRegistration.query().where('tournament_id', tournament.id)
+    assert.lengthOf(requests, 1)
+    assert.equal(requests[0].teamName, 'Les Lions')
+    assert.equal(requests[0].contactEmail, 'lions@example.com') // normalisé en minuscules
+    assert.equal(requests[0].status, 'pending')
+
     const teams = await Team.query().where('tournament_id', tournament.id)
-    assert.lengthOf(teams, 1)
-    assert.equal(teams[0].name, 'Les Lions')
-    assert.equal(teams[0].contactEmail, 'lions@example.com') // normalisé en minuscules
+    assert.lengthOf(teams, 0)
   })
 
-  test('nom déjà pris → refusé, aucune équipe en double', async ({ client, assert }) => {
+  test('nom déjà pris → refusé, aucune demande en double', async ({ client, assert }) => {
     const { club } = await makeClubOwner('Club A', 'club-a')
     const tournament = await makeTournament(club.id, { slug: 'a', open: true, token: 'tok-dup' })
     await Team.create({ tournamentId: tournament.id, name: 'Les Lions' })
@@ -120,8 +130,27 @@ test.group('Inscription publique d’une équipe (#112)', (group) => {
       .redirects(0)
     res.assertStatus(302) // VineJS → redirection avec erreurs, pas de création
 
-    const teams = await Team.query().where('tournament_id', tournament.id)
-    assert.lengthOf(teams, 1)
+    const requests = await TeamRegistration.query().where('tournament_id', tournament.id)
+    assert.lengthOf(requests, 0)
+  })
+
+  test('deux demandes homonymes → la 2ᵉ est refusée', async ({ client, assert }) => {
+    const { club } = await makeClubOwner('Club A', 'club-a')
+    const tournament = await makeTournament(club.id, { slug: 'a', open: true, token: 'tok-dup2' })
+
+    await client
+      .post('/inscription/tok-dup2')
+      .form({ name: 'Les Aigles', contactEmail: 'a@example.com', website: '' })
+      .redirects(0)
+    const second = await client
+      .post('/inscription/tok-dup2')
+      .header('accept', 'text/html')
+      .form({ name: 'les aigles', contactEmail: 'b@example.com', website: '' })
+      .redirects(0)
+    second.assertStatus(302)
+
+    const requests = await TeamRegistration.query().where('tournament_id', tournament.id)
+    assert.lengthOf(requests, 1) // la seconde, homonyme, n'a pas été enregistrée
   })
 
   test('capacité atteinte → complet, inscription refusée', async ({ client, assert }) => {
@@ -132,7 +161,13 @@ test.group('Inscription publique d’une équipe (#112)', (group) => {
       token: 'tok-full',
       capacity: 1,
     })
-    await Team.create({ tournamentId: tournament.id, name: 'Déjà inscrite' })
+    // Une demande en attente occupe déjà l'unique place (occupation = équipes + demandes).
+    await TeamRegistration.create({
+      tournamentId: tournament.id,
+      teamName: 'Déjà demandée',
+      contactEmail: 'first@example.com',
+      status: 'pending',
+    })
 
     // La page annonce « complet ».
     const page = await client.get('/inscription/tok-full')
@@ -146,11 +181,11 @@ test.group('Inscription publique d’une équipe (#112)', (group) => {
       .redirects(0)
     res.assertStatus(302)
 
-    const teams = await Team.query().where('tournament_id', tournament.id)
-    assert.lengthOf(teams, 1)
+    const requests = await TeamRegistration.query().where('tournament_id', tournament.id)
+    assert.lengthOf(requests, 1)
   })
 
-  test('honeypot rempli → aucune équipe créée (silencieux)', async ({ client, assert }) => {
+  test('honeypot rempli → aucune demande créée (silencieux)', async ({ client, assert }) => {
     const { club } = await makeClubOwner('Club A', 'club-a')
     const tournament = await makeTournament(club.id, { slug: 'a', open: true, token: 'tok-bot' })
 
@@ -160,8 +195,8 @@ test.group('Inscription publique d’une équipe (#112)', (group) => {
       .redirects(0)
     res.assertStatus(302)
 
-    const teams = await Team.query().where('tournament_id', tournament.id)
-    assert.lengthOf(teams, 0)
+    const requests = await TeamRegistration.query().where('tournament_id', tournament.id)
+    assert.lengthOf(requests, 0)
   })
 
   test('jeton invalide → page indisponible', async ({ client, assert }) => {

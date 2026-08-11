@@ -57,6 +57,12 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
         success: ctx.session?.flashMessages.get('success') ?? null,
         error: ctx.session?.flashMessages.get('error') ?? null,
       },
+
+      /**
+       * Langue active de la requête (issue #123) — le front choisit le dictionnaire
+       * bundlé correspondant (`always` : présent aussi lors des rechargements partiels).
+       */
+      locale: ctx.inertia.always(ctx.i18n?.locale ?? 'fr'),
     }
   }
 

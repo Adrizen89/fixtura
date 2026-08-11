@@ -49,12 +49,12 @@ export default class ExportController {
   }
 
   /** Planning imprimable (grille créneaux × terrains). */
-  async planning({ view, params, response, session }: HttpContext) {
+  async planning({ view, params, response, session, i18n }: HttpContext) {
     const tournament = await this.findTournament(params.id)
     const matches = await this.matchesOf(tournament)
 
     if (matches.length === 0) {
-      session.flash('error', 'Générez d’abord le planning pour l’exporter.')
+      session.flash('error', i18n.t('messages.flash.admin.exportGeneratePlanningFirst'))
       return response.redirect().toRoute('tournaments.show', { id: tournament.id })
     }
 
@@ -66,12 +66,12 @@ export default class ExportController {
   }
 
   /** Feuilles de match imprimables (une par match, score à remplir). */
-  async matchSheets({ view, params, response, session }: HttpContext) {
+  async matchSheets({ view, params, response, session, i18n }: HttpContext) {
     const tournament = await this.findTournament(params.id)
     const matches = await this.matchesOf(tournament)
 
     if (matches.length === 0) {
-      session.flash('error', 'Générez d’abord le planning pour imprimer les feuilles de match.')
+      session.flash('error', i18n.t('messages.flash.admin.exportGenerateSheetsFirst'))
       return response.redirect().toRoute('tournaments.show', { id: tournament.id })
     }
 

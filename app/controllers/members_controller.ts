@@ -75,7 +75,7 @@ export default class MembersController {
   }
 
   /** Crée une invitation (email + rôle) et prépare le lien d'acceptation. */
-  async invite({ request, response, auth, session }: HttpContext) {
+  async invite({ request, response, auth, session, i18n }: HttpContext) {
     if (!MemberPolicy.manage(auth.user!)) {
       return deny({ session, response })
     }
@@ -92,7 +92,7 @@ export default class MembersController {
       .select('id')
       .first()
     if (already) {
-      session.flash('error', 'Cette personne est déjà membre du club.')
+      session.flash('error', i18n.t('messages.flash.admin.memberAlreadyMember'))
       return response.redirect().toRoute('members.index')
     }
 
@@ -109,12 +109,12 @@ export default class MembersController {
       metadata: { role: data.role },
     })
 
-    session.flash('success', `Invitation créée pour ${email}. Le lien est prêt à être partagé.`)
+    session.flash('success', i18n.t('messages.flash.admin.memberInvited', { email }))
     return response.redirect().toRoute('members.index')
   }
 
   /** Révoque une invitation en attente (scopée au club). */
-  async revokeInvitation({ params, request, response, auth, session }: HttpContext) {
+  async revokeInvitation({ params, request, response, auth, session, i18n }: HttpContext) {
     if (!MemberPolicy.manage(auth.user!)) {
       return deny({ session, response })
     }
@@ -125,12 +125,12 @@ export default class MembersController {
       target: invitation.email,
     })
 
-    session.flash('success', 'Invitation révoquée.')
+    session.flash('success', i18n.t('messages.flash.admin.invitationRevoked'))
     return response.redirect().toRoute('members.index')
   }
 
   /** Change le rôle d'un membre (garde : au moins un responsable). */
-  async updateRole({ params, request, response, auth, session }: HttpContext) {
+  async updateRole({ params, request, response, auth, session, i18n }: HttpContext) {
     if (!MemberPolicy.manage(auth.user!)) {
       return deny({ session, response })
     }
@@ -141,7 +141,7 @@ export default class MembersController {
 
     // Empêcher de rétrograder le dernier responsable.
     if (member.isOwner && role !== 'owner' && (await this.ownerCount(clubId)) <= 1) {
-      session.flash('error', 'Le club doit garder au moins un responsable.')
+      session.flash('error', i18n.t('messages.flash.admin.mustKeepOwner'))
       return response.redirect().toRoute('members.index')
     }
 
@@ -153,12 +153,12 @@ export default class MembersController {
       metadata: { from: previousRole, to: role },
     })
 
-    session.flash('success', 'Rôle mis à jour.')
+    session.flash('success', i18n.t('messages.flash.admin.roleUpdated'))
     return response.redirect().toRoute('members.index')
   }
 
   /** Retire un membre du club (pas soi-même ; jamais le dernier responsable). */
-  async remove({ params, request, response, auth, session }: HttpContext) {
+  async remove({ params, request, response, auth, session, i18n }: HttpContext) {
     if (!MemberPolicy.manage(auth.user!)) {
       return deny({ session, response })
     }
@@ -167,11 +167,11 @@ export default class MembersController {
     const member = await this.findMember(clubId, params.id)
 
     if (member.id === auth.user!.id) {
-      session.flash('error', 'Vous ne pouvez pas vous retirer vous-même.')
+      session.flash('error', i18n.t('messages.flash.admin.cannotRemoveSelf'))
       return response.redirect().toRoute('members.index')
     }
     if (member.isOwner && (await this.ownerCount(clubId)) <= 1) {
-      session.flash('error', 'Le club doit garder au moins un responsable.')
+      session.flash('error', i18n.t('messages.flash.admin.mustKeepOwner'))
       return response.redirect().toRoute('members.index')
     }
 
@@ -180,7 +180,7 @@ export default class MembersController {
       target: member.email,
     })
 
-    session.flash('success', `${member.email} a été retiré du club.`)
+    session.flash('success', i18n.t('messages.flash.admin.memberRemoved', { email: member.email }))
     return response.redirect().toRoute('members.index')
   }
 }

@@ -2,12 +2,15 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import AdminLayout from '~/layouts/AdminLayout.vue'
 import StatusBadge from '~/components/StatusBadge.vue'
+import { useI18n } from '~/composables/i18n'
 import type { EventItem } from '~/app/types'
+
+const { t, dateLocale } = useI18n()
 
 defineProps<{ events: EventItem[] }>()
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('fr-FR', {
+  return new Date(iso).toLocaleDateString(dateLocale.value, {
     day: '2-digit',
     month: 'long',
     year: 'numeric',
@@ -15,33 +18,28 @@ function formatDate(iso: string) {
 }
 
 function destroy(e: EventItem) {
-  if (
-    confirm(
-      `Supprimer l'événement « ${e.name} » ? Ses catégories resteront accessibles comme tournois.`
-    )
-  ) {
+  if (confirm(t('eventsAdmin.index.confirmDelete', { name: e.name }))) {
     router.delete(`/events/${e.id}`)
   }
 }
 </script>
 
 <template>
-  <Head title="Événements" />
+  <Head :title="t('nav.events')" />
 
   <AdminLayout>
     <div class="mb-6 flex items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold tracking-tight text-sand-12">Événements</h1>
+        <h1 class="text-2xl font-bold tracking-tight text-sand-12">{{ t('nav.events') }}</h1>
         <p class="mt-1 text-sm text-sand-11">
-          Un événement fait tourner plusieurs catégories le même jour sur un pool de terrains
-          partagé.
+          {{ t('eventsAdmin.index.subtitle') }}
         </p>
       </div>
       <Link
         href="/events/create"
         class="shrink-0 rounded-lg bg-primary px-4 py-2.5 font-semibold text-white transition hover:bg-primary-700"
       >
-        + Nouvel événement
+        + {{ t('eventsAdmin.index.newEvent') }}
       </Link>
     </div>
 
@@ -50,12 +48,12 @@ function destroy(e: EventItem) {
       v-if="events.length === 0"
       class="rounded-2xl border border-dashed border-sand-7 bg-white p-12 text-center"
     >
-      <p class="text-sand-11">Aucun événement pour le moment.</p>
+      <p class="text-sand-11">{{ t('eventsAdmin.index.empty') }}</p>
       <Link
         href="/events/create"
         class="mt-4 inline-block rounded-lg bg-primary px-4 py-2 font-semibold text-white transition hover:bg-primary-700"
       >
-        Créer le premier événement
+        {{ t('eventsAdmin.index.createFirst') }}
       </Link>
     </div>
 
@@ -78,26 +76,34 @@ function destroy(e: EventItem) {
 
         <dl class="grid grid-cols-2 gap-2 text-sm text-sand-11">
           <div>
-            <dt class="text-xs uppercase tracking-wide text-sand-9">Date</dt>
+            <dt class="text-xs uppercase tracking-wide text-sand-9">
+              {{ t('eventsAdmin.index.date') }}
+            </dt>
             <dd class="text-sand-12">{{ formatDate(e.eventDate) }}</dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-sand-9">Terrains</dt>
+            <dt class="text-xs uppercase tracking-wide text-sand-9">
+              {{ t('eventsAdmin.index.pitches') }}
+            </dt>
             <dd class="text-sand-12">{{ e.numTerrains }}</dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-sand-9">Catégories</dt>
+            <dt class="text-xs uppercase tracking-wide text-sand-9">
+              {{ t('eventsAdmin.index.categories') }}
+            </dt>
             <dd class="text-sand-12">{{ e.categoriesCount ?? 0 }}</dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-sand-9">Début</dt>
+            <dt class="text-xs uppercase tracking-wide text-sand-9">
+              {{ t('eventsAdmin.index.start') }}
+            </dt>
             <dd class="text-sand-12">{{ e.startTime.slice(0, 5) }}</dd>
           </div>
         </dl>
 
         <div class="mt-4 flex items-center gap-3 border-t border-sand-5 pt-3 text-sm">
           <Link :href="`/events/${e.id}`" class="font-medium text-primary hover:underline">
-            Ouvrir
+            {{ t('eventsAdmin.index.open') }}
           </Link>
           <a
             :href="`/e/${e.publicSlug}`"
@@ -105,14 +111,14 @@ function destroy(e: EventItem) {
             rel="noopener"
             class="font-medium text-sand-11 hover:text-sand-12"
           >
-            Écran public
+            {{ t('eventsAdmin.index.publicScreen') }}
           </a>
           <button
             type="button"
             class="ml-auto font-medium text-red-700 hover:underline"
             @click="destroy(e)"
           >
-            Supprimer
+            {{ t('eventsAdmin.index.delete') }}
           </button>
         </div>
       </article>

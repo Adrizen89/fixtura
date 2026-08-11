@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Event from '#models/event'
 import Tournament from '#models/tournament'
 import { SchedulerError } from '#services/scheduler/index'
+import { translateSchedulerError } from '#services/scheduler_i18n'
 import {
   generateEventSchedule,
   persistEventSchedule,
@@ -30,11 +31,11 @@ export default class EventPlanningController {
   }
 
   /** Aperçu du planning combiné (sans persistance). */
-  async preview({ inertia, response, params, session }: HttpContext) {
+  async preview({ inertia, response, params, session, i18n }: HttpContext) {
     const { event, categories } = await this.load(params.id)
 
     if (categories.length === 0) {
-      session.flash('error', 'Ajoutez au moins une catégorie avant de générer le planning.')
+      session.flash('error', i18n.t('messages.flash.admin.eventPlanningNeedCategory'))
       return response.redirect().toRoute('events.show', { id: event.id })
     }
 
@@ -50,7 +51,7 @@ export default class EventPlanningController {
       })
     } catch (error) {
       if (error instanceof SchedulerError) {
-        session.flash('error', error.message)
+        session.flash('error', translateSchedulerError(i18n, error))
         return response.redirect().toRoute('events.show', { id: event.id })
       }
       throw error
@@ -58,21 +59,21 @@ export default class EventPlanningController {
   }
 
   /** Valide l'aperçu : génère puis persiste le planning combiné (draft → scheduled). */
-  async store({ response, params, session }: HttpContext) {
+  async store({ response, params, session, i18n }: HttpContext) {
     const { event, categories } = await this.load(params.id)
 
     if (categories.length === 0) {
-      session.flash('error', 'Ajoutez au moins une catégorie avant de générer le planning.')
+      session.flash('error', i18n.t('messages.flash.admin.eventPlanningNeedCategory'))
       return response.redirect().toRoute('events.show', { id: event.id })
     }
 
     try {
       const schedule = generateEventSchedule(event, categories)
       await persistEventSchedule(event, categories, schedule)
-      session.flash('success', 'Planning de l’événement généré et enregistré.')
+      session.flash('success', i18n.t('messages.flash.admin.eventPlanningGenerated'))
     } catch (error) {
       if (error instanceof SchedulerError) {
-        session.flash('error', error.message)
+        session.flash('error', translateSchedulerError(i18n, error))
       } else {
         throw error
       }

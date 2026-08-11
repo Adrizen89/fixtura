@@ -1,0 +1,61 @@
+{
+  "flash": {
+    "auth": {
+      "invalidCredentials": "Identifiants invalides.",
+      "welcomeClub": "Bienvenue ! Le club « {club} » est créé."
+    },
+    "invitation": {
+      "emailExists": "Un compte existe déjà avec cette adresse e-mail. Connectez-vous.",
+      "welcome": "Bienvenue ! Votre compte organisateur est prêt."
+    },
+    "registration": {
+      "received": "La demande d'inscription de l'équipe « {team} » a bien été envoyée. L'organisateur la validera avant le tournoi.",
+      "recorded": "Inscription enregistrée.",
+      "tooManyAttempts": "Trop de tentatives. Réessayez dans quelques minutes.",
+      "closed": "Les inscriptions sont fermées pour ce tournoi.",
+      "full": "Le tournoi est complet.",
+      "duplicateName": "Une équipe porte déjà ce nom dans ce tournoi.",
+      "notPending": "Cette demande a déjà été traitée."
+    },
+    "incident": {
+      "drawNotAllowed": "Match nul en élimination directe : désignez le vainqueur (tirs au but).",
+      "progressionConflict": "Correction impossible : un match suivant du tableau est déjà joué. Impossible de changer rétroactivement qui y participe — corrigez d'abord le match aval."
+    },
+    "admin": {
+      "tournamentCreated": "Tournoi créé.",
+      "tournamentUpdated": "Tournoi mis à jour.",
+      "tournamentDeleted": "Tournoi supprimé.",
+      "teamAdded": "Équipe « {name} » ajoutée.",
+      "teamRenamed": "Équipe renommée.",
+      "teamDeleted": "Équipe « {name} » supprimée.",
+      "planningNeedTwoTeams": "Il faut au moins 2 équipes pour générer un planning.",
+      "planningGenerated": "Planning généré et enregistré.",
+      "scoreSaved": "Score enregistré.",
+      "tooManyTerrains": "Ce tournoi n'a que {count} terrain(s).",
+      "matchRescheduled": "Match décalé à {time}.",
+      "matchNoTeams": "Ce match n'a pas encore d'équipes définies.",
+      "forfeitRecorded": "Forfait de « {team} » enregistré (défaite 3–0).",
+      "eventCreated": "Événement créé. Ajoutez maintenant vos catégories.",
+      "eventUpdated": "Événement mis à jour.",
+      "eventDeleted": "Événement supprimé. Les catégories restent accessibles en tournois.",
+      "categoryAdded": "Catégorie ajoutée.",
+      "categoryDeleted": "Catégorie supprimée.",
+      "eventPlanningNeedCategory": "Ajoutez au moins une catégorie avant de générer le planning.",
+      "eventPlanningGenerated": "Planning de l'événement généré et enregistré.",
+      "memberAlreadyMember": "Cette personne est déjà membre du club.",
+      "memberInvited": "Invitation créée pour {email}. Le lien est prêt à être partagé.",
+      "invitationRevoked": "Invitation révoquée.",
+      "mustKeepOwner": "Le club doit garder au moins un responsable.",
+      "roleUpdated": "Rôle mis à jour.",
+      "cannotRemoveSelf": "Vous ne pouvez pas vous retirer vous-même.",
+      "memberRemoved": "{email} a été retiré du club.",
+      "appearanceUpdated": "Apparence du club mise à jour.",
+      "exportGeneratePlanningFirst": "Générez d'abord le planning pour l'exporter.",
+      "exportGenerateSheetsFirst": "Générez d'abord le planning pour imprimer les feuilles de match.",
+      "registrationOpened": "Inscriptions en ligne ouvertes.",
+      "registrationClosed": "Inscriptions en ligne fermées.",
+      "requestApproved": "L'équipe « {team} » est validée et ajoutée au tournoi.",
+      "requestRejected": "La demande de l'équipe « {team} » a été refusée."
+    }
+  }
+}

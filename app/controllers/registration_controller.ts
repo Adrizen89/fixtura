@@ -16,7 +16,7 @@ export default class RegistrationController {
   }
 
   /** Crée le club + l'owner, connecte, redirige vers le tableau de bord. */
-  async register({ request, response, auth, session }: HttpContext) {
+  async register({ request, response, auth, session, i18n }: HttpContext) {
     const data = await request.validateUsing(registerValidator)
 
     const user = await registerClub({
@@ -27,7 +27,10 @@ export default class RegistrationController {
     })
 
     await auth.use('web').login(user)
-    session.flash('success', `Bienvenue ! Le club « ${data.clubName.trim()} » est créé.`)
+    session.flash(
+      'success',
+      i18n.t('messages.flash.auth.welcomeClub', { club: data.clubName.trim() })
+    )
     return response.redirect().toRoute('tournaments.index')
   }
 }

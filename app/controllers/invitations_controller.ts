@@ -40,7 +40,7 @@ export default class InvitationsController {
   }
 
   /** Crée le compte organisateur à partir de l'invitation, puis connecte. */
-  async accept({ request, response, params, auth, session, inertia }: HttpContext) {
+  async accept({ request, response, params, auth, session, inertia, i18n }: HttpContext) {
     const invitation = await this.findByToken(params.token)
     if (!invitation || !invitation.isPending) {
       return inertia.render('invitations/invalid', { reason: this.invalidReason(invitation) })
@@ -49,7 +49,7 @@ export default class InvitationsController {
     // Un compte peut déjà exister pour cet email (identifiant unique global).
     const existing = await User.findBy('email', normalizeEmail(invitation.email))
     if (existing) {
-      session.flash('error', 'Un compte existe déjà avec cette adresse e-mail. Connectez-vous.')
+      session.flash('error', i18n.t('messages.flash.invitation.emailExists'))
       return response.redirect().toRoute('login.show')
     }
 
@@ -60,7 +60,7 @@ export default class InvitationsController {
     })
 
     await auth.use('web').login(user)
-    session.flash('success', 'Bienvenue ! Votre compte organisateur est prêt.')
+    session.flash('success', i18n.t('messages.flash.invitation.welcome'))
     return response.redirect().toRoute('tournaments.index')
   }
 }

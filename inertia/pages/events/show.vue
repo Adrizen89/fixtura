@@ -4,12 +4,15 @@ import { Head, Link, router, useForm } from '@inertiajs/vue3'
 import AdminLayout from '~/layouts/AdminLayout.vue'
 import StatusBadge from '~/components/StatusBadge.vue'
 import PlanningGrid from '~/components/PlanningGrid.vue'
+import { useI18n } from '~/composables/i18n'
 import type {
   EventCategory,
   EventCategoryFormData,
   EventItem,
   EventPlanningView,
 } from '~/app/types'
+
+const { t, dateLocale } = useI18n()
 
 const props = defineProps<{
   event: EventItem
@@ -29,12 +32,12 @@ const activePlanning = computed(
   () => props.planning?.categories.find((c) => c.categoryId === activeCategory.value) ?? null
 )
 
-const formatLabels: Record<string, string> = {
-  championship: 'Championnat',
-  pools: 'Poules',
-  knockout: 'Élimination directe',
-  hybrid: 'Hybride',
-}
+const formatLabels = computed<Record<string, string>>(() => ({
+  championship: t('eventsAdmin.show.formatChampionship'),
+  pools: t('eventsAdmin.show.formatPools'),
+  knockout: t('eventsAdmin.show.formatKnockout'),
+  hybrid: t('eventsAdmin.show.formatHybrid'),
+}))
 
 const form = useForm<EventCategoryFormData>({
   name: '',
@@ -58,13 +61,13 @@ function addCategory() {
 }
 
 function destroyCategory(c: EventCategory) {
-  if (confirm(`Supprimer la catégorie « ${c.name} » et ses équipes / matchs ?`)) {
+  if (confirm(t('eventsAdmin.show.confirmDeleteCategory', { name: c.name }))) {
     router.delete(`/events/${props.event.id}/categories/${c.id}`)
   }
 }
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('fr-FR', {
+  return new Date(iso).toLocaleDateString(dateLocale.value, {
     weekday: 'long',
     day: '2-digit',
     month: 'long',
@@ -82,7 +85,9 @@ function hhmm(v: string | null) {
 
   <AdminLayout>
     <div class="mb-6">
-      <Link href="/events" class="text-sm text-sand-11 hover:text-sand-12">← Événements</Link>
+      <Link href="/events" class="text-sm text-sand-11 hover:text-sand-12"
+        >← {{ t('nav.events') }}</Link
+      >
       <div class="mt-1 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-3">
           <h1 class="text-2xl font-bold tracking-tight text-sand-12">{{ event.name }}</h1>
@@ -95,13 +100,13 @@ function hhmm(v: string | null) {
             rel="noopener"
             class="rounded-lg border border-sand-7 px-4 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
           >
-            Écran public
+            {{ t('eventsAdmin.show.publicScreen') }}
           </a>
           <Link
             :href="`/events/${event.id}/edit`"
             class="rounded-lg border border-sand-7 px-4 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
           >
-            Modifier
+            {{ t('eventsAdmin.show.edit') }}
           </Link>
         </div>
       </div>
@@ -111,26 +116,38 @@ function hhmm(v: string | null) {
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <!-- Paramètres partagés -->
       <section class="rounded-2xl border border-sand-6 bg-white p-6 lg:col-span-2">
-        <h2 class="mb-4 text-base font-semibold text-sand-12">Paramètres partagés</h2>
+        <h2 class="mb-4 text-base font-semibold text-sand-12">
+          {{ t('eventsAdmin.show.sharedSettings') }}
+        </h2>
         <dl class="grid grid-cols-2 gap-x-6 gap-y-4 text-sm sm:grid-cols-3">
           <div>
-            <dt class="text-xs uppercase tracking-wide text-sand-9">Heure de début</dt>
+            <dt class="text-xs uppercase tracking-wide text-sand-9">
+              {{ t('eventsAdmin.show.startTime') }}
+            </dt>
             <dd class="mt-0.5 text-sand-12">{{ hhmm(event.startTime) }}</dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-sand-9">Terrains (pool)</dt>
+            <dt class="text-xs uppercase tracking-wide text-sand-9">
+              {{ t('eventsAdmin.show.pitchesPool') }}
+            </dt>
             <dd class="mt-0.5 text-sand-12">{{ event.numTerrains }}</dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-sand-9">Durée d'un match</dt>
+            <dt class="text-xs uppercase tracking-wide text-sand-9">
+              {{ t('eventsAdmin.show.matchDuration') }}
+            </dt>
             <dd class="mt-0.5 text-sand-12">{{ event.matchDurationMin }} min</dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-sand-9">Pause entre matchs</dt>
+            <dt class="text-xs uppercase tracking-wide text-sand-9">
+              {{ t('eventsAdmin.show.breakBetween') }}
+            </dt>
             <dd class="mt-0.5 text-sand-12">{{ event.breakDurationMin }} min</dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-sand-9">Pause déjeuner</dt>
+            <dt class="text-xs uppercase tracking-wide text-sand-9">
+              {{ t('eventsAdmin.show.lunchBreak') }}
+            </dt>
             <dd class="mt-0.5 text-sand-12">
               <template v-if="event.lunchStart">
                 {{ hhmm(event.lunchStart) }} ({{ event.lunchDurationMin }} min)
@@ -143,16 +160,20 @@ function hhmm(v: string | null) {
 
       <!-- Ajouter une catégorie -->
       <section class="rounded-2xl border border-sand-6 bg-white p-6">
-        <h2 class="mb-4 text-base font-semibold text-sand-12">Ajouter une catégorie</h2>
+        <h2 class="mb-4 text-base font-semibold text-sand-12">
+          {{ t('eventsAdmin.show.addCategory') }}
+        </h2>
         <form class="space-y-3" @submit.prevent="addCategory">
           <div>
-            <label for="cat-name" class="mb-1 block text-sm font-medium text-sand-12">Nom</label>
+            <label for="cat-name" class="mb-1 block text-sm font-medium text-sand-12">
+              {{ t('eventsAdmin.show.nameLabel') }}
+            </label>
             <input
               id="cat-name"
               v-model="form.name"
               type="text"
               required
-              placeholder="Tournoi U11"
+              :placeholder="t('eventsAdmin.show.namePlaceholder')"
               class="w-full rounded-lg border border-sand-7 px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
               :class="{ 'border-red-400': form.errors.name }"
             />
@@ -160,7 +181,7 @@ function hhmm(v: string | null) {
           </div>
           <div>
             <label for="cat-category" class="mb-1 block text-sm font-medium text-sand-12">
-              Catégorie
+              {{ t('eventsAdmin.show.categoryLabel') }}
             </label>
             <input
               id="cat-category"
@@ -177,16 +198,16 @@ function hhmm(v: string | null) {
           </div>
           <div>
             <label for="cat-format" class="mb-1 block text-sm font-medium text-sand-12">
-              Format
+              {{ t('eventsAdmin.show.formatLabel') }}
             </label>
             <select
               id="cat-format"
               v-model="form.format"
               class="w-full rounded-lg border border-sand-7 bg-white px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
             >
-              <option value="championship">Championnat</option>
-              <option value="pools">Poules</option>
-              <option value="knockout">Élimination directe</option>
+              <option value="championship">{{ t('eventsAdmin.show.formatChampionship') }}</option>
+              <option value="pools">{{ t('eventsAdmin.show.formatPools') }}</option>
+              <option value="knockout">{{ t('eventsAdmin.show.formatKnockout') }}</option>
             </select>
           </div>
           <label
@@ -200,11 +221,11 @@ function hhmm(v: string | null) {
               type="checkbox"
               class="h-4 w-4 rounded border-sand-7 text-primary focus:ring-2 focus:ring-primary/30"
             />
-            Disputer la petite finale (3<sup>e</sup> place)
+            {{ t('eventsAdmin.show.thirdPlace') }}
           </label>
           <div v-if="needsPools">
             <label for="cat-pools" class="mb-1 block text-sm font-medium text-sand-12">
-              Nombre de poules
+              {{ t('eventsAdmin.show.numPoolsLabel') }}
             </label>
             <input
               id="cat-pools"
@@ -225,7 +246,11 @@ function hhmm(v: string | null) {
             :disabled="form.processing"
             class="w-full rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {{ form.processing ? 'Ajout…' : 'Ajouter la catégorie' }}
+            {{
+              form.processing
+                ? t('eventsAdmin.show.adding')
+                : t('eventsAdmin.show.addCategorySubmit')
+            }}
           </button>
         </form>
       </section>
@@ -234,14 +259,15 @@ function hhmm(v: string | null) {
     <!-- Catégories -->
     <section class="mt-6 rounded-2xl border border-sand-6 bg-white p-6">
       <h2 class="mb-4 text-base font-semibold text-sand-12">
-        Catégories <span class="text-sand-10">({{ categories.length }})</span>
+        {{ t('eventsAdmin.show.categoriesHeading') }}
+        <span class="text-sand-10">({{ categories.length }})</span>
       </h2>
 
       <div
         v-if="categories.length === 0"
         class="rounded-lg border border-dashed border-sand-7 px-4 py-8 text-center text-sm text-sand-11"
       >
-        Ajoutez au moins une catégorie pour composer cet événement.
+        {{ t('eventsAdmin.show.categoriesEmpty') }}
       </div>
 
       <ul v-else class="divide-y divide-sand-5">
@@ -253,9 +279,9 @@ function hhmm(v: string | null) {
             </div>
             <p class="text-sm text-sand-11">
               {{ c.category }} · {{ formatLabels[c.format] ?? c.format }} ·
-              {{ c.teamsCount ?? 0 }} équipe(s)
+              {{ t('eventsAdmin.show.teams', { count: c.teamsCount ?? 0 }) }}
               <span v-if="(c.teamsCount ?? 0) < 2" class="text-amber-700">
-                — ajoutez au moins 2 équipes
+                {{ t('eventsAdmin.show.addAtLeast2') }}
               </span>
             </p>
           </div>
@@ -263,14 +289,14 @@ function hhmm(v: string | null) {
             :href="`/tournaments/${c.id}`"
             class="text-sm font-medium text-primary hover:underline"
           >
-            Gérer les équipes
+            {{ t('eventsAdmin.show.manageTeams') }}
           </Link>
           <button
             type="button"
             class="text-sm font-medium text-red-700 hover:underline"
             @click="destroyCategory(c)"
           >
-            Supprimer
+            {{ t('eventsAdmin.show.delete') }}
           </button>
         </li>
       </ul>
@@ -280,10 +306,19 @@ function hhmm(v: string | null) {
     <section class="mt-6 rounded-2xl border border-sand-6 bg-white p-6">
       <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 class="text-base font-semibold text-sand-12">Planning combiné</h2>
+          <h2 class="text-base font-semibold text-sand-12">
+            {{ t('eventsAdmin.show.combinedSchedule') }}
+          </h2>
           <p v-if="planning" class="mt-0.5 text-sm text-sand-11">
-            {{ planning.matchCount }} matchs · {{ planning.slotsCount }} créneaux ·
-            {{ planning.numTerrains }} terrains · {{ planning.startTime }}–{{ planning.endTime }}
+            {{
+              t('eventsAdmin.show.planningSummary', {
+                matches: planning.matchCount,
+                slots: planning.slotsCount,
+                terrains: planning.numTerrains,
+                start: planning.startTime,
+                end: planning.endTime,
+              })
+            }}
           </p>
         </div>
         <Link
@@ -295,7 +330,7 @@ function hhmm(v: string | null) {
               : 'rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700'
           "
         >
-          {{ planning ? 'Régénérer le planning' : 'Générer le planning' }}
+          {{ planning ? t('eventsAdmin.show.regenerate') : t('eventsAdmin.show.generate') }}
         </Link>
       </div>
 
@@ -323,9 +358,9 @@ function hhmm(v: string | null) {
       <!-- Pas encore de planning -->
       <div v-else class="rounded-lg border border-dashed border-sand-7 px-4 py-8 text-center">
         <p v-if="!canGenerate" class="text-sm text-sand-11">
-          Chaque catégorie doit compter au moins 2 équipes pour générer le planning combiné.
+          {{ t('eventsAdmin.show.needTwoTeams') }}
         </p>
-        <p v-else class="text-sm text-sand-11">Aucun planning généré pour l'instant.</p>
+        <p v-else class="text-sm text-sand-11">{{ t('eventsAdmin.show.noPlanning') }}</p>
       </div>
     </section>
   </AdminLayout>

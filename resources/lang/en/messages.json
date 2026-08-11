@@ -1,0 +1,61 @@
+{
+  "flash": {
+    "auth": {
+      "invalidCredentials": "Invalid credentials.",
+      "welcomeClub": "Welcome! The club “{club}” has been created."
+    },
+    "invitation": {
+      "emailExists": "An account already exists with this email address. Please sign in.",
+      "welcome": "Welcome! Your organizer account is ready."
+    },
+    "registration": {
+      "received": "The registration request for team “{team}” has been sent. The organizer will approve it before the tournament.",
+      "recorded": "Registration recorded.",
+      "tooManyAttempts": "Too many attempts. Please try again in a few minutes.",
+      "closed": "Registration is closed for this tournament.",
+      "full": "The tournament is full.",
+      "duplicateName": "A team with this name is already registered for this tournament.",
+      "notPending": "This request has already been processed."
+    },
+    "incident": {
+      "drawNotAllowed": "Draw in a knockout match: designate the winner (penalty shootout).",
+      "progressionConflict": "Cannot correct: a later match in the bracket has already been played. Its participants cannot be changed retroactively — correct the downstream match first."
+    },
+    "admin": {
+      "tournamentCreated": "Tournament created.",
+      "tournamentUpdated": "Tournament updated.",
+      "tournamentDeleted": "Tournament deleted.",
+      "teamAdded": "Team “{name}” added.",
+      "teamRenamed": "Team renamed.",
+      "teamDeleted": "Team “{name}” deleted.",
+      "planningNeedTwoTeams": "You need at least 2 teams to generate a schedule.",
+      "planningGenerated": "Schedule generated and saved.",
+      "scoreSaved": "Score saved.",
+      "tooManyTerrains": "This tournament only has {count} pitch(es).",
+      "matchRescheduled": "Match rescheduled to {time}.",
+      "matchNoTeams": "This match does not have its teams set yet.",
+      "forfeitRecorded": "Forfeit for “{team}” recorded (3–0 loss).",
+      "eventCreated": "Event created. Now add your categories.",
+      "eventUpdated": "Event updated.",
+      "eventDeleted": "Event deleted. The categories remain available as tournaments.",
+      "categoryAdded": "Category added.",
+      "categoryDeleted": "Category deleted.",
+      "eventPlanningNeedCategory": "Add at least one category before generating the schedule.",
+      "eventPlanningGenerated": "Event schedule generated and saved.",
+      "memberAlreadyMember": "This person is already a member of the club.",
+      "memberInvited": "Invitation created for {email}. The link is ready to share.",
+      "invitationRevoked": "Invitation revoked.",
+      "mustKeepOwner": "The club must keep at least one owner.",
+      "roleUpdated": "Role updated.",
+      "cannotRemoveSelf": "You cannot remove yourself.",
+      "memberRemoved": "{email} has been removed from the club.",
+      "appearanceUpdated": "Club appearance updated.",
+      "exportGeneratePlanningFirst": "Generate the schedule first to export it.",
+      "exportGenerateSheetsFirst": "Generate the schedule first to print the match sheets.",
+      "registrationOpened": "Online registration opened.",
+      "registrationClosed": "Online registration closed.",
+      "requestApproved": "Team “{team}” has been approved and added to the tournament.",
+      "requestRejected": "The request from team “{team}” has been rejected."
+    }
+  }
+}

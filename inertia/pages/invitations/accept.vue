@@ -2,7 +2,10 @@
 import { computed } from 'vue'
 import { Head, useForm, usePage } from '@inertiajs/vue3'
 import SiteFooter from '~/components/SiteFooter.vue'
+import { useI18n } from '~/composables/i18n'
 import type { FlashMessages, UserRole } from '~/app/types'
+
+const { t } = useI18n()
 
 /**
  * Acceptation d'une invitation (issue #35) : l'invité choisit son nom + mot de
@@ -18,7 +21,9 @@ const props = defineProps<{
 const page = usePage()
 const flashError = computed(() => (page.props.flash as FlashMessages | undefined)?.error ?? null)
 
-const roleLabel = computed(() => (props.role === 'owner' ? 'responsable' : 'organisateur'))
+const roleLabel = computed(() =>
+  props.role === 'owner' ? t('invitation.roleOwner') : t('invitation.roleOrganizer')
+)
 
 const form = useForm({
   fullName: '',
@@ -34,7 +39,7 @@ function submit() {
 </script>
 
 <template>
-  <Head title="Rejoindre le club" />
+  <Head :title="t('invitation.headTitle')" />
 
   <div class="flex min-h-screen flex-col bg-sand-2">
     <div class="flex flex-1 items-center justify-center px-4 py-12">
@@ -45,9 +50,11 @@ function submit() {
           >
             F
           </span>
-          <h1 class="text-2xl font-bold tracking-tight text-sand-12">Rejoindre {{ clubName }}</h1>
+          <h1 class="text-2xl font-bold tracking-tight text-sand-12">
+            {{ t('invitation.joinClub', { club: clubName }) }}
+          </h1>
           <p class="mt-1 text-sm text-sand-11">
-            Vous avez été invité·e comme <strong>{{ roleLabel }}</strong> —
+            {{ t('invitation.invitedAs') }} <strong>{{ roleLabel }}</strong> —
             <span class="text-sand-12">{{ email }}</span>
           </p>
         </div>
@@ -66,7 +73,7 @@ function submit() {
 
           <div>
             <label for="fullName" class="mb-1 block text-sm font-medium text-sand-12">
-              Votre nom
+              {{ t('invitation.fullNameLabel') }}
             </label>
             <input
               id="fullName"
@@ -85,7 +92,7 @@ function submit() {
 
           <div>
             <label for="password" class="mb-1 block text-sm font-medium text-sand-12">
-              Mot de passe
+              {{ t('invitation.passwordLabel') }}
             </label>
             <input
               id="password"
@@ -103,7 +110,7 @@ function submit() {
 
           <div>
             <label for="passwordConfirmation" class="mb-1 block text-sm font-medium text-sand-12">
-              Confirmer le mot de passe
+              {{ t('invitation.passwordConfirmLabel') }}
             </label>
             <input
               id="passwordConfirmation"
@@ -124,7 +131,7 @@ function submit() {
             :disabled="form.processing"
             class="w-full rounded-lg bg-primary px-4 py-2.5 font-semibold text-white transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {{ form.processing ? 'Création…' : 'Rejoindre le club' }}
+            {{ form.processing ? t('invitation.submitting') : t('invitation.submit') }}
           </button>
         </form>
       </div>

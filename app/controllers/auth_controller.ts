@@ -14,7 +14,7 @@ export default class AuthController {
   /**
    * Traite la connexion d'un organisateur (guard session « web »).
    */
-  async login({ request, response, auth, session }: HttpContext) {
+  async login({ request, response, auth, session, i18n }: HttpContext) {
     const { email, password } = await request.validateUsing(loginValidator)
 
     try {
@@ -23,7 +23,7 @@ export default class AuthController {
       // Journal d'audit : connexion réussie (issue #117).
       await recordAudit(user, request.ip(), AUDIT_ACTIONS.LOGIN)
     } catch {
-      session.flash('error', 'Identifiants invalides.')
+      session.flash('error', i18n.t('messages.flash.auth.invalidCredentials'))
       // On re-flash l'email saisi pour ne pas le perdre, jamais le mot de passe.
       session.flashExcept(['password'])
       return response.redirect().back()

@@ -2,6 +2,9 @@
 import { computed } from 'vue'
 import type { ResultMatchRow } from '~/app/types'
 import { finalRanking, ordinalFr } from '~/composables/final_ranking'
+import { useI18n } from '~/composables/i18n'
+
+const { t } = useI18n()
 
 /**
  * Arbre de **double élimination** (issue #111) — lecture seule, sobre.
@@ -22,7 +25,7 @@ interface Column {
 }
 
 /** Colonnes d'un tableau (`wb-r*` ou `lb-r*`), ordonnées par tour ; dernier = finale. */
-function bracketColumns(prefix: string, finalLabel: string, roundLabel: string): Column[] {
+function bracketColumns(prefix: string, finalKey: string, roundKey: string): Column[] {
   const re = new RegExp(`^${prefix}(\\d+)$`)
   const byRound = new Map<number, ResultMatchRow[]>()
   for (const m of ko.value) {
@@ -38,13 +41,17 @@ function bracketColumns(prefix: string, finalLabel: string, roundLabel: string):
     .sort((a, b) => a - b)
     .map((n) => ({
       round: n,
-      label: n === maxN ? finalLabel : `${roundLabel} ${n}`,
+      label: n === maxN ? t(finalKey) : t(roundKey, { n }),
       matches: byRound.get(n)!.sort((a, b) => (a.bracketSlot ?? 0) - (b.bracketSlot ?? 0)),
     }))
 }
 
-const winnersColumns = computed(() => bracketColumns('wb-r', 'Finale gagnants', 'Principal — T'))
-const losersColumns = computed(() => bracketColumns('lb-r', 'Finale repêchage', 'Repêchage — T'))
+const winnersColumns = computed(() =>
+  bracketColumns('wb-r', 'bracket.winnersFinal', 'bracket.winnersRound')
+)
+const losersColumns = computed(() =>
+  bracketColumns('lb-r', 'bracket.losersFinal', 'bracket.losersRound')
+)
 const grandFinal = computed(() => ko.value.find((m) => m.bracketRound === 'gf') ?? null)
 
 /** Classement final (podium) dérivé de la grande finale + finale du repêchage. */
@@ -83,7 +90,7 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
     <!-- Classement final (podium) une fois la grande finale jouée. -->
     <div v-if="podium.length" class="mb-5">
       <h3 class="mb-2 text-xs font-semibold uppercase tracking-wide text-sand-9">
-        Classement final
+        {{ t('bracket.finalRanking') }}
       </h3>
       <ol class="flex flex-wrap gap-2">
         <li
@@ -101,8 +108,8 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
     <!-- Sections : tableau principal, repêchage, grande finale. -->
     <div
       v-for="section in [
-        { key: 'wb', title: 'Tableau principal', columns: winnersColumns },
-        { key: 'lb', title: 'Repêchage', columns: losersColumns },
+        { key: 'wb', title: t('bracket.mainBracket'), columns: winnersColumns },
+        { key: 'lb', title: t('bracket.losersBracket'), columns: losersColumns },
       ]"
       :key="section.key"
       class="mb-6"
@@ -142,7 +149,7 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
                   v-if="isShootout(m)"
                   class="px-3 pb-1 pt-0.5 text-[10px] font-semibold uppercase tracking-wide text-sand-9"
                 >
-                  Tirs au but
+                  {{ t('bracket.shootout') }}
                 </div>
               </div>
             </div>
@@ -153,7 +160,7 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
 
     <!-- Grande finale -->
     <div v-if="grandFinal" class="border-t border-sand-5 pt-4">
-      <h3 class="mb-2 text-sm font-bold text-sand-12">Grande finale</h3>
+      <h3 class="mb-2 text-sm font-bold text-sand-12">{{ t('bracket.grandFinal') }}</h3>
       <div class="max-w-xs rounded-lg border border-sand-6 bg-white">
         <div
           v-for="side in sides"
@@ -173,13 +180,13 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
           v-if="isShootout(grandFinal)"
           class="px-3 pb-1 pt-0.5 text-[10px] font-semibold uppercase tracking-wide text-sand-9"
         >
-          Tirs au but
+          {{ t('bracket.shootout') }}
         </div>
       </div>
     </div>
   </div>
 
   <p v-else class="rounded-xl bg-sand-2 px-4 py-8 text-center text-sm text-sand-11">
-    Le tableau s'affichera une fois le planning généré.
+    {{ t('bracket.emptyBracket') }}
   </p>
 </template>

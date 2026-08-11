@@ -2,6 +2,9 @@
 import { computed } from 'vue'
 import { Link, useForm } from '@inertiajs/vue3'
 import type { TournamentFormData } from '~/app/types'
+import { useI18n } from '~/composables/i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   initial: TournamentFormData
@@ -41,18 +44,20 @@ function submit() {
   <form class="space-y-8" @submit.prevent="submit">
     <!-- Général -->
     <section class="rounded-2xl border border-sand-6 bg-white p-6">
-      <h2 class="mb-4 text-base font-semibold text-sand-12">Général</h2>
+      <h2 class="mb-4 text-base font-semibold text-sand-12">
+        {{ t('tournamentForm.sections.general') }}
+      </h2>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div class="sm:col-span-2">
-          <label for="name" class="mb-1 block text-sm font-medium text-sand-12"
-            >Nom du tournoi</label
-          >
+          <label for="name" class="mb-1 block text-sm font-medium text-sand-12">{{
+            t('tournamentForm.name.label')
+          }}</label>
           <input
             id="name"
             v-model="form.name"
             type="text"
             required
-            placeholder="Tournoi de Pâques"
+            :placeholder="t('tournamentForm.name.placeholder')"
             class="w-full rounded-lg border border-sand-7 px-3 py-2 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
             :class="{ 'border-red-400': form.errors.name }"
           />
@@ -60,15 +65,15 @@ function submit() {
         </div>
 
         <div>
-          <label for="category" class="mb-1 block text-sm font-medium text-sand-12"
-            >Catégorie</label
-          >
+          <label for="category" class="mb-1 block text-sm font-medium text-sand-12">{{
+            t('tournamentForm.category.label')
+          }}</label>
           <input
             id="category"
             v-model="form.category"
             type="text"
             required
-            placeholder="U11"
+            :placeholder="t('tournamentForm.category.placeholder')"
             class="w-full rounded-lg border border-sand-7 px-3 py-2 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
             :class="{ 'border-red-400': form.errors.category }"
           />
@@ -78,7 +83,9 @@ function submit() {
         </div>
 
         <div>
-          <label for="eventDate" class="mb-1 block text-sm font-medium text-sand-12">Date</label>
+          <label for="eventDate" class="mb-1 block text-sm font-medium text-sand-12">{{
+            t('tournamentForm.eventDate.label')
+          }}</label>
           <input
             id="eventDate"
             v-model="form.eventDate"
@@ -96,12 +103,14 @@ function submit() {
 
     <!-- Format -->
     <section class="rounded-2xl border border-sand-6 bg-white p-6">
-      <h2 class="mb-1 text-base font-semibold text-sand-12">Format</h2>
-      <p class="mb-4 text-sm text-sand-11">Détermine comment le planning est généré.</p>
+      <h2 class="mb-1 text-base font-semibold text-sand-12">
+        {{ t('tournamentForm.format.title') }}
+      </h2>
+      <p class="mb-4 text-sm text-sand-11">{{ t('tournamentForm.format.hint') }}</p>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div :class="{ 'sm:col-span-2': !needsPools && !needsSwissRounds }">
           <label for="format" class="mb-1 block text-sm font-medium text-sand-12">
-            Type de compétition
+            {{ t('tournamentForm.format.label') }}
           </label>
           <select
             id="format"
@@ -109,14 +118,16 @@ function submit() {
             class="w-full rounded-lg border border-sand-7 bg-white px-3 py-2 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
             :class="{ 'border-red-400': form.errors.format }"
           >
-            <option value="championship">Championnat — toutes les équipes se rencontrent</option>
-            <option value="pools">Poules</option>
-            <option value="knockout">Élimination directe</option>
-            <option value="double_elimination">
-              Double élimination — repêchage + grande finale
+            <option value="championship">
+              {{ t('tournamentForm.format.options.championship') }}
             </option>
-            <option value="hybrid">Hybride — poules puis phase finale</option>
-            <option value="swiss">Système suisse — appariements par niveau, sans rematch</option>
+            <option value="pools">{{ t('tournamentForm.format.options.pools') }}</option>
+            <option value="knockout">{{ t('tournamentForm.format.options.knockout') }}</option>
+            <option value="double_elimination">
+              {{ t('tournamentForm.format.options.doubleElimination') }}
+            </option>
+            <option value="hybrid">{{ t('tournamentForm.format.options.hybrid') }}</option>
+            <option value="swiss">{{ t('tournamentForm.format.options.swiss') }}</option>
           </select>
           <p v-if="form.errors.format" class="mt-1 text-sm text-red-700">
             {{ form.errors.format }}
@@ -125,7 +136,7 @@ function submit() {
 
         <div v-if="needsSwissRounds">
           <label for="swissRounds" class="mb-1 block text-sm font-medium text-sand-12">
-            Nombre de rondes
+            {{ t('tournamentForm.swissRounds.label') }}
           </label>
           <input
             id="swissRounds"
@@ -133,12 +144,12 @@ function submit() {
             type="number"
             min="1"
             max="20"
-            placeholder="Auto"
+            :placeholder="t('tournamentForm.swissRounds.placeholder')"
             class="w-full rounded-lg border border-sand-7 px-3 py-2 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
             :class="{ 'border-red-400': form.errors.swissRounds }"
           />
           <p class="mt-1 text-xs text-sand-10">
-            Laisser vide pour automatique (⌈log₂ du nombre d'équipes⌉).
+            {{ t('tournamentForm.swissRounds.hint') }}
           </p>
           <p v-if="form.errors.swissRounds" class="mt-1 text-sm text-red-700">
             {{ form.errors.swissRounds }}
@@ -147,7 +158,7 @@ function submit() {
 
         <div v-if="needsPools">
           <label for="numPools" class="mb-1 block text-sm font-medium text-sand-12">
-            Nombre de poules
+            {{ t('tournamentForm.numPools.label') }}
           </label>
           <input
             id="numPools"
@@ -166,7 +177,7 @@ function submit() {
 
         <div v-if="needsQualifiers">
           <label for="qualifiersPerPool" class="mb-1 block text-sm font-medium text-sand-12">
-            Qualifiés par poule
+            {{ t('tournamentForm.qualifiersPerPool.label') }}
           </label>
           <input
             id="qualifiersPerPool"
@@ -185,7 +196,7 @@ function submit() {
 
         <div v-if="needsQualifiers">
           <label for="bestRunnersUp" class="mb-1 block text-sm font-medium text-sand-12">
-            Meilleurs repêchés
+            {{ t('tournamentForm.bestRunnersUp.label') }}
           </label>
           <input
             id="bestRunnersUp"
@@ -197,8 +208,7 @@ function submit() {
             :class="{ 'border-red-400': form.errors.bestRunnersUp }"
           />
           <p class="mt-1 text-xs text-sand-11">
-            Repêche les meilleurs {{ nextRankLabel }} de poule, toutes poules confondues (0 = aucun
-            repêchage).
+            {{ t('tournamentForm.bestRunnersUp.hint', { rank: nextRankLabel }) }}
           </p>
           <p v-if="form.errors.bestRunnersUp" class="mt-1 text-sm text-red-700">
             {{ form.errors.bestRunnersUp }}
@@ -216,21 +226,23 @@ function submit() {
             type="checkbox"
             class="h-4 w-4 rounded border-sand-7 text-primary focus:ring-2 focus:ring-primary/30"
           />
-          Disputer la petite finale (3<sup>e</sup> place)
+          {{ t('tournamentForm.thirdPlace.label') }}
         </label>
       </div>
     </section>
 
     <!-- Barème de points (issue #104) -->
     <section class="rounded-2xl border border-sand-6 bg-white p-6">
-      <h2 class="mb-1 text-base font-semibold text-sand-12">Barème de points</h2>
+      <h2 class="mb-1 text-base font-semibold text-sand-12">
+        {{ t('tournamentForm.scoring.title') }}
+      </h2>
       <p class="mb-4 text-sm text-sand-11">
-        Points attribués au classement. Par défaut : victoire 3, nul 1, défaite 0.
+        {{ t('tournamentForm.scoring.hint') }}
       </p>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
           <label for="winPoints" class="mb-1 block text-sm font-medium text-sand-12">
-            Victoire
+            {{ t('tournamentForm.scoring.win') }}
           </label>
           <input
             id="winPoints"
@@ -248,7 +260,9 @@ function submit() {
         </div>
 
         <div>
-          <label for="drawPoints" class="mb-1 block text-sm font-medium text-sand-12">Nul</label>
+          <label for="drawPoints" class="mb-1 block text-sm font-medium text-sand-12">{{
+            t('tournamentForm.scoring.draw')
+          }}</label>
           <input
             id="drawPoints"
             v-model.number="form.drawPoints"
@@ -266,7 +280,7 @@ function submit() {
 
         <div>
           <label for="lossPoints" class="mb-1 block text-sm font-medium text-sand-12">
-            Défaite
+            {{ t('tournamentForm.scoring.loss') }}
           </label>
           <input
             id="lossPoints"
@@ -287,14 +301,16 @@ function submit() {
 
     <!-- Horaires & terrains -->
     <section class="rounded-2xl border border-sand-6 bg-white p-6">
-      <h2 class="mb-1 text-base font-semibold text-sand-12">Horaires & terrains</h2>
+      <h2 class="mb-1 text-base font-semibold text-sand-12">
+        {{ t('tournamentForm.schedule.title') }}
+      </h2>
       <p class="mb-4 text-sm text-sand-11">
-        Ces paramètres pilotent la génération automatique du planning.
+        {{ t('tournamentForm.schedule.hint') }}
       </p>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label for="startTime" class="mb-1 block text-sm font-medium text-sand-12">
-            Heure de début
+            {{ t('tournamentForm.schedule.startTime') }}
           </label>
           <input
             id="startTime"
@@ -311,7 +327,7 @@ function submit() {
 
         <div>
           <label for="numTerrains" class="mb-1 block text-sm font-medium text-sand-12">
-            Nombre de terrains
+            {{ t('tournamentForm.schedule.numTerrains') }}
           </label>
           <input
             id="numTerrains"
@@ -330,7 +346,7 @@ function submit() {
 
         <div>
           <label for="matchDurationMin" class="mb-1 block text-sm font-medium text-sand-12">
-            Durée d'un match (min)
+            {{ t('tournamentForm.schedule.matchDuration') }}
           </label>
           <input
             id="matchDurationMin"
@@ -349,7 +365,7 @@ function submit() {
 
         <div>
           <label for="breakDurationMin" class="mb-1 block text-sm font-medium text-sand-12">
-            Pause entre matchs (min)
+            {{ t('tournamentForm.schedule.breakDuration') }}
           </label>
           <input
             id="breakDurationMin"
@@ -368,8 +384,8 @@ function submit() {
 
         <div>
           <label for="lunchStart" class="mb-1 block text-sm font-medium text-sand-12">
-            Début pause déjeuner
-            <span class="font-normal text-sand-10">(optionnel)</span>
+            {{ t('tournamentForm.schedule.lunchStart') }}
+            <span class="font-normal text-sand-10">{{ t('tournamentForm.common.optional') }}</span>
           </label>
           <input
             id="lunchStart"
@@ -385,7 +401,7 @@ function submit() {
 
         <div>
           <label for="lunchDurationMin" class="mb-1 block text-sm font-medium text-sand-12">
-            Durée pause déjeuner (min)
+            {{ t('tournamentForm.schedule.lunchDuration') }}
           </label>
           <input
             id="lunchDurationMin"
@@ -409,14 +425,14 @@ function submit() {
         :href="cancelHref"
         class="rounded-lg border border-sand-7 px-4 py-2.5 font-medium text-sand-11 transition hover:bg-sand-3"
       >
-        Annuler
+        {{ t('tournamentForm.actions.cancel') }}
       </Link>
       <button
         type="submit"
         :disabled="form.processing"
         class="rounded-lg bg-primary px-5 py-2.5 font-semibold text-white transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {{ form.processing ? 'Enregistrement…' : submitLabel }}
+        {{ form.processing ? t('tournamentForm.actions.saving') : submitLabel }}
       </button>
     </div>
   </form>

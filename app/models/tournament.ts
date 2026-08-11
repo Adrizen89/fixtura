@@ -6,6 +6,7 @@ import Club from '#models/club'
 import Event from '#models/event'
 import Team from '#models/team'
 import Match from '#models/match'
+import TeamRegistration from '#models/team_registration'
 import { withTenantScope } from '#models/concerns/tenant_scoped'
 import type { Scoring } from '#services/standings'
 
@@ -153,6 +154,10 @@ export default class Tournament extends compose(BaseModel, withTenantScope()) {
 
   @hasMany(() => Match)
   declare matches: HasMany<typeof Match>
+
+  /** Demandes d'inscription en ligne (issue #113) — en attente / validées / refusées. */
+  @hasMany(() => TeamRegistration)
+  declare registrations: HasMany<typeof TeamRegistration>
 
   /** Barème du tournoi, prêt à passer au service de classement pur (issue #104). */
   get scoring(): Scoring {

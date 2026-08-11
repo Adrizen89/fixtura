@@ -3,7 +3,10 @@ import { computed, ref } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import AdminLayout from '~/layouts/AdminLayout.vue'
 import PlanningGrid from '~/components/PlanningGrid.vue'
+import { useI18n } from '~/composables/i18n'
 import type { EventItem, EventPlanningView } from '~/app/types'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   event: EventItem
@@ -19,10 +22,7 @@ const activePlanning = computed(
 )
 
 function validate() {
-  if (
-    props.hasExistingPlanning &&
-    !confirm('Cela remplacera le planning actuel (et les scores déjà saisis). Continuer ?')
-  ) {
+  if (props.hasExistingPlanning && !confirm(t('eventsAdmin.planning.confirmValidate'))) {
     return
   }
   router.post(`/events/${props.event.id}/planning`)
@@ -30,7 +30,7 @@ function validate() {
 </script>
 
 <template>
-  <Head :title="`Aperçu du planning — ${event.name}`" />
+  <Head :title="t('eventsAdmin.planning.headTitle', { name: event.name })" />
 
   <AdminLayout>
     <div class="mb-6">
@@ -38,11 +38,10 @@ function validate() {
         ← {{ event.name }}
       </Link>
       <h1 class="mt-1 text-2xl font-bold tracking-tight text-sand-12">
-        Aperçu du planning combiné
+        {{ t('eventsAdmin.planning.title') }}
       </h1>
       <p class="mt-1 text-sand-11">
-        Toutes les catégories sont placées sur le pool de terrains partagé, sans collision de
-        créneau. Rien n'est enregistré tant que vous n'avez pas validé.
+        {{ t('eventsAdmin.planning.subtitle') }}
       </p>
     </div>
 
@@ -52,26 +51,33 @@ function validate() {
       class="mb-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800"
       role="alert"
     >
-      Un planning existe déjà pour cet événement. Le valider remplacera le planning actuel ainsi que
-      les scores éventuellement saisis.
+      {{ t('eventsAdmin.planning.regenWarning') }}
     </div>
 
     <!-- Résumé -->
     <div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
       <div class="rounded-xl border border-sand-6 bg-white p-4">
-        <dt class="text-xs uppercase tracking-wide text-sand-9">Matchs</dt>
+        <dt class="text-xs uppercase tracking-wide text-sand-9">
+          {{ t('eventsAdmin.planning.matches') }}
+        </dt>
         <dd class="mt-0.5 text-xl font-semibold text-sand-12">{{ preview.matchCount }}</dd>
       </div>
       <div class="rounded-xl border border-sand-6 bg-white p-4">
-        <dt class="text-xs uppercase tracking-wide text-sand-9">Catégories</dt>
+        <dt class="text-xs uppercase tracking-wide text-sand-9">
+          {{ t('eventsAdmin.planning.categories') }}
+        </dt>
         <dd class="mt-0.5 text-xl font-semibold text-sand-12">{{ preview.categories.length }}</dd>
       </div>
       <div class="rounded-xl border border-sand-6 bg-white p-4">
-        <dt class="text-xs uppercase tracking-wide text-sand-9">Créneaux</dt>
+        <dt class="text-xs uppercase tracking-wide text-sand-9">
+          {{ t('eventsAdmin.planning.slots') }}
+        </dt>
         <dd class="mt-0.5 text-xl font-semibold text-sand-12">{{ preview.slotsCount }}</dd>
       </div>
       <div class="rounded-xl border border-sand-6 bg-white p-4">
-        <dt class="text-xs uppercase tracking-wide text-sand-9">Plage horaire</dt>
+        <dt class="text-xs uppercase tracking-wide text-sand-9">
+          {{ t('eventsAdmin.planning.timeRange') }}
+        </dt>
         <dd class="mt-0.5 text-xl font-semibold tabular-nums text-sand-12">
           {{ preview.startTime }}–{{ preview.endTime }}
         </dd>
@@ -106,14 +112,14 @@ function validate() {
         :href="showHref"
         class="rounded-lg border border-sand-7 px-4 py-2.5 font-medium text-sand-11 transition hover:bg-sand-3"
       >
-        Annuler
+        {{ t('eventsAdmin.planning.cancel') }}
       </Link>
       <button
         type="button"
         class="rounded-lg bg-primary px-5 py-2.5 font-semibold text-white transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
         @click="validate"
       >
-        Valider ce planning
+        {{ t('eventsAdmin.planning.validate') }}
       </button>
     </div>
   </AdminLayout>

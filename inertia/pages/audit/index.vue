@@ -2,7 +2,10 @@
 import { computed } from 'vue'
 import { Head, Link } from '@inertiajs/vue3'
 import AdminLayout from '~/layouts/AdminLayout.vue'
+import { useI18n } from '~/composables/i18n'
 import type { AuditLogEntry } from '~/app/types'
+
+const { t, dateLocale } = useI18n()
 
 /**
  * Journal d'audit du club (issue #117) — lecture seule, réservé au responsable.
@@ -13,25 +16,26 @@ const props = defineProps<{
   pagination: { currentPage: number; lastPage: number; total: number }
 }>()
 
-/** Libellés lisibles des actions tracées. */
-const ACTION_LABELS: Record<string, string> = {
-  'auth.login': 'Connexion',
-  'member.invited': 'Invitation d’un membre',
-  'member.role_changed': 'Changement de rôle',
-  'member.removed': 'Retrait d’un membre',
-  'invitation.revoked': 'Révocation d’invitation',
-  'tournament.deleted': 'Suppression d’un tournoi',
-  'event.deleted': 'Suppression d’un événement',
-  'event.category_deleted': 'Suppression d’une catégorie',
-  'club.data_exported': 'Export des données du club',
+/** Clés de traduction des actions tracées. */
+const ACTION_KEYS: Record<string, string> = {
+  'auth.login': 'login',
+  'member.invited': 'memberInvited',
+  'member.role_changed': 'roleChanged',
+  'member.removed': 'memberRemoved',
+  'invitation.revoked': 'invitationRevoked',
+  'tournament.deleted': 'tournamentDeleted',
+  'event.deleted': 'eventDeleted',
+  'event.category_deleted': 'categoryDeleted',
+  'club.data_exported': 'dataExported',
 }
 
 function actionLabel(action: string): string {
-  return ACTION_LABELS[action] ?? action
+  const key = ACTION_KEYS[action]
+  return key ? t(`auditAdmin.action.${key}`) : action
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString('fr-FR', {
+  return new Date(iso).toLocaleString(dateLocale.value, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -45,7 +49,7 @@ function metadataLabel(entry: AuditLogEntry): string | null {
   const m = entry.metadata
   if (!m) return null
   if (m.from && m.to) return `${m.from} → ${m.to}`
-  if (m.role) return `rôle : ${m.role}`
+  if (m.role) return t('auditAdmin.metaRole', { role: m.role })
   return null
 }
 
@@ -54,14 +58,13 @@ const { currentPage, lastPage } = props.pagination
 </script>
 
 <template>
-  <Head title="Journal d'audit" />
+  <Head :title="t('auditAdmin.title')" />
 
   <AdminLayout>
     <div class="mb-6">
-      <h1 class="text-2xl font-bold tracking-tight text-sand-12">Journal d'audit</h1>
+      <h1 class="text-2xl font-bold tracking-tight text-sand-12">{{ t('auditAdmin.title') }}</h1>
       <p class="mt-1 text-sand-11">
-        Historique des actions sensibles du club (connexions, changements de rôle, suppressions).
-        {{ pagination.total }} entrée(s).
+        {{ t('auditAdmin.subtitle', { count: pagination.total }) }}
       </p>
     </div>
 
@@ -72,11 +75,11 @@ const { currentPage, lastPage } = props.pagination
             class="border-b border-sand-6 bg-sand-2 text-xs uppercase tracking-wide text-sand-9"
           >
             <tr>
-              <th scope="col" class="px-4 py-3 font-semibold">Date</th>
-              <th scope="col" class="px-4 py-3 font-semibold">Action</th>
-              <th scope="col" class="px-4 py-3 font-semibold">Auteur</th>
-              <th scope="col" class="px-4 py-3 font-semibold">Cible</th>
-              <th scope="col" class="px-4 py-3 font-semibold">IP</th>
+              <th scope="col" class="px-4 py-3 font-semibold">{{ t('auditAdmin.colDate') }}</th>
+              <th scope="col" class="px-4 py-3 font-semibold">{{ t('auditAdmin.colAction') }}</th>
+              <th scope="col" class="px-4 py-3 font-semibold">{{ t('auditAdmin.colAuthor') }}</th>
+              <th scope="col" class="px-4 py-3 font-semibold">{{ t('auditAdmin.colTarget') }}</th>
+              <th scope="col" class="px-4 py-3 font-semibold">{{ t('auditAdmin.colIp') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-sand-4">
@@ -101,7 +104,7 @@ const { currentPage, lastPage } = props.pagination
       </div>
 
       <p v-else class="px-4 py-12 text-center text-sand-11">
-        Aucune action sensible enregistrée pour l'instant.
+        {{ t('auditAdmin.empty') }}
       </p>
     </section>
 
@@ -109,23 +112,25 @@ const { currentPage, lastPage } = props.pagination
     <nav
       v-if="lastPage > 1"
       class="mt-4 flex items-center justify-between text-sm"
-      aria-label="Pagination du journal"
+      :aria-label="t('auditAdmin.paginationLabel')"
     >
       <Link
         v-if="currentPage > 1"
         :href="`/journal?page=${currentPage - 1}`"
         class="rounded-lg border border-sand-7 px-3 py-1.5 font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
       >
-        ← Précédent
+        {{ t('auditAdmin.previous') }}
       </Link>
       <span v-else />
-      <span class="text-sand-10">Page {{ currentPage }} / {{ lastPage }}</span>
+      <span class="text-sand-10">{{
+        t('auditAdmin.pageOf', { current: currentPage, last: lastPage })
+      }}</span>
       <Link
         v-if="currentPage < lastPage"
         :href="`/journal?page=${currentPage + 1}`"
         class="rounded-lg border border-sand-7 px-3 py-1.5 font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
       >
-        Suivant →
+        {{ t('auditAdmin.next') }}
       </Link>
       <span v-else />
     </nav>

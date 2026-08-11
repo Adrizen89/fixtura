@@ -2,7 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Tournament from '#models/tournament'
 import { teamRegistrationValidator } from '#validators/team_registration'
 import {
-  registerTeam,
+  submitRegistration,
   registrationStatusFor,
   remainingSlots,
   RegistrationClosedError,
@@ -27,8 +27,20 @@ export default class PublicRegistrationController {
     return Tournament.query()
       .where('registration_token', token)
       .withCount('teams')
+      .withCount('registrations', (q) => q.where('status', 'pending'))
       .preload('club')
       .first()
+  }
+
+  /**
+   * Occupation courante = équipes confirmées + demandes en attente (#113). La
+   * « fermeture pleine » en découle : une demande non encore validée réserve une place.
+   */
+  private occupancyOf(tournament: Tournament): number {
+    return (
+      Number(tournament.$extras.teams_count ?? 0) +
+      Number(tournament.$extras.registrations_count ?? 0)
+    )
   }
 
   /** Vue publique du formulaire (ou état « fermé » / « complet »). */
@@ -38,12 +50,14 @@ export default class PublicRegistrationController {
       return inertia.render('public/registration_invalid', {})
     }
 
-    const teamsCount = Number(tournament.$extras.teams_count ?? 0)
-    return inertia.render('public/register', this.viewData(tournament, teamsCount))
+    return inertia.render(
+      'public/register',
+      this.viewData(tournament, this.occupancyOf(tournament))
+    )
   }
 
   /** Enregistre une inscription (honeypot + rate-limit + validation + service). */
-  async register({ inertia, request, response, params, session }: HttpContext) {
+  async register({ inertia, request, response, params, session, i18n }: HttpContext) {
     const tournament = await this.findByToken(params.token)
     if (!tournament) {
       return inertia.render('public/registration_invalid', {})
@@ -52,14 +66,14 @@ export default class PublicRegistrationController {
     // Anti-spam 1/2 — honeypot : un champ leurre invisible ; s'il est rempli, c'est
     // un robot. On répond « succès » sans rien créer (ne pas informer le bot).
     if (String(request.input('website') ?? '').trim() !== '') {
-      session.flash('success', 'Inscription enregistrée.')
+      session.flash('success', i18n.t('messages.flash.registration.recorded'))
       return response.redirect().toRoute('public.registration', { token: params.token })
     }
 
     // Anti-spam 2/2 — rate-limit par IP + tournoi (fenêtre glissante en mémoire).
     const key = `register:${tournament.id}:${request.ip()}`
     if (hitRateLimit(key, { max: 5, windowMs: 10 * 60 * 1000 })) {
-      session.flash('error', 'Trop de tentatives. Réessayez dans quelques minutes.')
+      session.flash('error', i18n.t('messages.flash.registration.tooManyAttempts'))
       return response.redirect().toRoute('public.registration', { token: params.token })
     }
 
@@ -68,25 +82,33 @@ export default class PublicRegistrationController {
     })
 
     try {
-      await registerTeam(tournament, { name: data.name, contactEmail: data.contactEmail })
+      await submitRegistration(tournament, { name: data.name, contactEmail: data.contactEmail })
     } catch (error) {
-      if (
-        error instanceof RegistrationClosedError ||
-        error instanceof RegistrationFullError ||
-        error instanceof DuplicateTeamNameError
-      ) {
-        session.flash('error', error.message)
+      // Erreurs métier → message localisé par type (le message brut du service reste FR).
+      const flashKey =
+        error instanceof RegistrationClosedError
+          ? 'messages.flash.registration.closed'
+          : error instanceof RegistrationFullError
+            ? 'messages.flash.registration.full'
+            : error instanceof DuplicateTeamNameError
+              ? 'messages.flash.registration.duplicateName'
+              : null
+      if (flashKey) {
+        session.flash('error', i18n.t(flashKey))
         return response.redirect().toRoute('public.registration', { token: params.token })
       }
       throw error
     }
 
-    session.flash('success', `L'équipe « ${data.name.trim()} » est inscrite. À bientôt !`)
+    session.flash(
+      'success',
+      i18n.t('messages.flash.registration.received', { team: data.name.trim() })
+    )
     return response.redirect().toRoute('public.registration', { token: params.token })
   }
 
   /** Données publiques passées à la page (aucune donnée personnelle). */
-  private viewData(tournament: Tournament, teamsCount: number) {
+  private viewData(tournament: Tournament, occupancy: number) {
     return {
       tournament: {
         name: tournament.name,
@@ -94,8 +116,8 @@ export default class PublicRegistrationController {
         eventDate: tournament.eventDate.toISODate(),
       },
       club: { name: tournament.club.name },
-      status: registrationStatusFor(tournament, teamsCount),
-      remaining: remainingSlots(tournament, teamsCount),
+      status: registrationStatusFor(tournament, occupancy),
+      remaining: remainingSlots(tournament, occupancy),
     }
   }
 }

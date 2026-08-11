@@ -2,7 +2,10 @@
 import { Head, Link } from '@inertiajs/vue3'
 import AdminLayout from '~/layouts/AdminLayout.vue'
 import TournamentForm from '~/components/TournamentForm.vue'
+import { useI18n } from '~/composables/i18n'
 import type { TournamentFormData } from '~/app/types'
+
+const { t } = useI18n()
 
 const initial: TournamentFormData = {
   name: '',
@@ -27,19 +30,23 @@ const initial: TournamentFormData = {
 </script>
 
 <template>
-  <Head title="Nouveau tournoi" />
+  <Head :title="t('tournamentsAdmin.create.title')" />
 
   <AdminLayout>
     <div class="mb-6">
-      <Link href="/tournaments" class="text-sm text-sand-11 hover:text-sand-12">← Tournois</Link>
-      <h1 class="mt-1 text-2xl font-bold tracking-tight text-sand-12">Nouveau tournoi</h1>
+      <Link href="/tournaments" class="text-sm text-sand-11 hover:text-sand-12">
+        ← {{ t('nav.tournaments') }}
+      </Link>
+      <h1 class="mt-1 text-2xl font-bold tracking-tight text-sand-12">
+        {{ t('tournamentsAdmin.create.title') }}
+      </h1>
     </div>
 
     <TournamentForm
       :initial="initial"
       action="/tournaments"
       method="post"
-      submit-label="Créer le tournoi"
+      :submit-label="t('tournamentsAdmin.create.submit')"
       cancel-href="/tournaments"
     />
   </AdminLayout>

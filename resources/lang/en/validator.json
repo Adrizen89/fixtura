@@ -1,0 +1,60 @@
+{
+  "shared": {
+    "messages": {
+      "required": "The {field} field is required.",
+      "string": "The {field} field must be a string.",
+      "email": "The {field} field must be a valid email address.",
+      "number": "The {field} field must be a number.",
+      "withoutDecimals": "The {field} field must be an integer.",
+      "enum": "The {field} field value is invalid.",
+      "minLength": "The {field} field must have at least {min} character(s).",
+      "maxLength": "The {field} field must not exceed {max} character(s).",
+      "min": "The {field} field must be at least {min}.",
+      "max": "The {field} field must not exceed {max}.",
+      "regex": "The {field} field format is invalid.",
+      "confirmed": "The {field} confirmation does not match.",
+      "database": {
+        "unique": "An account already exists with this email address."
+      },
+      "name": {
+        "database": {
+          "unique": "A team with this name is already registered for this tournament."
+        }
+      },
+      "eventDate": {
+        "regex": "The date must be in YYYY-MM-DD format."
+      },
+      "startTime": {
+        "regex": "The start time must be in HH:MM format."
+      },
+      "lunchStart": {
+        "regex": "The lunch break start time must be in HH:MM format."
+      },
+      "time": {
+        "regex": "The time must be in HH:MM format."
+      }
+    },
+    "fields": {
+      "name": "name",
+      "category": "category",
+      "eventDate": "date",
+      "startTime": "start time",
+      "matchDurationMin": "match duration",
+      "breakDurationMin": "break between matches",
+      "lunchStart": "lunch break start",
+      "lunchDurationMin": "lunch break duration",
+      "numTerrains": "number of pitches",
+      "email": "email address",
+      "password": "password",
+      "passwordConfirmation": "password confirmation",
+      "clubName": "club name",
+      "fullName": "full name",
+      "role": "role",
+      "homeScore": "home score",
+      "awayScore": "away score",
+      "time": "time",
+      "terrainNumber": "pitch",
+      "side": "side"
+    }
+  }
+}

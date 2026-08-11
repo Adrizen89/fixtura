@@ -45,6 +45,8 @@ declare module '@adonisjs/inertia/types' {
       success: string | null
       error: string | null
     }
+    /** Langue active de la requête (issue #123) : 'fr' | 'en'. */
+    locale: string
   }
 
   /**
