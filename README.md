@@ -19,7 +19,7 @@ Produit développé par **ADBDigital**. v1 mono-club, architecture prête pour l
 ## Prérequis
 
 - Node.js LTS ≥ 20
-- PostgreSQL ≥ 14
+- PostgreSQL ≥ 14 — ou **Docker** pour la lancer sans rien installer (cf. « Démarrage rapide » ci-dessous)
 - npm
 
 ## Installation
@@ -32,6 +32,33 @@ cp .env.example .env   # renseigner la connexion Postgres + APP_KEY
 node ace migration:run
 node ace db:seed        # crée le club + un compte organisateur de départ
 ```
+
+## Démarrage rapide (Docker)
+
+Le plus simple pour lancer l'application en local : **PostgreSQL via Docker**, l'app en
+`npm` sur la machine hôte (le HMR Vite fonctionne nativement). Un `docker-compose.yml`
+fournit une base déjà alignée sur `.env.example` — aucune variable de connexion à modifier.
+
+```bash
+docker compose up -d        # 1) PostgreSQL (prêt en ~3 s, sans mot de passe en dev)
+npm install                 # 2) dépendances (Node ≥ 20)
+cp .env.example .env        # 3) config (déjà alignée sur le conteneur)
+node ace generate:key       #    → renseigne APP_KEY dans .env
+node ace migration:run      # 4) tables
+node ace db:seed            #    → club « Club Démo » + compte organisateur
+node ace serve --hmr        # 5) → http://localhost:3333
+```
+
+Connexion de démo : **`owner@fixtura.test`** / **`password`**. Bascule FR/EN via le
+sélecteur en pied de page.
+
+Pour tout arrêter : `docker compose down` (ajouter `-v` pour supprimer aussi les données).
+
+> ⚠️ Le `docker-compose.yml` utilise l'auth `trust` (sans mot de passe) — **dev local
+> uniquement**, jamais en production.
+>
+> Note : `node ace test` réutilise la base de dev et la **vide** (truncate) entre les
+> tests ; relancez `node ace db:seed` ensuite pour retrouver le compte de démo.
 
 ## Développement
 
