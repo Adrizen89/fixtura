@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useI18n } from '~/composables/i18n'
 import type {
   ResultMatchRow,
   StandingRow,
@@ -24,6 +25,8 @@ const props = defineProps<{
   pools: PoolStanding[]
   liveState: string
 }>()
+
+const { t } = useI18n()
 
 const DEFAULT_ACCENT = '#16a34a'
 const ROTATE_MS = 12000
@@ -60,12 +63,12 @@ const slots = computed(() => {
 
 const globalStandings = computed(() => props.standings.filter((r) => r.played > 0))
 
-const statusLabel: Record<TournamentStatus, string> = {
-  draft: 'À venir',
-  scheduled: 'À venir',
-  live: 'En direct',
-  finished: 'Terminé',
-}
+const statusLabel = computed<Record<TournamentStatus, string>>(() => ({
+  draft: t('tv.status.upcoming'),
+  scheduled: t('tv.status.upcoming'),
+  live: t('tv.status.live'),
+  finished: t('tv.status.finished'),
+}))
 
 function isFinished(m: ResultMatchRow) {
   return m.homeScore !== null && m.awayScore !== null
@@ -112,7 +115,7 @@ function isFinished(m: ResultMatchRow) {
             class="h-[1.6vh] w-[1.6vh] rounded-full"
             :style="{ backgroundColor: liveState === 'connected' ? 'var(--accent)' : '#666' }"
           />
-          {{ currentPanel === 'planning' ? 'Planning' : 'Classement' }}
+          {{ currentPanel === 'planning' ? t('tv.panel.schedule') : t('tv.panel.standings') }}
         </span>
       </div>
     </header>
@@ -131,7 +134,7 @@ function isFinished(m: ResultMatchRow) {
               class="flex items-center gap-[1.2vw] rounded-xl bg-white/[0.06] px-[1.4vw] py-[1.2vh] text-[3vh]"
             >
               <span class="w-[4vw] shrink-0 text-[2.2vh] font-semibold text-white/50">
-                T{{ m.terrainNumber }}
+                {{ t('tv.pitchShort', { n: m.terrainNumber }) }}
               </span>
               <span class="min-w-0 flex-1 truncate text-right font-semibold">{{ m.homeTeam }}</span>
               <span
@@ -150,7 +153,9 @@ function isFinished(m: ResultMatchRow) {
           </ul>
         </div>
       </div>
-      <p v-else class="pt-[10vh] text-center text-[4vh] text-white/50">Planning à venir</p>
+      <p v-else class="pt-[10vh] text-center text-[4vh] text-white/50">
+        {{ t('tv.scheduleEmpty') }}
+      </p>
     </main>
 
     <!-- Panneau : CLASSEMENT -->
@@ -159,7 +164,7 @@ function isFinished(m: ResultMatchRow) {
       <div v-if="showPools" class="grid grid-cols-1 gap-[3vh] lg:grid-cols-2">
         <div v-for="pool in pools" :key="pool.label">
           <h2 class="mb-[1vh] text-[3.2vh] font-black" :style="{ color: 'var(--accent)' }">
-            Poule {{ pool.label }}
+            {{ t('tv.group', { label: pool.label }) }}
           </h2>
           <table class="w-full text-[3vh]">
             <tbody>
@@ -180,10 +185,10 @@ function isFinished(m: ResultMatchRow) {
         <thead>
           <tr class="text-[2.2vh] uppercase tracking-wide text-white/50">
             <th class="w-[5vw] py-[1vh] text-left">#</th>
-            <th class="py-[1vh] text-left">Équipe</th>
-            <th class="w-[8vw] py-[1vh] text-center">J</th>
-            <th class="w-[8vw] py-[1vh] text-center">Diff</th>
-            <th class="w-[10vw] py-[1vh] text-right">Pts</th>
+            <th class="py-[1vh] text-left">{{ t('tv.col.team') }}</th>
+            <th class="w-[8vw] py-[1vh] text-center">{{ t('tv.col.played') }}</th>
+            <th class="w-[8vw] py-[1vh] text-center">{{ t('tv.col.goalDifference') }}</th>
+            <th class="w-[10vw] py-[1vh] text-right">{{ t('tv.col.points') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -214,7 +219,9 @@ function isFinished(m: ResultMatchRow) {
           </tr>
         </tbody>
       </table>
-      <p v-else class="pt-[10vh] text-center text-[4vh] text-white/50">Classement à venir</p>
+      <p v-else class="pt-[10vh] text-center text-[4vh] text-white/50">
+        {{ t('tv.standingsEmpty') }}
+      </p>
     </main>
 
     <!-- Indicateur de rotation -->

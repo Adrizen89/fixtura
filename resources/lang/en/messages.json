@@ -1,0 +1,20 @@
+{
+  "flash": {
+    "auth": {
+      "invalidCredentials": "Invalid credentials.",
+      "welcomeClub": "Welcome! The club “{club}” has been created."
+    },
+    "invitation": {
+      "emailExists": "An account already exists with this email address. Please sign in.",
+      "welcome": "Welcome! Your organizer account is ready."
+    },
+    "registration": {
+      "received": "The registration request for team “{team}” has been sent. The organizer will approve it before the tournament.",
+      "recorded": "Registration recorded.",
+      "tooManyAttempts": "Too many attempts. Please try again in a few minutes.",
+      "closed": "Registration is closed for this tournament.",
+      "full": "The tournament is full.",
+      "duplicateName": "A team with this name is already registered for this tournament."
+    }
+  }
+}

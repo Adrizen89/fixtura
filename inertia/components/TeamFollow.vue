@@ -7,6 +7,9 @@ import {
   opponentName,
 } from '~/composables/next_match'
 import type { ResultMatchRow } from '~/app/types'
+import { useI18n } from '~/composables/i18n'
+
+const { t } = useI18n()
 
 /**
  * Suivi d'équipe sur l'écran public (cf. CLAUDE.md §9 · issue #39).
@@ -35,7 +38,7 @@ const followedTeamId = ref<number | null>(null)
 const sortedTeams = computed(() => [...props.teams].sort((a, b) => a.name.localeCompare(b.name)))
 
 const followedTeamName = computed(
-  () => props.teams.find((t) => t.id === followedTeamId.value)?.name ?? null
+  () => props.teams.find((team) => team.id === followedTeamId.value)?.name ?? null
 )
 
 const nextMatch = computed(() =>
@@ -136,7 +139,7 @@ onMounted(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY)
     if (saved !== null) {
       const id = Number(saved)
-      if (props.teams.some((t) => t.id === id)) followedTeamId.value = id
+      if (props.teams.some((team) => team.id === id)) followedTeamId.value = id
     }
   } catch {
     // Ignore : pas de restauration si localStorage est bloqué.
@@ -170,7 +173,7 @@ watch(
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-2">
         <label for="follow-team" class="text-sm font-semibold text-sand-12 sm:text-base">
-          Suivre mon équipe
+          {{ t('teamFollow.follow') }}
         </label>
         <select
           id="follow-team"
@@ -178,7 +181,7 @@ watch(
           :value="followedTeamId ?? ''"
           @change="onSelect"
         >
-          <option value="">— Choisir —</option>
+          <option value="">{{ t('teamFollow.choose') }}</option>
           <option v-for="team in sortedTeams" :key="team.id" :value="team.id">
             {{ team.name }}
           </option>
@@ -192,13 +195,13 @@ watch(
         class="rounded-lg border border-sand-7 px-3 py-1.5 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
         @click="enableNotifications"
       >
-        🔔 Activer les notifications
+        🔔 {{ t('teamFollow.enableNotifications') }}
       </button>
       <span
         v-else-if="followedTeamId !== null && notifState === 'granted'"
         class="text-xs font-medium text-sand-10"
       >
-        🔔 Notifications activées
+        🔔 {{ t('teamFollow.notificationsEnabled') }}
       </span>
     </div>
 
@@ -209,7 +212,7 @@ watch(
         class="rounded-xl border-2 border-primary-200 bg-primary-50 px-4 py-4 sm:px-5"
       >
         <p class="text-xs font-bold uppercase tracking-wide text-primary-800 sm:text-sm">
-          Votre prochain match
+          {{ t('teamFollow.yourNextMatch') }}
         </p>
         <div class="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1">
           <span class="text-2xl font-extrabold tabular-nums text-sand-12 sm:text-3xl">
@@ -218,10 +221,10 @@ watch(
           <span
             class="rounded-lg bg-sand-12 px-2.5 py-1 text-base font-bold text-sand-1 sm:text-lg"
           >
-            Terrain {{ nextMatch.terrainNumber }}
+            {{ t('teamFollow.pitch', { number: nextMatch.terrainNumber }) }}
           </span>
           <span class="text-lg font-semibold text-sand-11 sm:text-xl">
-            contre {{ nextOpponent }}
+            {{ t('teamFollow.versus', { opponent: nextOpponent }) }}
           </span>
         </div>
       </div>
@@ -229,10 +232,10 @@ watch(
         v-else-if="finishedAll"
         class="rounded-xl bg-sand-2 px-4 py-3 text-center text-base text-sand-11"
       >
-        Tous vos matchs sont terminés. Rendez-vous au classement !
+        {{ t('teamFollow.allFinished') }}
       </p>
       <p v-else class="rounded-xl bg-sand-2 px-4 py-3 text-center text-base text-sand-11">
-        Aucun match à venir pour l'instant.
+        {{ t('teamFollow.noUpcoming') }}
       </p>
     </div>
 
@@ -241,7 +244,7 @@ watch(
       v-if="alerts.length"
       class="mt-3 space-y-2"
       aria-live="polite"
-      aria-label="Notifications de votre équipe"
+      :aria-label="t('teamFollow.alertsLabel')"
     >
       <li
         v-for="alert in alerts"
@@ -252,7 +255,7 @@ watch(
         <button
           type="button"
           class="shrink-0 rounded p-0.5 text-amber-700 hover:text-amber-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
-          aria-label="Masquer cette alerte"
+          :aria-label="t('teamFollow.dismissAlert')"
           @click="dismiss(alert.id)"
         >
           ✕

@@ -1,0 +1,20 @@
+{
+  "flash": {
+    "auth": {
+      "invalidCredentials": "Identifiants invalides.",
+      "welcomeClub": "Bienvenue ! Le club « {club} » est créé."
+    },
+    "invitation": {
+      "emailExists": "Un compte existe déjà avec cette adresse e-mail. Connectez-vous.",
+      "welcome": "Bienvenue ! Votre compte organisateur est prêt."
+    },
+    "registration": {
+      "received": "La demande d'inscription de l'équipe « {team} » a bien été envoyée. L'organisateur la validera avant le tournoi.",
+      "recorded": "Inscription enregistrée.",
+      "tooManyAttempts": "Trop de tentatives. Réessayez dans quelques minutes.",
+      "closed": "Les inscriptions sont fermées pour ce tournoi.",
+      "full": "Le tournoi est complet.",
+      "duplicateName": "Une équipe porte déjà ce nom dans ce tournoi."
+    }
+  }
+}

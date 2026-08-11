@@ -6,6 +6,7 @@ import PoolStandings from '~/components/PoolStandings.vue'
 import TeamFollow from '~/components/TeamFollow.vue'
 import TvBoard from '~/components/TvBoard.vue'
 import { useLiveTournament } from '~/composables/use_live_tournament'
+import { useI18n } from '~/composables/i18n'
 import type {
   ResultMatchRow,
   StandingRow,
@@ -36,6 +37,8 @@ const props = defineProps<{
   standings: StandingRow[]
   pools: PoolStanding[]
 }>()
+
+const { t } = useI18n()
 
 /**
  * Personnalisation du club (#40) : on surcharge les variables CSS de la couleur
@@ -68,7 +71,9 @@ const showBracket = computed(
 const showPools = computed(
   () => props.tournament.format === 'pools' || props.tournament.format === 'hybrid'
 )
-const sideTitle = computed(() => (showPools.value ? 'Classements par poule' : 'Classement'))
+const sideTitle = computed(() =>
+  showPools.value ? t('publicTournament.poolStandingsTitle') : t('publicTournament.standingsTitle')
+)
 
 /**
  * État affiché, initialisé depuis le rendu serveur puis mis à jour en direct par le
@@ -125,12 +130,12 @@ const allTeams = computed(() =>
   liveStandings.value.map((r) => ({ id: r.teamId, name: r.teamName }))
 )
 
-const statusLabel: Record<TournamentStatus, string> = {
-  draft: 'À venir',
-  scheduled: 'À venir',
-  live: 'En direct',
-  finished: 'Terminé',
-}
+const statusLabel = computed<Record<TournamentStatus, string>>(() => ({
+  draft: t('publicTournament.status.upcoming'),
+  scheduled: t('publicTournament.status.upcoming'),
+  live: t('publicTournament.status.live'),
+  finished: t('publicTournament.status.finished'),
+}))
 
 function formatDate(iso: string | null) {
   if (!iso) return ''
@@ -169,7 +174,7 @@ function rowClass(rank: number) {
 </script>
 
 <template>
-  <Head :title="`${tournament.name} — en direct`" />
+  <Head :title="t('publicTournament.headTitle', { name: tournament.name })" />
 
   <!-- Mode TV : affichage plein écran en rotation, très gros contrastes (#40). -->
   <TvBoard
@@ -234,7 +239,7 @@ function rowClass(rank: number) {
               class="flex items-center gap-1.5 text-xs font-medium text-sand-10"
             >
               <span class="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
-              Mise à jour automatique
+              {{ t('publicTournament.autoUpdate') }}
             </span>
           </div>
         </div>
@@ -250,7 +255,7 @@ function rowClass(rank: number) {
 
       <!-- Tableau d'élimination (pleine largeur, mis en avant pour l'affichage TV) -->
       <section v-if="showBracket" class="mb-8">
-        <h2 class="mb-4 text-xl font-bold sm:text-2xl">Tableau final</h2>
+        <h2 class="mb-4 text-xl font-bold sm:text-2xl">{{ t('publicTournament.finalBracket') }}</h2>
         <Bracket :matches="liveMatches" />
       </section>
 
@@ -264,53 +269,70 @@ function rowClass(rank: number) {
             v-else-if="showBracket"
             class="rounded-xl bg-sand-2 px-4 py-8 text-center text-base text-sand-11"
           >
-            Le tableau final est affiché ci-dessus.
+            {{ t('publicTournament.bracketAbove') }}
           </p>
           <div v-else-if="hasResults" class="overflow-x-auto">
             <table class="w-full border-collapse">
               <caption class="sr-only">
-                Classement en direct : rang, équipe, matchs joués, gagnés, nuls, perdus, différence
-                de buts et points.
+                {{
+                  t('publicTournament.standingsCaption')
+                }}
               </caption>
               <thead>
                 <tr
                   class="border-b-2 border-sand-7 text-left text-xs uppercase tracking-wide text-sand-10 sm:text-sm"
                 >
                   <th scope="col" class="py-2 pr-2 font-semibold">#</th>
-                  <th scope="col" class="py-2 pr-3 font-semibold">Équipe</th>
-                  <th scope="col" class="py-2 px-1.5 text-center font-semibold" title="Joués">
-                    J<span class="sr-only"> — matchs joués</span>
-                  </th>
-                  <th
-                    scope="col"
-                    class="hidden py-2 px-1.5 text-center font-semibold sm:table-cell"
-                    title="Gagnés"
-                  >
-                    G<span class="sr-only"> — gagnés</span>
-                  </th>
-                  <th
-                    scope="col"
-                    class="hidden py-2 px-1.5 text-center font-semibold sm:table-cell"
-                    title="Nuls"
-                  >
-                    N<span class="sr-only"> — nuls</span>
-                  </th>
-                  <th
-                    scope="col"
-                    class="hidden py-2 px-1.5 text-center font-semibold sm:table-cell"
-                    title="Perdus"
-                  >
-                    P<span class="sr-only"> — perdus</span>
+                  <th scope="col" class="py-2 pr-3 font-semibold">
+                    {{ t('publicTournament.col.team') }}
                   </th>
                   <th
                     scope="col"
                     class="py-2 px-1.5 text-center font-semibold"
-                    title="Différence de buts"
+                    :title="t('publicTournament.colFull.played')"
                   >
-                    Diff<span class="sr-only"> — différence de buts</span>
+                    {{ t('publicTournament.col.played')
+                    }}<span class="sr-only"> — {{ t('publicTournament.sr.played') }}</span>
                   </th>
-                  <th scope="col" class="py-2 pl-2 text-center font-bold" title="Points">
-                    Pts<span class="sr-only"> — points</span>
+                  <th
+                    scope="col"
+                    class="hidden py-2 px-1.5 text-center font-semibold sm:table-cell"
+                    :title="t('publicTournament.colFull.won')"
+                  >
+                    {{ t('publicTournament.col.won')
+                    }}<span class="sr-only"> — {{ t('publicTournament.sr.won') }}</span>
+                  </th>
+                  <th
+                    scope="col"
+                    class="hidden py-2 px-1.5 text-center font-semibold sm:table-cell"
+                    :title="t('publicTournament.colFull.drawn')"
+                  >
+                    {{ t('publicTournament.col.drawn')
+                    }}<span class="sr-only"> — {{ t('publicTournament.sr.drawn') }}</span>
+                  </th>
+                  <th
+                    scope="col"
+                    class="hidden py-2 px-1.5 text-center font-semibold sm:table-cell"
+                    :title="t('publicTournament.colFull.lost')"
+                  >
+                    {{ t('publicTournament.col.lost')
+                    }}<span class="sr-only"> — {{ t('publicTournament.sr.lost') }}</span>
+                  </th>
+                  <th
+                    scope="col"
+                    class="py-2 px-1.5 text-center font-semibold"
+                    :title="t('publicTournament.colFull.goalDifference')"
+                  >
+                    {{ t('publicTournament.col.goalDifference')
+                    }}<span class="sr-only"> — {{ t('publicTournament.sr.goalDifference') }}</span>
+                  </th>
+                  <th
+                    scope="col"
+                    class="py-2 pl-2 text-center font-bold"
+                    :title="t('publicTournament.colFull.points')"
+                  >
+                    {{ t('publicTournament.col.points')
+                    }}<span class="sr-only"> — {{ t('publicTournament.sr.points') }}</span>
                   </th>
                 </tr>
               </thead>
@@ -361,13 +383,15 @@ function rowClass(rank: number) {
             </table>
           </div>
           <p v-else class="rounded-xl bg-sand-2 px-4 py-8 text-center text-base text-sand-11">
-            Le classement s'affichera dès le premier score.
+            {{ t('publicTournament.standingsEmpty') }}
           </p>
         </section>
 
         <!-- Résultats / planning -->
         <section class="lg:col-span-2">
-          <h2 class="mb-4 text-xl font-bold sm:text-2xl">Matchs</h2>
+          <h2 class="mb-4 text-xl font-bold sm:text-2xl">
+            {{ t('publicTournament.matchesTitle') }}
+          </h2>
 
           <div v-if="slots.length" class="space-y-5">
             <div v-for="slot in slots" :key="slot.time">
@@ -382,7 +406,7 @@ function rowClass(rank: number) {
                   :class="isFinished(m) ? 'bg-sand-2' : 'bg-sand-1 ring-1 ring-inset ring-sand-4'"
                 >
                   <span class="w-7 shrink-0 text-center text-xs font-medium text-sand-9">
-                    T{{ m.terrainNumber }}
+                    {{ t('publicTournament.pitchShort', { n: m.terrainNumber }) }}
                   </span>
                   <span class="min-w-0 flex-1 truncate text-right font-medium">{{
                     m.homeTeam
@@ -399,20 +423,21 @@ function rowClass(rank: number) {
                     v-if="m.status === 'forfeit'"
                     class="w-full text-right text-xs font-semibold uppercase tracking-wide text-amber-700"
                   >
-                    Forfait<span v-if="forfeitTeamName(m)"> — {{ forfeitTeamName(m) }}</span>
+                    {{ t('publicTournament.forfeit')
+                    }}<span v-if="forfeitTeamName(m)"> — {{ forfeitTeamName(m) }}</span>
                   </span>
                   <span
                     v-else-if="shootoutTeamName(m)"
                     class="w-full text-right text-xs font-semibold uppercase tracking-wide text-sand-9"
                   >
-                    Tirs au but — {{ shootoutTeamName(m) }}
+                    {{ t('publicTournament.shootout') }} — {{ shootoutTeamName(m) }}
                   </span>
                 </li>
               </ul>
             </div>
           </div>
           <p v-else class="rounded-xl bg-sand-2 px-4 py-8 text-center text-base text-sand-11">
-            Le planning n'est pas encore publié.
+            {{ t('publicTournament.scheduleEmpty') }}
           </p>
         </section>
       </div>
@@ -422,24 +447,23 @@ function rowClass(rank: number) {
         class="mt-10 flex flex-col items-center gap-3 border-t border-sand-6 pt-6 text-center"
       >
         <h2 class="text-sm font-semibold uppercase tracking-wide text-sand-11">
-          Ajouter à mon agenda
+          {{ t('publicTournament.addToCalendar') }}
         </h2>
         <p class="max-w-md text-sm text-sand-10">
-          Suivez le planning depuis votre téléphone. L'abonnement se met à jour automatiquement
-          (décalages, scores).
+          {{ t('publicTournament.calendarHelp') }}
         </p>
         <div class="flex flex-wrap items-center justify-center gap-3">
           <a
             :href="ical.subscribeUrl"
             class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
-            S'abonner au calendrier
+            {{ t('publicTournament.subscribeCalendar') }}
           </a>
           <a
             :href="ical.downloadUrl"
             class="inline-flex items-center gap-2 rounded-lg border border-sand-7 px-4 py-2 text-sm font-semibold text-sand-12 transition hover:bg-sand-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
-            Télécharger le .ics
+            {{ t('publicTournament.downloadIcs') }}
           </a>
         </div>
       </section>
@@ -447,16 +471,20 @@ function rowClass(rank: number) {
       <footer
         class="mt-10 flex flex-col items-center gap-2 border-t border-sand-6 pt-4 text-center text-xs text-sand-9"
       >
-        <span>Fixtura · résultats en direct</span>
+        <span>{{ t('publicTournament.footerTagline') }}</span>
         <nav
-          aria-label="Liens légaux"
+          :aria-label="t('publicTournament.legalNav')"
           class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1"
         >
-          <a href="/mentions-legales" class="hover:text-sand-12 hover:underline"
-            >Mentions légales</a
-          >
-          <a href="/cgu" class="hover:text-sand-12 hover:underline">CGU</a>
-          <a href="/confidentialite" class="hover:text-sand-12 hover:underline">Confidentialité</a>
+          <a href="/mentions-legales" class="hover:text-sand-12 hover:underline">{{
+            t('publicTournament.legalMentions')
+          }}</a>
+          <a href="/cgu" class="hover:text-sand-12 hover:underline">{{
+            t('publicTournament.cgu')
+          }}</a>
+          <a href="/confidentialite" class="hover:text-sand-12 hover:underline">{{
+            t('publicTournament.privacy')
+          }}</a>
         </nav>
       </footer>
     </div>

@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3'
 import SiteFooter from '~/components/SiteFooter.vue'
+import { useI18n } from '~/composables/i18n'
 
 /**
  * Lien d'inscription invalide (issue #112) : jeton introuvable (fautif, révoqué…).
  * On reste volontairement vague — aucune information sur l'existence d'un tournoi.
  */
+const { t } = useI18n()
 </script>
 
 <template>
-  <Head title="Lien d'inscription invalide" />
+  <Head :title="t('publicRegister.invalidHeadTitle')" />
 
   <div class="flex min-h-screen flex-col bg-sand-2">
     <div class="flex flex-1 items-center justify-center px-4 py-12">
@@ -19,17 +21,18 @@ import SiteFooter from '~/components/SiteFooter.vue'
         >
           !
         </span>
-        <h1 class="text-2xl font-bold tracking-tight text-sand-12">Lien indisponible</h1>
+        <h1 class="text-2xl font-bold tracking-tight text-sand-12">
+          {{ t('publicRegister.invalidTitle') }}
+        </h1>
         <p class="mt-3 text-sand-11">
-          Ce lien d'inscription est invalide ou n'existe plus. Vérifiez l'adresse ou demandez un
-          nouveau lien à l'organisateur.
+          {{ t('publicRegister.invalidBody') }}
         </p>
 
         <Link
           href="/"
           class="mt-6 inline-block rounded-lg bg-primary px-4 py-2.5 font-semibold text-white transition hover:bg-primary-700"
         >
-          Retour à l'accueil
+          {{ t('common.backHome') }}
         </Link>
       </div>
     </div>

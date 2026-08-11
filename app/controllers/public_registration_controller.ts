@@ -57,7 +57,7 @@ export default class PublicRegistrationController {
   }
 
   /** Enregistre une inscription (honeypot + rate-limit + validation + service). */
-  async register({ inertia, request, response, params, session }: HttpContext) {
+  async register({ inertia, request, response, params, session, i18n }: HttpContext) {
     const tournament = await this.findByToken(params.token)
     if (!tournament) {
       return inertia.render('public/registration_invalid', {})
@@ -66,14 +66,14 @@ export default class PublicRegistrationController {
     // Anti-spam 1/2 — honeypot : un champ leurre invisible ; s'il est rempli, c'est
     // un robot. On répond « succès » sans rien créer (ne pas informer le bot).
     if (String(request.input('website') ?? '').trim() !== '') {
-      session.flash('success', 'Inscription enregistrée.')
+      session.flash('success', i18n.t('messages.flash.registration.recorded'))
       return response.redirect().toRoute('public.registration', { token: params.token })
     }
 
     // Anti-spam 2/2 — rate-limit par IP + tournoi (fenêtre glissante en mémoire).
     const key = `register:${tournament.id}:${request.ip()}`
     if (hitRateLimit(key, { max: 5, windowMs: 10 * 60 * 1000 })) {
-      session.flash('error', 'Trop de tentatives. Réessayez dans quelques minutes.')
+      session.flash('error', i18n.t('messages.flash.registration.tooManyAttempts'))
       return response.redirect().toRoute('public.registration', { token: params.token })
     }
 
@@ -84,12 +84,17 @@ export default class PublicRegistrationController {
     try {
       await submitRegistration(tournament, { name: data.name, contactEmail: data.contactEmail })
     } catch (error) {
-      if (
-        error instanceof RegistrationClosedError ||
-        error instanceof RegistrationFullError ||
-        error instanceof DuplicateTeamNameError
-      ) {
-        session.flash('error', error.message)
+      // Erreurs métier → message localisé par type (le message brut du service reste FR).
+      const flashKey =
+        error instanceof RegistrationClosedError
+          ? 'messages.flash.registration.closed'
+          : error instanceof RegistrationFullError
+            ? 'messages.flash.registration.full'
+            : error instanceof DuplicateTeamNameError
+              ? 'messages.flash.registration.duplicateName'
+              : null
+      if (flashKey) {
+        session.flash('error', i18n.t(flashKey))
         return response.redirect().toRoute('public.registration', { token: params.token })
       }
       throw error
@@ -97,8 +102,7 @@ export default class PublicRegistrationController {
 
     session.flash(
       'success',
-      `La demande d'inscription de l'équipe « ${data.name.trim()} » a bien été envoyée. ` +
-        `L'organisateur la validera avant le tournoi.`
+      i18n.t('messages.flash.registration.received', { team: data.name.trim() })
     )
     return response.redirect().toRoute('public.registration', { token: params.token })
   }

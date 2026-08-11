@@ -27,6 +27,9 @@ server.use([
   () => import('@adonisjs/static/static_middleware'),
   () => import('@adonisjs/cors/cors_middleware'),
   () => import('@adonisjs/vite/vite_middleware'),
+  // Détection de la langue (issue #123) — avant Inertia pour que la locale soit
+  // connue au moment de partager les props (et prête pour les messages de validation).
+  () => import('#middleware/detect_user_locale_middleware'),
   () => import('#middleware/inertia_middleware'),
 ])
 

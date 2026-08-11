@@ -5,7 +5,10 @@ import StandingsTable from '~/components/StandingsTable.vue'
 import PoolStandings from '~/components/PoolStandings.vue'
 import Bracket from '~/components/Bracket.vue'
 import { useLiveEvent } from '~/composables/use_live_event'
+import { useI18n } from '~/composables/i18n'
 import type { PublicEventCategory, TournamentStatus } from '~/app/types'
+
+const { t } = useI18n()
 
 /**
  * Écran public d'un **événement** multi-catégories (#32, cf. CLAUDE.md §5) — double
@@ -69,12 +72,12 @@ const slots = computed(() => {
 
 const hasResults = computed(() => (active.value?.standings ?? []).some((r) => r.played > 0))
 
-const statusLabel: Record<TournamentStatus, string> = {
-  draft: 'À venir',
-  scheduled: 'À venir',
-  live: 'En direct',
-  finished: 'Terminé',
-}
+const statusLabel = computed<Record<TournamentStatus, string>>(() => ({
+  draft: t('publicEvent.status.upcoming'),
+  scheduled: t('publicEvent.status.upcoming'),
+  live: t('publicEvent.status.live'),
+  finished: t('publicEvent.status.finished'),
+}))
 
 function formatDate(iso: string | null) {
   if (!iso) return ''
@@ -98,7 +101,7 @@ function forfeitTeamName(m: PublicEventCategory['matches'][number]) {
 </script>
 
 <template>
-  <Head :title="`${event.name} — en direct`" />
+  <Head :title="t('publicEvent.headTitle', { name: event.name })" />
 
   <div class="min-h-screen bg-sand-1 text-sand-12">
     <div class="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
@@ -118,7 +121,7 @@ function forfeitTeamName(m: PublicEventCategory['matches'][number]) {
             class="flex items-center gap-1.5 text-xs font-medium text-sand-10"
           >
             <span class="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
-            Mise à jour automatique
+            {{ t('publicEvent.autoUpdate') }}
           </span>
         </div>
       </header>
@@ -128,12 +131,12 @@ function forfeitTeamName(m: PublicEventCategory['matches'][number]) {
         v-if="liveCategories.length === 0"
         class="rounded-xl bg-sand-2 px-4 py-10 text-center text-base text-sand-11"
       >
-        Aucune catégorie n'est encore publiée pour cet événement.
+        {{ t('publicEvent.emptyCategories') }}
       </p>
 
       <template v-else>
         <!-- Navigation entre catégories -->
-        <nav class="mb-6 flex flex-wrap gap-2" aria-label="Catégories de l'événement">
+        <nav class="mb-6 flex flex-wrap gap-2" :aria-label="t('publicEvent.categoriesNav')">
           <button
             v-for="c in liveCategories"
             :key="c.id"
@@ -175,13 +178,13 @@ function forfeitTeamName(m: PublicEventCategory['matches'][number]) {
               :href="`/t/${active.publicSlug}`"
               class="ml-auto text-sm font-medium text-primary hover:underline"
             >
-              Vue plein écran de la catégorie →
+              {{ t('publicEvent.fullscreenLink') }}
             </a>
           </div>
 
           <!-- Tableau d'élimination (pleine largeur, mis en avant pour l'affichage TV) -->
           <section v-if="showBracket" class="mb-8">
-            <h3 class="mb-4 text-xl font-bold sm:text-2xl">Tableau final</h3>
+            <h3 class="mb-4 text-xl font-bold sm:text-2xl">{{ t('publicEvent.finalBracket') }}</h3>
             <Bracket :matches="active.matches" />
           </section>
 
@@ -189,24 +192,24 @@ function forfeitTeamName(m: PublicEventCategory['matches'][number]) {
             <!-- Classement -->
             <section class="lg:col-span-3">
               <h3 class="mb-4 text-xl font-bold sm:text-2xl">
-                {{ showPools ? 'Classements par poule' : 'Classement' }}
+                {{ showPools ? t('publicEvent.poolStandings') : t('publicEvent.standings') }}
               </h3>
               <PoolStandings v-if="showPools" :pools="active.pools" />
               <p
                 v-else-if="showBracket"
                 class="rounded-xl bg-sand-2 px-4 py-8 text-center text-base text-sand-11"
               >
-                Le tableau final est affiché ci-dessus.
+                {{ t('publicEvent.bracketAbove') }}
               </p>
               <StandingsTable v-else-if="hasResults" :standings="active.standings" />
               <p v-else class="rounded-xl bg-sand-2 px-4 py-8 text-center text-base text-sand-11">
-                Le classement s'affichera dès le premier score.
+                {{ t('publicEvent.standingsPending') }}
               </p>
             </section>
 
             <!-- Matchs -->
             <section class="lg:col-span-2">
-              <h3 class="mb-4 text-xl font-bold sm:text-2xl">Matchs</h3>
+              <h3 class="mb-4 text-xl font-bold sm:text-2xl">{{ t('publicEvent.matches') }}</h3>
               <div v-if="slots.length" class="space-y-5">
                 <div v-for="slot in slots" :key="slot.time">
                   <div class="mb-1.5 text-sm font-bold uppercase tracking-wide text-sand-9">
@@ -222,7 +225,7 @@ function forfeitTeamName(m: PublicEventCategory['matches'][number]) {
                       "
                     >
                       <span class="w-7 shrink-0 text-center text-xs font-medium text-sand-9">
-                        T{{ m.terrainNumber }}
+                        {{ t('publicEvent.pitchShort', { n: m.terrainNumber }) }}
                       </span>
                       <span class="min-w-0 flex-1 truncate text-right font-medium">
                         {{ m.homeTeam }}
@@ -234,21 +237,22 @@ function forfeitTeamName(m: PublicEventCategory['matches'][number]) {
                         <template v-if="isFinished(m)">
                           {{ m.homeScore }} – {{ m.awayScore }}
                         </template>
-                        <template v-else>vs</template>
+                        <template v-else>{{ t('publicEvent.vs') }}</template>
                       </span>
                       <span class="min-w-0 flex-1 truncate font-medium">{{ m.awayTeam }}</span>
                       <span
                         v-if="m.status === 'forfeit'"
                         class="w-full text-right text-xs font-semibold uppercase tracking-wide text-amber-700"
                       >
-                        Forfait<span v-if="forfeitTeamName(m)"> — {{ forfeitTeamName(m) }}</span>
+                        {{ t('publicEvent.forfeit')
+                        }}<span v-if="forfeitTeamName(m)"> — {{ forfeitTeamName(m) }}</span>
                       </span>
                     </li>
                   </ul>
                 </div>
               </div>
               <p v-else class="rounded-xl bg-sand-2 px-4 py-8 text-center text-base text-sand-11">
-                Le planning n'est pas encore publié.
+                {{ t('publicEvent.schedulePending') }}
               </p>
             </section>
           </div>
@@ -256,7 +260,7 @@ function forfeitTeamName(m: PublicEventCategory['matches'][number]) {
       </template>
 
       <footer class="mt-10 border-t border-sand-6 pt-4 text-center text-xs text-sand-9">
-        Fixtura · résultats en direct
+        {{ t('publicEvent.footer') }}
       </footer>
     </div>
   </div>

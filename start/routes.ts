@@ -38,6 +38,7 @@ const RegistrationRequestsController = () => import('#controllers/registration_r
 const PalmaresController = () => import('#controllers/palmares_controller')
 const HealthController = () => import('#controllers/health_controller')
 const AuditController = () => import('#controllers/audit_controller')
+const LocaleController = () => import('#controllers/locale_controller')
 
 /**
  * Fenêtres de limitation de débit (issue #116). Généreuses : elles bloquent l'abus
@@ -136,6 +137,12 @@ router
 router.get('/mentions-legales', [LegalController, 'mentions']).as('legal.mentions')
 router.get('/cgu', [LegalController, 'terms']).as('legal.terms')
 router.get('/confidentialite', [LegalController, 'privacy']).as('legal.privacy')
+
+/**
+ * Changement de langue (issue #123) — public, sans auth. Pose le cookie de préférence
+ * `locale` puis renvoie sur la page d'origine.
+ */
+router.get('/locale/:locale', [LocaleController, 'update']).as('locale.update')
 
 /**
  * Authentification — accessible aux invités uniquement.

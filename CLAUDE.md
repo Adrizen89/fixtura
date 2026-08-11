@@ -179,6 +179,22 @@ final #106 alignés).
 - **Accessibilité WCAG AA minimum.** L'écran public : très gros contrastes, grandes typos (lisible à distance).
 - **Mobile-first** — le lien public mobile est central.
 - **Logique métier hors des contrôleurs** : services (`app/services/`), contrôleurs minces.
+- **Internationalisation (issue #123)** — **FR par défaut + anglais**, FR étant le
+  **fallback** (toute clé EN manquante retombe sur le FR). Deux couches :
+  - **Serveur** (`@adonisjs/i18n`, `config/i18n.ts`) : messages de **validation** VineJS
+    (`resources/lang/{fr,en}/validator.json`, câblés via `RequestValidator.messagesProvider`
+    dans `detect_user_locale_middleware`) et **flash** serveur (`messages.json`, lus par
+    `ctx.i18n.t(...)` dans les contrôleurs en périmètre). Formatter **ICU** (interpolation
+    `{field}`). Les messages de validation ne sont **plus** dans `start/validator.ts`.
+  - **Front** (Inertia/Vue) : dictionnaires **bundlés** `inertia/i18n/{fr,en}.ts` (parité de
+    clés garantie), composable `useI18n()` → `t('clé.pointée', { param })`, locale partagée
+    via Inertia (`page.props.locale`, SSR-safe). Sélecteur `LocaleSwitcher.vue`.
+  - **Négociation** de la langue (`detect_user_locale_middleware`, pile serveur avant Inertia) :
+    **préférence** cookie `locale` (posé par `/locale/:locale`) → `Accept-Language` → défaut FR.
+  - **Périmètre traduit** : écran public (`/t`, `/e` + composants de classement/brackets/suivi),
+    inscription publique, pages légales, connexion/onboarding, navigation/layout. Le **back-office
+    admin reste en FR** mais lit les mêmes clés (extensible écran par écran). Ajouter une chaîne =
+    ajouter sa clé dans **les deux** catalogues (front `.ts` et/ou serveur `.json`).
 
 ## 9. Points d'attention (à ne jamais oublier)
 

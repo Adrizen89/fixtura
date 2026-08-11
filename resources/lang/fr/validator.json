@@ -1,0 +1,60 @@
+{
+  "shared": {
+    "messages": {
+      "required": "Le champ {field} est obligatoire.",
+      "string": "Le champ {field} doit être une chaîne de caractères.",
+      "email": "Le champ {field} doit être une adresse e-mail valide.",
+      "number": "Le champ {field} doit être un nombre.",
+      "withoutDecimals": "Le champ {field} doit être un entier.",
+      "enum": "La valeur du champ {field} est invalide.",
+      "minLength": "Le champ {field} doit contenir au moins {min} caractère(s).",
+      "maxLength": "Le champ {field} ne doit pas dépasser {max} caractère(s).",
+      "min": "Le champ {field} doit être au moins {min}.",
+      "max": "Le champ {field} ne doit pas dépasser {max}.",
+      "regex": "Le champ {field} n'est pas au bon format.",
+      "confirmed": "La confirmation du champ {field} ne correspond pas.",
+      "database": {
+        "unique": "Un compte existe déjà avec cette adresse e-mail."
+      },
+      "name": {
+        "database": {
+          "unique": "Une équipe porte déjà ce nom dans ce tournoi."
+        }
+      },
+      "eventDate": {
+        "regex": "La date doit être au format AAAA-MM-JJ."
+      },
+      "startTime": {
+        "regex": "L'heure de début doit être au format HH:MM."
+      },
+      "lunchStart": {
+        "regex": "L'heure de la pause déjeuner doit être au format HH:MM."
+      },
+      "time": {
+        "regex": "L'heure doit être au format HH:MM."
+      }
+    },
+    "fields": {
+      "name": "nom",
+      "category": "catégorie",
+      "eventDate": "date",
+      "startTime": "heure de début",
+      "matchDurationMin": "durée d'un match",
+      "breakDurationMin": "pause entre matchs",
+      "lunchStart": "début de pause déjeuner",
+      "lunchDurationMin": "durée de pause déjeuner",
+      "numTerrains": "nombre de terrains",
+      "email": "adresse e-mail",
+      "password": "mot de passe",
+      "passwordConfirmation": "confirmation du mot de passe",
+      "clubName": "nom du club",
+      "fullName": "nom complet",
+      "role": "rôle",
+      "homeScore": "score domicile",
+      "awayScore": "score extérieur",
+      "time": "heure",
+      "terrainNumber": "terrain",
+      "side": "côté"
+    }
+  }
+}

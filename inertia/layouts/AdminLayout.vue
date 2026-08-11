@@ -2,7 +2,11 @@
 import { computed } from 'vue'
 import { Link, usePage, router } from '@inertiajs/vue3'
 import SiteFooter from '~/components/SiteFooter.vue'
+import LocaleSwitcher from '~/components/LocaleSwitcher.vue'
+import { useI18n } from '~/composables/i18n'
 import type { AuthUser, CurrentClub, FlashMessages } from '~/app/types'
+
+const { t } = useI18n()
 
 const page = usePage()
 const user = computed(() => page.props.auth as AuthUser | null)
@@ -10,7 +14,9 @@ const currentClub = computed(() => page.props.currentClub as CurrentClub | null)
 const flash = computed(() => page.props.flash as FlashMessages | undefined)
 
 /** Libellé lisible du rôle (contexte multi-tenant — issue #34). */
-const roleLabel = computed(() => (user.value?.role === 'owner' ? 'Responsable' : 'Organisateur'))
+const roleLabel = computed(() =>
+  user.value?.role === 'owner' ? t('nav.roleOwner') : t('nav.roleOrganizer')
+)
 
 function logout() {
   router.post('/logout')
@@ -24,7 +30,7 @@ function logout() {
       href="#content"
       class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:font-semibold focus:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
     >
-      Aller au contenu
+      {{ t('common.skipToContent') }}
     </a>
 
     <header class="border-b border-sand-6 bg-white">
@@ -32,43 +38,43 @@ function logout() {
         <div class="flex items-center gap-6">
           <Link href="/tournaments" class="flex items-center gap-2 font-bold text-sand-12">
             <span class="grid h-8 w-8 place-items-center rounded-lg bg-primary text-white">F</span>
-            <span class="text-lg tracking-tight">Fixtura</span>
+            <span class="text-lg tracking-tight">{{ t('nav.brand') }}</span>
           </Link>
           <nav v-if="user" class="flex items-center gap-4 text-sm font-medium">
-            <Link href="/events" class="text-sand-11 transition hover:text-sand-12"
-              >Événements</Link
-            >
-            <Link href="/tournaments" class="text-sand-11 transition hover:text-sand-12"
-              >Tournois</Link
-            >
+            <Link href="/events" class="text-sand-11 transition hover:text-sand-12">{{
+              t('nav.events')
+            }}</Link>
+            <Link href="/tournaments" class="text-sand-11 transition hover:text-sand-12">{{
+              t('nav.tournaments')
+            }}</Link>
             <!-- Archives des éditions terminées, en lecture seule (issue #108). -->
-            <Link href="/historique" class="text-sand-11 transition hover:text-sand-12"
-              >Historique</Link
-            >
+            <Link href="/historique" class="text-sand-11 transition hover:text-sand-12">{{
+              t('nav.history')
+            }}</Link>
             <!-- Palmarès : vainqueurs + bilan cumulé par équipe (issue #109). -->
-            <Link href="/palmares" class="text-sand-11 transition hover:text-sand-12"
-              >Palmarès</Link
-            >
+            <Link href="/palmares" class="text-sand-11 transition hover:text-sand-12">{{
+              t('nav.palmares')
+            }}</Link>
             <!-- Gestion des membres — réservée au responsable (issue #35). -->
             <Link
               v-if="user.role === 'owner'"
               href="/membres"
               class="text-sand-11 transition hover:text-sand-12"
-              >Membres</Link
+              >{{ t('nav.members') }}</Link
             >
             <!-- Journal d'audit — réservé au responsable (issue #117). -->
             <Link
               v-if="user.role === 'owner'"
               href="/journal"
               class="text-sand-11 transition hover:text-sand-12"
-              >Journal</Link
+              >{{ t('nav.journal') }}</Link
             >
             <!-- Personnalisation de l'écran public — responsable (issue #40). -->
             <Link
               v-if="user.role === 'owner'"
               href="/club/apparence"
               class="text-sand-11 transition hover:text-sand-12"
-              >Apparence</Link
+              >{{ t('nav.appearance') }}</Link
             >
           </nav>
         </div>
@@ -78,7 +84,7 @@ function logout() {
           <span
             v-if="currentClub"
             class="hidden items-center gap-1.5 rounded-full bg-sand-3 px-2.5 py-1 font-medium text-sand-12 md:inline-flex"
-            :aria-label="`Club courant : ${currentClub.name}`"
+            :aria-label="t('nav.currentClub', { name: currentClub.name })"
           >
             <span class="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
             {{ currentClub.name }}
@@ -87,12 +93,13 @@ function logout() {
             <span class="block">{{ user.email }}</span>
             <span class="block text-xs text-sand-9">{{ roleLabel }}</span>
           </span>
+          <LocaleSwitcher class="hidden sm:flex" />
           <button
             type="button"
             class="rounded-md border border-sand-7 px-3 py-1.5 font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             @click="logout"
           >
-            Déconnexion
+            {{ t('nav.logout') }}
           </button>
         </div>
       </div>

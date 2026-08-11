@@ -1,0 +1,418 @@
+/**
+ * English dictionary (issue #123) — second supported language.
+ *
+ * Mirrors the French catalog (~/i18n/fr). Any missing key falls back to French at
+ * lookup time (useI18n). Some legal values contain inline HTML (rendered via v-html
+ * on trusted static content).
+ */
+export default {
+  locale: {
+    switch: 'Choose language',
+  },
+  common: {
+    skipToContent: 'Skip to content',
+    backHome: 'Back to home',
+    goLogin: 'Go to sign in',
+  },
+  footer: {
+    rights: '© {year} Fixtura — ADBDigital. All rights reserved.',
+    legalLinks: 'Legal links',
+    mentions: 'Legal notice',
+    cgu: 'Terms',
+    privacy: 'Privacy',
+    exportData: 'Export my data',
+    exportTitle: 'Download all of your club data (JSON)',
+  },
+  legalLayout: {
+    brand: 'Fixtura',
+    backHome: 'Back to home',
+    updatedAt: 'Last updated: {date}',
+  },
+  nav: {
+    brand: 'Fixtura',
+    events: 'Events',
+    tournaments: 'Tournaments',
+    history: 'History',
+    palmares: 'Honours',
+    members: 'Members',
+    journal: 'Audit log',
+    appearance: 'Appearance',
+    logout: 'Sign out',
+    roleOwner: 'Owner',
+    roleOrganizer: 'Organizer',
+    currentClub: 'Current club: {name}',
+  },
+  auth: {
+    loginTitle: 'Sign in',
+    organizersArea: 'Organizers area',
+    emailLabel: 'Email address',
+    passwordLabel: 'Password',
+    signingIn: 'Signing in…',
+    signIn: 'Sign in',
+    loginConsentBefore: 'By signing in, you agree to the',
+    consentAnd: 'and the',
+    privacyPolicy: 'privacy policy',
+    noClubYet: 'No club yet?',
+    createClub: 'Create a club',
+    registerSubtitle: 'You will be the club owner.',
+    clubNameLabel: 'Club name',
+    fullNameLabel: 'Your name',
+    passwordConfirmationLabel: 'Confirm password',
+    creating: 'Creating…',
+    createClubButton: 'Create the club',
+    registerConsentBefore: 'By creating a club, you agree to the',
+    alreadyAccount: 'Already have an account?',
+  },
+  invitation: {
+    headTitle: 'Join the club',
+    joinClub: 'Join {club}',
+    roleOwner: 'owner',
+    roleOrganizer: 'organizer',
+    invitedAs: 'You were invited as',
+    fullNameLabel: 'Your name',
+    passwordLabel: 'Password',
+    passwordConfirmLabel: 'Confirm password',
+    submit: 'Join the club',
+    submitting: 'Creating…',
+    invalidHeadTitle: 'Invalid invitation',
+    unavailableTitle: 'Invitation unavailable',
+    reasonAccepted: 'This invitation has already been accepted. Log in with your account.',
+    reasonExpired: 'This invitation has expired. Ask the club owner to send you a new one.',
+    reasonNotFound: 'This invitation link is invalid or no longer exists.',
+  },
+  publicRegister: {
+    headTitle: 'Registration — {name}',
+    organizedBy: 'Organized by {club}',
+    closedTitle: 'Registration is not open for this tournament.',
+    closedHint: 'Come back later or contact the organizer.',
+    fullTitle: 'The tournament is full.',
+    fullHint: 'All spots are taken. Contact the organizer in case of a withdrawal.',
+    remaining: '{count} spot(s) left.',
+    pendingNotice:
+      'Your request will be approved by the organizer before the tournament. You will be informed of their decision by email.',
+    nameLabel: 'Team name',
+    emailLabel: 'Contact email',
+    submitting: 'Registering…',
+    submit: 'Register my team',
+    rgpdBefore:
+      'Your team name and contact email are used only to organize this tournament and to keep you informed. See our',
+    rgpdLink: 'privacy policy',
+    invalidHeadTitle: 'Invalid registration link',
+    invalidTitle: 'Link unavailable',
+    invalidBody:
+      'This registration link is invalid or no longer exists. Check the address or ask the organizer for a new link.',
+  },
+  publicEvent: {
+    headTitle: '{name} — live',
+    autoUpdate: 'Auto-updating',
+    emptyCategories: 'No category has been published for this event yet.',
+    categoriesNav: 'Event categories',
+    fullscreenLink: 'Full-screen view of the category →',
+    finalBracket: 'Final bracket',
+    poolStandings: 'Group standings',
+    standings: 'Standings',
+    bracketAbove: 'The final bracket is shown above.',
+    standingsPending: 'Standings will appear as soon as the first score is entered.',
+    matches: 'Matches',
+    pitchShort: 'P{n}',
+    vs: 'vs',
+    forfeit: 'Forfeit',
+    schedulePending: "The schedule isn't published yet.",
+    footer: 'Fixtura · live results',
+    status: {
+      upcoming: 'Upcoming',
+      live: 'Live',
+      finished: 'Finished',
+    },
+  },
+  publicTournament: {
+    headTitle: '{name} — live',
+    status: {
+      upcoming: 'Upcoming',
+      live: 'Live',
+      finished: 'Finished',
+    },
+    autoUpdate: 'Auto-updating',
+    finalBracket: 'Final bracket',
+    standingsTitle: 'Standings',
+    poolStandingsTitle: 'Group standings',
+    bracketAbove: 'The final bracket is shown above.',
+    standingsCaption:
+      'Live standings: rank, team, matches played, won, drawn, lost, goal difference and points.',
+    col: {
+      team: 'Team',
+      played: 'P',
+      won: 'W',
+      drawn: 'D',
+      lost: 'L',
+      goalDifference: 'GD',
+      points: 'Pts',
+    },
+    colFull: {
+      played: 'Played',
+      won: 'Won',
+      drawn: 'Drawn',
+      lost: 'Lost',
+      goalDifference: 'Goal difference',
+      points: 'Points',
+    },
+    sr: {
+      played: 'matches played',
+      won: 'won',
+      drawn: 'drawn',
+      lost: 'lost',
+      goalDifference: 'goal difference',
+      points: 'points',
+    },
+    standingsEmpty: 'Standings will appear with the first score.',
+    matchesTitle: 'Matches',
+    pitchShort: 'P{n}',
+    forfeit: 'Forfeit',
+    shootout: 'Penalty shootout',
+    scheduleEmpty: 'The schedule is not published yet.',
+    addToCalendar: 'Add to my calendar',
+    calendarHelp:
+      'Follow the schedule from your phone. The subscription updates automatically (delays, scores).',
+    subscribeCalendar: 'Subscribe to calendar',
+    downloadIcs: 'Download .ics',
+    footerTagline: 'Fixtura · live results',
+    legalNav: 'Legal links',
+    legalMentions: 'Legal notice',
+    cgu: 'Terms',
+    privacy: 'Privacy',
+  },
+  tv: {
+    status: {
+      upcoming: 'Upcoming',
+      live: 'Live',
+      finished: 'Finished',
+    },
+    panel: {
+      schedule: 'Schedule',
+      standings: 'Standings',
+    },
+    pitchShort: 'P{n}',
+    scheduleEmpty: 'Schedule coming soon',
+    group: 'Group {label}',
+    col: {
+      team: 'Team',
+      played: 'P',
+      goalDifference: 'GD',
+      points: 'Pts',
+    },
+    standingsEmpty: 'Standings coming soon',
+  },
+  standings: {
+    caption:
+      'Tournament standings: position, team, played, won, drawn, lost, goals for and against, goal difference and points.',
+    col: {
+      pos: 'Pos',
+      team: 'Team',
+      played: 'P',
+      playedTitle: 'Played',
+      playedSr: '— played',
+      won: 'W',
+      wonTitle: 'Won',
+      wonSr: '— won',
+      drawn: 'D',
+      drawnTitle: 'Drawn',
+      drawnSr: '— drawn',
+      lost: 'L',
+      lostTitle: 'Lost',
+      lostSr: '— lost',
+      goalsFor: 'GF',
+      goalsForTitle: 'Goals for',
+      goalsForSr: '— goals for',
+      goalsAgainst: 'GA',
+      goalsAgainstTitle: 'Goals against',
+      goalsAgainstSr: '— goals against',
+      goalDifference: 'GD',
+      goalDifferenceTitle: 'Goal difference',
+      goalDifferenceSr: '— goal difference',
+      points: 'Pts',
+      pointsTitle: 'Points',
+      pointsSr: '— points',
+    },
+  },
+  poolStandings: {
+    pool: 'Group {label}',
+  },
+  teamFollow: {
+    follow: 'Follow my team',
+    choose: '— Choose —',
+    enableNotifications: 'Enable notifications',
+    notificationsEnabled: 'Notifications enabled',
+    yourNextMatch: 'Your next match',
+    pitch: 'Pitch {number}',
+    versus: 'vs {opponent}',
+    allFinished: 'All your matches are finished. See you in the standings!',
+    noUpcoming: 'No upcoming match for now.',
+    alertsLabel: 'Your team notifications',
+    dismissAlert: 'Dismiss this alert',
+  },
+  bracket: {
+    r64: 'Round of 64',
+    r32: 'Round of 32',
+    r16: 'Round of 16',
+    qf: 'Quarter-finals',
+    sf: 'Semi-finals',
+    final: 'Final',
+    third: 'Third-place match',
+    finalRanking: 'Final ranking',
+    shootout: 'Penalty shootout',
+    emptyKnockout: 'The final bracket will appear once the schedule is generated.',
+    winnersFinal: 'Winners final',
+    winnersRound: 'Winners — R {n}',
+    losersFinal: 'Losers final',
+    losersRound: 'Losers — R {n}',
+    mainBracket: 'Main bracket',
+    losersBracket: 'Losers bracket',
+    grandFinal: 'Grand final',
+    emptyBracket: 'The bracket will appear once the schedule is generated.',
+  },
+  legal: {
+    mentions: {
+      title: 'Legal notice',
+      publisher: {
+        heading: 'Publisher',
+        intro:
+          'The <strong>Fixtura</strong> website (available at <a href="https://fixtura.fr">fixtura.fr</a>) is published by <strong>ADBDigital</strong>, a sole proprietorship (micro-entreprise).',
+        director: 'Publication director: Adrien (ADBDigital).',
+        contact:
+          'Contact: <a href="mailto:adri.veille.tech@gmail.com">adri.veille.tech@gmail.com</a>',
+        registration: 'SIREN / SIRET: <em>[to be completed]</em>',
+        address: 'Address: <em>[to be completed]</em>',
+      },
+      hosting: {
+        heading: 'Hosting provider',
+        intro:
+          'The website is hosted on a <strong>Hostinger</strong> virtual private server (VPS):',
+        company: 'Hostinger International Ltd.',
+        location: '61 Lordou Vironos Str., 6023 Larnaca, Cyprus.',
+        website: 'Website: <a href="https://www.hostinger.fr">www.hostinger.fr</a>',
+      },
+      ip: {
+        heading: 'Intellectual property',
+        body: 'All elements making up Fixtura (code, interface, visual identity, text) are the exclusive property of ADBDigital, unless otherwise stated. Any reproduction or representation, in whole or in part, without prior authorisation is prohibited. The <em>Inter</em> typeface is used under the SIL Open Font License and served from our own servers.',
+      },
+      liability: {
+        heading: 'Liability',
+        body: 'Fixtura is a tournament management tool: schedules, results and standings are generated from the information entered by organisers. ADBDigital cannot be held liable for data-entry errors or for the temporary unavailability of the service.',
+      },
+      data: {
+        heading: 'Personal data',
+        body: 'The processing of personal data is described in our <a href="/confidentialite">privacy policy</a>. The terms of use are set out in the <a href="/cgu">Terms of use</a>.',
+      },
+    },
+    terms: {
+      title: 'Terms of use',
+      purpose: {
+        heading: '1. Purpose',
+        body: 'These terms of use (ToU) govern access to and use of <strong>Fixtura</strong>, a football tournament management tool published by ADBDigital. By creating an account or logging in, the organiser fully accepts these ToU and the <a href="/confidentialite">privacy policy</a>.',
+      },
+      access: {
+        heading: '2. Access to the service',
+        body: 'Access to the administration area is reserved for organisers who have an account. At this stage, accounts and clubs are created by ADBDigital; there is no public self-service sign-up. Each organiser is responsible for keeping their credentials confidential and for the actions carried out with their account.',
+      },
+      usage: {
+        heading: '3. Compliant use',
+        item1:
+          'The organiser undertakes to record only the necessary data: <strong>team names</strong> — excluding any personal data about players (name, age, licence, etc.).',
+        item2:
+          'They warrant that they are authorised to enter and share the information they publish (team names, results).',
+        item3: 'Any misuse, fraudulent use or use contrary to the law is prohibited.',
+      },
+      publicDisplay: {
+        heading: '4. Public display',
+        body: 'Each tournament has a read-only public link showing the schedule, results and standings. The organiser acknowledges that this information is intended to be shared with the teams and the public in attendance.',
+      },
+      availability: {
+        heading: '5. Availability',
+        body: 'Fixtura is provided "as is". ADBDigital uses reasonable efforts to ensure the availability of the service but does not guarantee uninterrupted continuity (maintenance, incidents, hosting).',
+      },
+      liability: {
+        heading: '6. Liability',
+        body: 'Schedules, standings and results are calculated from the data entered by organisers. ADBDigital cannot be held liable for data-entry errors or for the consequences of any non-compliant use of the service.',
+      },
+      ip: {
+        heading: '7. Intellectual property',
+        body: 'Fixtura and its components are the property of ADBDigital (see the <a href="/mentions-legales">legal notice</a>).',
+      },
+      changes: {
+        heading: '8. Changes to the ToU',
+        body: 'ADBDigital may amend these ToU. The applicable version is the one in force at the time the service is used.',
+      },
+      law: {
+        heading: '9. Governing law',
+        body: 'These ToU are governed by French law. Failing an amicable settlement, the French courts shall have jurisdiction.',
+      },
+    },
+    privacy: {
+      title: 'Privacy policy',
+      intro:
+        'This policy describes how <strong>Fixtura</strong> (published by ADBDigital) processes personal data as part of managing football tournaments. We apply the principle of <strong>data minimisation</strong>: only the data strictly necessary for the service is collected.',
+      controller: {
+        heading: 'Data controller',
+        body: 'ADBDigital — contact: <a href="mailto:adri.veille.tech@gmail.com">adri.veille.tech@gmail.com</a>.',
+      },
+      data: {
+        heading: 'Data collected',
+        organizers: {
+          heading: 'Organisers (accounts)',
+          item1: 'Name (optional) and <strong>email address</strong>.',
+          item2: 'Password, never stored in clear text: it is <strong>hashed</strong> (scrypt).',
+          item3: 'Role (owner or organiser) and the club they belong to.',
+        },
+        teams: {
+          heading: 'Teams and tournaments',
+          item1:
+            '<strong>Team names only</strong> — no player data is handled (no name, no age, no licence).',
+          item2:
+            'Tournament settings, schedule, scores, match status and the timestamp of the last entry (together with the organiser who made it).',
+        },
+      },
+      purpose: {
+        heading: 'Purposes and legal basis',
+        body: 'The data is used solely to provide the service: authenticate organisers, generate schedules, enter results, calculate the live standings and display them. The legal basis is the <strong>performance of the contract</strong> between you and ADBDigital (provision of the tool) and our legitimate interest in securing access.',
+      },
+      publicDisplay: {
+        heading: 'Public display',
+        body: "A tournament's public screen (accessible via an unguessable link) is <strong>read-only</strong> and displays only information intended to be public: tournament name, team names, scores and standings. It <strong>never</strong> exposes organisers' email addresses or any account data.",
+      },
+      recipients: {
+        heading: 'Recipients and processors',
+        item1: 'The data is neither sold nor transferred to third parties for commercial purposes.',
+        item2:
+          'Hosting: <strong>Hostinger</strong> (VPS, data stored within the European Union). See the <a href="/mentions-legales">legal notice</a>.',
+      },
+      cookies: {
+        heading: 'Cookies and trackers',
+        intro:
+          'Fixtura uses <strong>no advertising trackers or analytics tools</strong> (no Google Analytics, no pixel, etc.). Only cookies that are <strong>strictly necessary</strong> for it to work are set:',
+        item1: 'a session cookie to keep organisers logged in;',
+        item2: 'an anti-CSRF cookie to secure forms.',
+        note: '<strong>No third-party tracking resources</strong> are loaded: fonts are hosted on our own servers (no Google Fonts or external CDN). The public screen, viewed without an account, sets no cookies.',
+      },
+      retention: {
+        heading: 'Retention period',
+        body: "A tournament's data is kept for as long as the club needs it (history of past editions). An inactive account or a club can be deleted at any time on request (see below).",
+      },
+      rights: {
+        heading: 'Your rights',
+        intro:
+          'In accordance with the GDPR, you have the right to access, rectify, erase, port and object to the processing of your data:',
+        portability:
+          "<strong>Portability / access</strong>: a club owner can download all of the club's data in JSON format from their account (the « Export my data » link in the footer).",
+        erasure:
+          '<strong>Erasure</strong>: on request to <a href="mailto:adri.veille.tech@gmail.com">adri.veille.tech@gmail.com</a>, a club and all of its data (tournaments, teams, matches, accounts) are permanently deleted.',
+        complaint:
+          'You can also lodge a complaint with the CNIL (<a href="https://www.cnil.fr">www.cnil.fr</a>).',
+      },
+      security: {
+        heading: 'Security',
+        item1: 'Encrypted connections (HTTPS) and hashed passwords (scrypt).',
+        item2: 'Public access limited to read-only, via an unguessable identifier.',
+      },
+    },
+  },
+}

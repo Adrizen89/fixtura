@@ -2,12 +2,15 @@
 import { computed } from 'vue'
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3'
 import SiteFooter from '~/components/SiteFooter.vue'
+import { useI18n } from '~/composables/i18n'
 import type { FlashMessages } from '~/app/types'
 
 /**
  * Inscription d'un club (issue #35) : crée le club et son premier responsable
  * (`owner`). Formulaire public, même gabarit que la connexion.
  */
+const { t } = useI18n()
+
 const page = usePage()
 const flashError = computed(() => (page.props.flash as FlashMessages | undefined)?.error ?? null)
 
@@ -27,7 +30,7 @@ function submit() {
 </script>
 
 <template>
-  <Head title="Créer un club" />
+  <Head :title="t('auth.createClub')" />
 
   <div class="flex min-h-screen flex-col bg-sand-2">
     <div class="flex flex-1 items-center justify-center px-4 py-12">
@@ -38,8 +41,8 @@ function submit() {
           >
             F
           </span>
-          <h1 class="text-2xl font-bold tracking-tight text-sand-12">Créer un club</h1>
-          <p class="mt-1 text-sm text-sand-11">Vous serez le responsable du club.</p>
+          <h1 class="text-2xl font-bold tracking-tight text-sand-12">{{ t('auth.createClub') }}</h1>
+          <p class="mt-1 text-sm text-sand-11">{{ t('auth.registerSubtitle') }}</p>
         </div>
 
         <form
@@ -56,7 +59,7 @@ function submit() {
 
           <div>
             <label for="clubName" class="mb-1 block text-sm font-medium text-sand-12">
-              Nom du club
+              {{ t('auth.clubNameLabel') }}
             </label>
             <input
               id="clubName"
@@ -74,7 +77,7 @@ function submit() {
 
           <div>
             <label for="fullName" class="mb-1 block text-sm font-medium text-sand-12">
-              Votre nom
+              {{ t('auth.fullNameLabel') }}
             </label>
             <input
               id="fullName"
@@ -92,7 +95,7 @@ function submit() {
 
           <div>
             <label for="email" class="mb-1 block text-sm font-medium text-sand-12">
-              Adresse e-mail
+              {{ t('auth.emailLabel') }}
             </label>
             <input
               id="email"
@@ -110,7 +113,7 @@ function submit() {
 
           <div>
             <label for="password" class="mb-1 block text-sm font-medium text-sand-12">
-              Mot de passe
+              {{ t('auth.passwordLabel') }}
             </label>
             <input
               id="password"
@@ -128,7 +131,7 @@ function submit() {
 
           <div>
             <label for="passwordConfirmation" class="mb-1 block text-sm font-medium text-sand-12">
-              Confirmer le mot de passe
+              {{ t('auth.passwordConfirmationLabel') }}
             </label>
             <input
               id="passwordConfirmation"
@@ -149,23 +152,25 @@ function submit() {
             :disabled="form.processing"
             class="w-full rounded-lg bg-primary px-4 py-2.5 font-semibold text-white transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {{ form.processing ? 'Création…' : 'Créer le club' }}
+            {{ form.processing ? t('auth.creating') : t('auth.createClubButton') }}
           </button>
 
           <p class="text-center text-xs leading-relaxed text-sand-10">
-            En créant un club, vous acceptez les
-            <Link href="/cgu" class="font-medium text-primary hover:underline">CGU</Link>
-            et la
+            {{ t('auth.registerConsentBefore') }}
+            <Link href="/cgu" class="font-medium text-primary hover:underline">{{
+              t('footer.cgu')
+            }}</Link>
+            {{ t('auth.consentAnd') }}
             <Link href="/confidentialite" class="font-medium text-primary hover:underline">
-              politique de confidentialité </Link
+              {{ t('auth.privacyPolicy') }} </Link
             >.
           </p>
         </form>
 
         <p class="mt-6 text-center text-sm text-sand-11">
-          Déjà un compte ?
+          {{ t('auth.alreadyAccount') }}
           <Link href="/login" class="font-semibold text-primary hover:underline">
-            Se connecter
+            {{ t('auth.signIn') }}
           </Link>
         </p>
       </div>

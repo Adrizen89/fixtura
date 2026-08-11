@@ -3,6 +3,9 @@ import { computed } from 'vue'
 import type { ResultMatchRow } from '~/app/types'
 import { finalRanking, ordinalFr } from '~/composables/final_ranking'
 import DoubleEliminationBracket from '~/components/DoubleEliminationBracket.vue'
+import { useI18n } from '~/composables/i18n'
+
+const { t } = useI18n()
 
 /**
  * Arbre d'élimination directe — affichage **sobre** en colonnes par tour.
@@ -29,15 +32,15 @@ const isDoubleElimination = computed(() =>
 )
 
 const ROUND_ORDER = ['r64', 'r32', 'r16', 'qf', 'sf', 'final']
-const ROUND_LABEL: Record<string, string> = {
-  r64: '32es de finale',
-  r32: '16es de finale',
-  r16: '8es de finale',
-  qf: 'Quarts',
-  sf: 'Demi-finales',
-  final: 'Finale',
-  third: 'Petite finale',
-}
+const ROUND_LABEL = computed<Record<string, string>>(() => ({
+  r64: t('bracket.r64'),
+  r32: t('bracket.r32'),
+  r16: t('bracket.r16'),
+  qf: t('bracket.qf'),
+  sf: t('bracket.sf'),
+  final: t('bracket.final'),
+  third: t('bracket.third'),
+}))
 
 const ko = computed(() => props.matches.filter((m) => m.stage === 'knockout'))
 
@@ -46,7 +49,7 @@ const columns = computed(() => {
   const present = new Set(ko.value.map((m) => m.bracketRound))
   return ROUND_ORDER.filter((r) => present.has(r)).map((round) => ({
     round,
-    label: ROUND_LABEL[round] ?? round,
+    label: ROUND_LABEL.value[round] ?? round,
     matches: ko.value
       .filter((m) => m.bracketRound === round)
       .sort((a, b) => (a.bracketSlot ?? 0) - (b.bracketSlot ?? 0)),
@@ -96,7 +99,7 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
     <!-- Classement final (podium) une fois la finale jouée (issue #106). -->
     <div v-if="podium.length" class="mb-5">
       <h3 class="mb-2 text-xs font-semibold uppercase tracking-wide text-sand-9">
-        Classement final
+        {{ t('bracket.finalRanking') }}
       </h3>
       <ol class="flex flex-wrap gap-2">
         <li
@@ -143,7 +146,7 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
                 v-if="isShootout(m)"
                 class="px-3 pb-1 pt-0.5 text-[10px] font-semibold uppercase tracking-wide text-sand-9"
               >
-                Tirs au but
+                {{ t('bracket.shootout') }}
               </div>
             </div>
           </div>
@@ -175,13 +178,13 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
           v-if="isShootout(third)"
           class="px-3 pb-1 pt-0.5 text-[10px] font-semibold uppercase tracking-wide text-sand-9"
         >
-          Tirs au but
+          {{ t('bracket.shootout') }}
         </div>
       </div>
     </div>
   </div>
 
   <p v-else class="rounded-xl bg-sand-2 px-4 py-8 text-center text-sm text-sand-11">
-    Le tableau final s'affichera une fois le planning généré.
+    {{ t('bracket.emptyKnockout') }}
   </p>
 </template>
