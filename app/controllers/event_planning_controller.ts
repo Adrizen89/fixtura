@@ -30,11 +30,11 @@ export default class EventPlanningController {
   }
 
   /** Aperçu du planning combiné (sans persistance). */
-  async preview({ inertia, response, params, session }: HttpContext) {
+  async preview({ inertia, response, params, session, i18n }: HttpContext) {
     const { event, categories } = await this.load(params.id)
 
     if (categories.length === 0) {
-      session.flash('error', 'Ajoutez au moins une catégorie avant de générer le planning.')
+      session.flash('error', i18n.t('messages.flash.admin.eventPlanningNeedCategory'))
       return response.redirect().toRoute('events.show', { id: event.id })
     }
 
@@ -58,18 +58,18 @@ export default class EventPlanningController {
   }
 
   /** Valide l'aperçu : génère puis persiste le planning combiné (draft → scheduled). */
-  async store({ response, params, session }: HttpContext) {
+  async store({ response, params, session, i18n }: HttpContext) {
     const { event, categories } = await this.load(params.id)
 
     if (categories.length === 0) {
-      session.flash('error', 'Ajoutez au moins une catégorie avant de générer le planning.')
+      session.flash('error', i18n.t('messages.flash.admin.eventPlanningNeedCategory'))
       return response.redirect().toRoute('events.show', { id: event.id })
     }
 
     try {
       const schedule = generateEventSchedule(event, categories)
       await persistEventSchedule(event, categories, schedule)
-      session.flash('success', 'Planning de l’événement généré et enregistré.')
+      session.flash('success', i18n.t('messages.flash.admin.eventPlanningGenerated'))
     } catch (error) {
       if (error instanceof SchedulerError) {
         session.flash('error', error.message)

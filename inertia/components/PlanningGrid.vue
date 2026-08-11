@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import type { PlanningSlotView } from '~/app/types'
+import { useI18n } from '~/composables/i18n'
 
 defineProps<{
   slots: PlanningSlotView[]
   /** Affiche la colonne des scores (planning persisté). */
   showScores?: boolean
 }>()
+
+const { t } = useI18n()
 
 function scoreLabel(home: number | null, away: number | null) {
   if (home === null || away === null) return '—'
@@ -17,14 +20,18 @@ function scoreLabel(home: number | null, away: number | null) {
   <div class="overflow-x-auto">
     <table class="w-full border-collapse text-sm">
       <caption class="sr-only">
-        Planning des matchs par créneau horaire, terrain et affiche.
+        {{
+          t('planningGrid.caption')
+        }}
       </caption>
       <thead>
         <tr class="border-b border-sand-6 text-left text-xs uppercase tracking-wide text-sand-9">
-          <th scope="col" class="py-2 pr-4 font-medium">Heure</th>
-          <th scope="col" class="py-2 pr-4 font-medium">Terrain</th>
-          <th scope="col" class="py-2 pr-4 font-medium">Match</th>
-          <th v-if="showScores" scope="col" class="py-2 font-medium">Score</th>
+          <th scope="col" class="py-2 pr-4 font-medium">{{ t('planningGrid.time') }}</th>
+          <th scope="col" class="py-2 pr-4 font-medium">{{ t('planningGrid.pitch') }}</th>
+          <th scope="col" class="py-2 pr-4 font-medium">{{ t('planningGrid.match') }}</th>
+          <th v-if="showScores" scope="col" class="py-2 font-medium">
+            {{ t('planningGrid.score') }}
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -46,7 +53,7 @@ function scoreLabel(home: number | null, away: number | null) {
             </td>
             <td class="py-2 pr-4 text-sand-12">
               <span>{{ match.homeTeam }}</span>
-              <span class="px-1.5 text-sand-9">vs</span>
+              <span class="px-1.5 text-sand-9">{{ t('planningGrid.versus') }}</span>
               <span>{{ match.awayTeam }}</span>
             </td>
             <td v-if="showScores" class="py-2 tabular-nums text-sand-12">

@@ -2,12 +2,15 @@
 import { computed, ref, watch } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import type { ResultMatchRow } from '~/app/types'
+import { useI18n } from '~/composables/i18n'
 
 const props = defineProps<{
   match: ResultMatchRow
   tournamentId: number
   numTerrains: number
 }>()
+
+const { t } = useI18n()
 
 const base = computed(() => `/tournaments/${props.tournamentId}/matches/${props.match.id}`)
 
@@ -130,7 +133,7 @@ function formatTime(iso: string | null) {
       <span
         class="inline-flex shrink-0 items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800"
       >
-        Exempt · victoire
+        {{ t('matchScoreRow.byeWin') }}
       </span>
     </div>
 
@@ -160,7 +163,7 @@ function formatTime(iso: string | null) {
           max="99"
           required
           inputmode="numeric"
-          aria-label="Score domicile"
+          :aria-label="t('matchScoreRow.homeScoreLabel')"
           class="w-14 rounded-lg border border-sand-7 px-2 py-1.5 text-center tabular-nums outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
           :class="{ 'border-red-400': scoreForm.errors.homeScore }"
         />
@@ -172,7 +175,7 @@ function formatTime(iso: string | null) {
           max="99"
           required
           inputmode="numeric"
-          aria-label="Score extérieur"
+          :aria-label="t('matchScoreRow.awayScoreLabel')"
           class="w-14 rounded-lg border border-sand-7 px-2 py-1.5 text-center tabular-nums outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
           :class="{ 'border-red-400': scoreForm.errors.awayScore }"
         />
@@ -184,7 +187,7 @@ function formatTime(iso: string | null) {
         :disabled="scoreForm.processing"
         class="shrink-0 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        Enregistrer
+        {{ t('matchScoreRow.save') }}
       </button>
 
       <!-- Bascule du panneau « aléas » (décaler / forfait). -->
@@ -193,19 +196,19 @@ function formatTime(iso: string | null) {
         :aria-expanded="showIncidents"
         :aria-controls="`incidents-${match.id}`"
         class="shrink-0 rounded-lg border border-sand-7 px-2 py-1.5 text-sm text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
-        title="Aléas : décaler, forfait"
+        :title="t('matchScoreRow.incidentsTitle')"
         @click="showIncidents = !showIncidents"
       >
-        Aléas {{ showIncidents ? '▴' : '▾' }}
+        {{ t('matchScoreRow.incidents') }} {{ showIncidents ? '▴' : '▾' }}
       </button>
     </form>
 
     <!-- Nul en élimination : désignation du vainqueur aux tirs au but (issue #105). -->
     <div v-if="needsShootout" class="mt-2 flex flex-wrap items-center gap-2 pl-11">
       <span class="text-xs font-semibold uppercase tracking-wide text-amber-700">
-        Nul — vainqueur t.a.b.
+        {{ t('matchScoreRow.drawShootout') }}
       </span>
-      <div class="flex gap-1.5" role="group" aria-label="Vainqueur aux tirs au but">
+      <div class="flex gap-1.5" role="group" :aria-label="t('matchScoreRow.shootoutWinnerLabel')">
         <button
           type="button"
           :aria-pressed="scoreForm.shootoutWinner === 'home'"
@@ -233,7 +236,7 @@ function formatTime(iso: string | null) {
           {{ match.awayTeam }}
         </button>
       </div>
-      <span class="text-xs text-sand-9">puis « Enregistrer »</span>
+      <span class="text-xs text-sand-9">{{ t('matchScoreRow.thenSave') }}</span>
     </div>
 
     <!-- Ligne d'état : forfait, tirs au but et/ou dernière saisie. -->
@@ -245,16 +248,20 @@ function formatTime(iso: string | null) {
         v-if="isForfeit"
         class="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-800"
       >
-        Forfait{{ forfeitTeam ? ` — ${forfeitTeam}` : '' }}
+        {{
+          forfeitTeam
+            ? t('matchScoreRow.forfeitWithTeam', { team: forfeitTeam })
+            : t('matchScoreRow.forfeit')
+        }}
       </span>
       <span
         v-if="shootoutTeam"
         class="inline-flex items-center rounded-full bg-sand-3 px-2 py-0.5 font-medium text-sand-11"
       >
-        t.a.b. — {{ shootoutTeam }}
+        {{ t('matchScoreRow.shootoutResult', { team: shootoutTeam }) }}
       </span>
       <span v-if="match.updatedBy">
-        Saisi par {{ match.updatedBy
+        {{ t('matchScoreRow.enteredBy', { name: match.updatedBy })
         }}<span v-if="match.updatedAt"> · {{ formatTime(match.updatedAt) }}</span>
       </span>
     </p>
@@ -267,20 +274,24 @@ function formatTime(iso: string | null) {
     >
       <!-- Décaler le match -->
       <form class="flex flex-wrap items-center gap-2" @submit.prevent="submitReschedule">
-        <span class="text-xs font-semibold uppercase tracking-wide text-sand-10">Décaler</span>
+        <span class="text-xs font-semibold uppercase tracking-wide text-sand-10">{{
+          t('matchScoreRow.reschedule')
+        }}</span>
         <input
           v-model="scheduleForm.time"
           type="time"
           required
-          :aria-label="`Nouvelle heure de ${match.homeTeam} contre ${match.awayTeam}`"
+          :aria-label="
+            t('matchScoreRow.newTimeLabel', { home: match.homeTeam, away: match.awayTeam })
+          "
           class="rounded-lg border border-sand-7 px-2 py-1 text-sm tabular-nums outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
           :class="{ 'border-red-400': scheduleForm.errors.time }"
         />
         <label class="flex items-center gap-1 text-sm text-sand-11">
-          Terrain
+          {{ t('matchScoreRow.pitch') }}
           <select
             v-model.number="scheduleForm.terrainNumber"
-            aria-label="Terrain"
+            :aria-label="t('matchScoreRow.pitch')"
             class="rounded-lg border border-sand-7 px-2 py-1 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
           >
             <option v-for="n in numTerrains" :key="n" :value="n">T{{ n }}</option>
@@ -291,13 +302,15 @@ function formatTime(iso: string | null) {
           :disabled="scheduleForm.processing"
           class="rounded-lg border border-sand-7 px-3 py-1 text-sm font-medium text-sand-12 transition hover:bg-sand-3 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Décaler
+          {{ t('matchScoreRow.reschedule') }}
         </button>
       </form>
 
       <!-- Déclarer un forfait -->
       <div class="flex flex-wrap items-center gap-2">
-        <span class="text-xs font-semibold uppercase tracking-wide text-sand-10">Forfait</span>
+        <span class="text-xs font-semibold uppercase tracking-wide text-sand-10">{{
+          t('matchScoreRow.forfeit')
+        }}</span>
         <button
           type="button"
           :disabled="forfeitForm.processing"
@@ -314,7 +327,7 @@ function formatTime(iso: string | null) {
         >
           {{ match.awayTeam }}
         </button>
-        <span class="text-xs text-sand-9">déclare forfait (défaite 3–0)</span>
+        <span class="text-xs text-sand-9">{{ t('matchScoreRow.forfeitHint') }}</span>
       </div>
     </div>
   </div>

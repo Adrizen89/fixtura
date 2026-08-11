@@ -77,7 +77,7 @@ export default class TournamentsController {
   }
 
   /** Persiste un nouveau tournoi. */
-  async store({ request, response, auth, session }: HttpContext) {
+  async store({ request, response, auth, session, i18n }: HttpContext) {
     const data = await request.validateUsing(tournamentValidator)
 
     const tournament = await Tournament.create({
@@ -100,7 +100,7 @@ export default class TournamentsController {
       formatConfig: formatConfigOf(data),
     })
 
-    session.flash('success', 'Tournoi créé.')
+    session.flash('success', i18n.t('messages.flash.admin.tournamentCreated'))
     return response.redirect().toRoute('tournaments.show', { id: tournament.id })
   }
 
@@ -147,7 +147,7 @@ export default class TournamentsController {
   }
 
   /** Met à jour un tournoi. */
-  async update({ request, response, params, session }: HttpContext) {
+  async update({ request, response, params, session, i18n }: HttpContext) {
     const tournament = await this.query().where('id', params.id).firstOrFail()
     const data = await request.validateUsing(tournamentValidator)
 
@@ -169,12 +169,12 @@ export default class TournamentsController {
     })
     await tournament.save()
 
-    session.flash('success', 'Tournoi mis à jour.')
+    session.flash('success', i18n.t('messages.flash.admin.tournamentUpdated'))
     return response.redirect().toRoute('tournaments.show', { id: tournament.id })
   }
 
   /** Supprime un tournoi (cascade équipes + matchs). Réservé au responsable (owner). */
-  async destroy({ request, response, params, auth, session }: HttpContext) {
+  async destroy({ request, response, params, auth, session, i18n }: HttpContext) {
     if (!TournamentPolicy.delete(auth.user!)) {
       return deny({ session, response })
     }
@@ -185,7 +185,7 @@ export default class TournamentsController {
       target: tournament.name,
     })
 
-    session.flash('success', 'Tournoi supprimé.')
+    session.flash('success', i18n.t('messages.flash.admin.tournamentDeleted'))
     return response.redirect().toRoute('tournaments.index')
   }
 }

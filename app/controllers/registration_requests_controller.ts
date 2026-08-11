@@ -32,7 +32,7 @@ export default class RegistrationRequestsController {
   }
 
   /** Valide une demande → crée l'équipe + notifie. */
-  async approve({ params, response, auth, session }: HttpContext) {
+  async approve({ params, response, auth, session, i18n }: HttpContext) {
     const { tournament, registration } = await this.findRegistration(
       params.id,
       params.registrationId
@@ -41,7 +41,7 @@ export default class RegistrationRequestsController {
     try {
       const team = await approveRegistration(registration, auth.user!)
       await deliverRegistrationDecision(registration, tournament.name, 'approved')
-      session.flash('success', `L'équipe « ${team.name} » est validée et ajoutée au tournoi.`)
+      session.flash('success', i18n.t('messages.flash.admin.requestApproved', { team: team.name }))
     } catch (error) {
       if (error instanceof DuplicateTeamNameError || error instanceof RegistrationNotPendingError) {
         session.flash('error', error.message)
@@ -54,7 +54,7 @@ export default class RegistrationRequestsController {
   }
 
   /** Refuse une demande → archive + notifie. */
-  async reject({ params, response, auth, session }: HttpContext) {
+  async reject({ params, response, auth, session, i18n }: HttpContext) {
     const { tournament, registration } = await this.findRegistration(
       params.id,
       params.registrationId
@@ -63,7 +63,10 @@ export default class RegistrationRequestsController {
     try {
       await rejectRegistration(registration, auth.user!)
       await deliverRegistrationDecision(registration, tournament.name, 'rejected')
-      session.flash('success', `La demande de l'équipe « ${registration.teamName} » a été refusée.`)
+      session.flash(
+        'success',
+        i18n.t('messages.flash.admin.requestRejected', { team: registration.teamName })
+      )
     } catch (error) {
       if (error instanceof RegistrationNotPendingError) {
         session.flash('error', error.message)

@@ -1,4 +1,7 @@
 import { test } from '@japa/runner'
+import testUtils from '@adonisjs/core/services/test_utils'
+import Club from '#models/club'
+import User from '#models/user'
 import { resetRateLimits } from '#services/rate_limit'
 
 /**
@@ -79,5 +82,41 @@ test.group('i18n · négociation & traduction (#123)', (group) => {
     // Contenu prose rendu via v-html + titre : la traduction anglaise s'affiche.
     assert.include(res.text(), 'Terms of use')
     assert.include(res.text(), 'football tournament management tool')
+  })
+})
+
+/**
+ * Back-office admin : traduit en anglais mais câblé sur les mêmes clés que le public
+ * (extensible). On vérifie qu'une page admin authentifiée rend bien la langue choisie.
+ */
+test.group('i18n · back-office admin (#123)', (group) => {
+  group.each.setup(() => testUtils.db().truncate())
+
+  async function makeOwner() {
+    const club = await Club.create({ name: 'Club i18n', slug: 'club-i18n' })
+    return User.create({
+      clubId: club.id,
+      fullName: 'Owner i18n',
+      email: 'owner-i18n@test.fixtura',
+      password: 'password',
+      role: 'owner',
+    })
+  }
+
+  test('tableau de bord tournois — FR par défaut', async ({ client, assert }) => {
+    const owner = await makeOwner()
+    const res = await client.get('/tournaments').loginAs(owner)
+    res.assertStatus(200)
+    assert.include(res.text(), 'Nouveau tournoi')
+    assert.include(res.text(), 'Tournois')
+  })
+
+  test('tableau de bord tournois — EN via Accept-Language', async ({ client, assert }) => {
+    const owner = await makeOwner()
+    const res = await client.get('/tournaments').header('accept-language', 'en').loginAs(owner)
+    res.assertStatus(200)
+    assert.include(res.text(), 'New tournament')
+    assert.include(res.text(), 'Tournaments')
+    assert.notInclude(res.text(), 'Nouveau tournoi')
   })
 })

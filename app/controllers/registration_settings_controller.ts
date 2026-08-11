@@ -13,16 +13,16 @@ import { openRegistration, closeRegistration } from '#services/team_registration
  * réservée à l'`owner`).
  */
 export default class RegistrationSettingsController {
-  async update({ request, response, params, session }: HttpContext) {
+  async update({ request, response, params, session, i18n }: HttpContext) {
     const tournament = await Tournament.query().where('id', params.id).firstOrFail()
     const data = await request.validateUsing(registrationSettingsValidator)
 
     if (data.open) {
       await openRegistration(tournament, data.capacity ?? null)
-      session.flash('success', 'Inscriptions en ligne ouvertes.')
+      session.flash('success', i18n.t('messages.flash.admin.registrationOpened'))
     } else {
       await closeRegistration(tournament)
-      session.flash('success', 'Inscriptions en ligne fermées.')
+      session.flash('success', i18n.t('messages.flash.admin.registrationClosed'))
     }
 
     return response.redirect().toRoute('tournaments.show', { id: tournament.id })

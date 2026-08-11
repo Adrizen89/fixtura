@@ -24,14 +24,14 @@ export default class PlanningController {
   }
 
   /** Aperçu du planning (sans persistance). */
-  async preview({ inertia, response, params, session }: HttpContext) {
+  async preview({ inertia, response, params, session, i18n }: HttpContext) {
     const tournament = await this.query()
       .where('id', params.id)
       .preload('teams', (q) => q.orderBy('name'))
       .firstOrFail()
 
     if (tournament.teams.length < 2) {
-      session.flash('error', 'Il faut au moins 2 équipes pour générer un planning.')
+      session.flash('error', i18n.t('messages.flash.admin.planningNeedTwoTeams'))
       return response.redirect().toRoute('tournaments.show', { id: tournament.id })
     }
 
@@ -64,14 +64,14 @@ export default class PlanningController {
   }
 
   /** Valide l'aperçu : génère puis persiste le planning (draft → scheduled). */
-  async store({ response, params, session }: HttpContext) {
+  async store({ response, params, session, i18n }: HttpContext) {
     const tournament = await this.query()
       .where('id', params.id)
       .preload('teams', (q) => q.orderBy('name'))
       .firstOrFail()
 
     if (tournament.teams.length < 2) {
-      session.flash('error', 'Il faut au moins 2 équipes pour générer un planning.')
+      session.flash('error', i18n.t('messages.flash.admin.planningNeedTwoTeams'))
       return response.redirect().toRoute('tournaments.show', { id: tournament.id })
     }
 
@@ -83,7 +83,7 @@ export default class PlanningController {
       } else {
         await persistPhasedSchedule(tournament, generatePhasedFor(tournament))
       }
-      session.flash('success', 'Planning généré et enregistré.')
+      session.flash('success', i18n.t('messages.flash.admin.planningGenerated'))
     } catch (error) {
       if (error instanceof SchedulerError) {
         session.flash('error', error.message)

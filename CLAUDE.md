@@ -191,10 +191,14 @@ final #106 alignés).
     via Inertia (`page.props.locale`, SSR-safe). Sélecteur `LocaleSwitcher.vue`.
   - **Négociation** de la langue (`detect_user_locale_middleware`, pile serveur avant Inertia) :
     **préférence** cookie `locale` (posé par `/locale/:locale`) → `Accept-Language` → défaut FR.
-  - **Périmètre traduit** : écran public (`/t`, `/e` + composants de classement/brackets/suivi),
-    inscription publique, pages légales, connexion/onboarding, navigation/layout. Le **back-office
-    admin reste en FR** mais lit les mêmes clés (extensible écran par écran). Ajouter une chaîne =
-    ajouter sa clé dans **les deux** catalogues (front `.ts` et/ou serveur `.json`).
+  - **Périmètre traduit** : **toute l'application** — écran public (`/t`, `/e` + composants de
+    classement/brackets/suivi), inscription publique, pages légales, connexion/onboarding, et le
+    **back-office admin** (tableaux de bord tournois/événements, formulaires, saisie des résultats,
+    gestion des équipes/inscriptions, membres, journal, historique, palmarès, apparence, pages
+    d'erreur) + navigation/layout. Les **messages flash** admin passent par `messages.json`
+    (`flash.admin.*`). Ajouter une chaîne = ajouter sa clé dans **les deux** catalogues (front `.ts`
+    et/ou serveur `.json`). Restent en FR : quelques messages d'erreur **issus des services purs**
+    (scheduler, incidents) affichés via `error.message`.
 
 ## 9. Points d'attention (à ne jamais oublier)
 

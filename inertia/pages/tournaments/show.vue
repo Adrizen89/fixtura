@@ -7,6 +7,7 @@ import TeamsManager from '~/components/TeamsManager.vue'
 import TeamsImport from '~/components/TeamsImport.vue'
 import RegistrationManager from '~/components/RegistrationManager.vue'
 import PlanningGrid from '~/components/PlanningGrid.vue'
+import { useI18n } from '~/composables/i18n'
 import type { PlanningView, TeamRegistrationItem, Tournament } from '~/app/types'
 
 const props = defineProps<{
@@ -14,6 +15,8 @@ const props = defineProps<{
   planning: PlanningView | null
   registrations: TeamRegistrationItem[]
 }>()
+
+const { t } = useI18n()
 
 const teams = computed(() => props.tournament.teams ?? [])
 const canGenerate = computed(() => teams.value.length >= 2)
@@ -46,7 +49,9 @@ function hhmm(v: string | null) {
 
   <AdminLayout>
     <div class="mb-6">
-      <Link href="/tournaments" class="text-sm text-sand-11 hover:text-sand-12">← Tournois</Link>
+      <Link href="/tournaments" class="text-sm text-sand-11 hover:text-sand-12">
+        ← {{ t('nav.tournaments') }}
+      </Link>
       <div class="mt-1 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-3">
           <h1 class="text-2xl font-bold tracking-tight text-sand-12">{{ tournament.name }}</h1>
@@ -57,7 +62,7 @@ function hhmm(v: string | null) {
             :href="`/tournaments/${tournament.id}/edit`"
             class="rounded-lg border border-sand-7 px-4 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
           >
-            Modifier
+            {{ t('tournamentsAdmin.show.edit') }}
           </Link>
         </div>
       </div>
@@ -69,26 +74,38 @@ function hhmm(v: string | null) {
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <!-- Paramètres -->
       <section class="rounded-2xl border border-sand-6 bg-white p-6 lg:col-span-2">
-        <h2 class="mb-4 text-base font-semibold text-sand-12">Paramètres</h2>
+        <h2 class="mb-4 text-base font-semibold text-sand-12">
+          {{ t('tournamentsAdmin.show.settings') }}
+        </h2>
         <dl class="grid grid-cols-2 gap-x-6 gap-y-4 text-sm sm:grid-cols-3">
           <div>
-            <dt class="text-xs uppercase tracking-wide text-sand-9">Heure de début</dt>
+            <dt class="text-xs uppercase tracking-wide text-sand-9">
+              {{ t('tournamentsAdmin.show.startTime') }}
+            </dt>
             <dd class="mt-0.5 text-sand-12">{{ hhmm(tournament.startTime) }}</dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-sand-9">Terrains</dt>
+            <dt class="text-xs uppercase tracking-wide text-sand-9">
+              {{ t('tournamentsAdmin.show.pitches') }}
+            </dt>
             <dd class="mt-0.5 text-sand-12">{{ tournament.numTerrains }}</dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-sand-9">Durée d'un match</dt>
+            <dt class="text-xs uppercase tracking-wide text-sand-9">
+              {{ t('tournamentsAdmin.show.matchDuration') }}
+            </dt>
             <dd class="mt-0.5 text-sand-12">{{ tournament.matchDurationMin }} min</dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-sand-9">Pause entre matchs</dt>
+            <dt class="text-xs uppercase tracking-wide text-sand-9">
+              {{ t('tournamentsAdmin.show.breakDuration') }}
+            </dt>
             <dd class="mt-0.5 text-sand-12">{{ tournament.breakDurationMin }} min</dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-sand-9">Pause déjeuner</dt>
+            <dt class="text-xs uppercase tracking-wide text-sand-9">
+              {{ t('tournamentsAdmin.show.lunchBreak') }}
+            </dt>
             <dd class="mt-0.5 text-sand-12">
               <template v-if="tournament.lunchStart">
                 {{ hhmm(tournament.lunchStart) }} ({{ tournament.lunchDurationMin }} min)
@@ -112,17 +129,18 @@ function hhmm(v: string | null) {
         <div class="flex shrink-0 justify-center">
           <img
             :src="qrHref"
-            alt="QR code vers l'écran public du tournoi"
+            :alt="t('tournamentsAdmin.show.qrAlt')"
             width="150"
             height="150"
             class="h-[150px] w-[150px] rounded-lg border border-sand-6"
           />
         </div>
         <div class="min-w-0 flex-1">
-          <h2 class="text-base font-semibold text-sand-12">Écran public</h2>
+          <h2 class="text-base font-semibold text-sand-12">
+            {{ t('tournamentsAdmin.show.publicScreen') }}
+          </h2>
           <p class="mt-0.5 text-sm text-sand-11">
-            Partagez ce QR code aux équipes ou affichez-le au bord des terrains : il ouvre le
-            classement et le planning en direct, en lecture seule.
+            {{ t('tournamentsAdmin.show.publicScreenHint') }}
           </p>
           <div class="mt-3 flex flex-wrap items-center gap-2">
             <a
@@ -131,7 +149,7 @@ function hhmm(v: string | null) {
               rel="noopener"
               class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700"
             >
-              Ouvrir l'écran public ↗
+              {{ t('tournamentsAdmin.show.openPublicScreen') }} ↗
             </a>
             <a
               :href="tvHref"
@@ -139,7 +157,7 @@ function hhmm(v: string | null) {
               rel="noopener"
               class="rounded-lg border border-sand-7 px-4 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
             >
-              Mode TV ↗
+              {{ t('tournamentsAdmin.show.tvMode') }} ↗
             </a>
             <a
               :href="qrHref"
@@ -147,7 +165,7 @@ function hhmm(v: string | null) {
               rel="noopener"
               class="rounded-lg border border-sand-7 px-4 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
             >
-              QR code (SVG) ↗
+              {{ t('tournamentsAdmin.show.qrSvg') }} ↗
             </a>
           </div>
         </div>
@@ -161,10 +179,18 @@ function hhmm(v: string | null) {
     <section class="mt-6 rounded-2xl border border-sand-6 bg-white p-6">
       <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 class="text-base font-semibold text-sand-12">Planning</h2>
+          <h2 class="text-base font-semibold text-sand-12">
+            {{ t('tournamentsAdmin.show.schedule') }}
+          </h2>
           <p v-if="planning" class="mt-0.5 text-sm text-sand-11">
-            {{ planning.matchCount }} matchs · {{ planning.roundsCount }} journées ·
-            {{ planning.startTime }}–{{ planning.endTime }}
+            {{
+              t('tournamentsAdmin.show.planningSummary', {
+                matches: planning.matchCount,
+                rounds: planning.roundsCount,
+                start: planning.startTime,
+                end: planning.endTime,
+              })
+            }}
           </p>
         </div>
         <div class="flex shrink-0 items-center gap-2">
@@ -173,7 +199,7 @@ function hhmm(v: string | null) {
             :href="resultsHref"
             class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700"
           >
-            Saisir les résultats
+            {{ t('tournamentsAdmin.show.enterResults') }}
           </Link>
           <Link
             v-if="canGenerate"
@@ -184,7 +210,11 @@ function hhmm(v: string | null) {
                 : 'rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700'
             "
           >
-            {{ planning ? 'Régénérer le planning' : 'Générer le planning' }}
+            {{
+              planning
+                ? t('tournamentsAdmin.show.regenerateSchedule')
+                : t('tournamentsAdmin.show.generateSchedule')
+            }}
           </Link>
         </div>
       </div>
@@ -194,14 +224,16 @@ function hhmm(v: string | null) {
         v-if="planning"
         class="mb-4 flex flex-wrap items-center gap-2 border-b border-sand-4 pb-4"
       >
-        <span class="mr-1 text-xs font-semibold uppercase tracking-wide text-sand-9">Imprimer</span>
+        <span class="mr-1 text-xs font-semibold uppercase tracking-wide text-sand-9">
+          {{ t('tournamentsAdmin.show.print') }}
+        </span>
         <a
           :href="planningPdfHref"
           target="_blank"
           rel="noopener"
           class="rounded-lg border border-sand-7 px-3 py-1.5 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
         >
-          Planning (PDF) ↗
+          {{ t('tournamentsAdmin.show.schedulePdf') }} ↗
         </a>
         <a
           :href="matchSheetsPdfHref"
@@ -209,7 +241,7 @@ function hhmm(v: string | null) {
           rel="noopener"
           class="rounded-lg border border-sand-7 px-3 py-1.5 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
         >
-          Feuilles de match (PDF) ↗
+          {{ t('tournamentsAdmin.show.matchSheetsPdf') }} ↗
         </a>
       </div>
 
@@ -219,15 +251,15 @@ function hhmm(v: string | null) {
       <!-- Pas encore de planning -->
       <div v-else class="rounded-lg border border-dashed border-sand-7 px-4 py-8 text-center">
         <p v-if="!canGenerate" class="text-sm text-sand-11">
-          Ajoutez au moins 2 équipes pour générer le planning.
+          {{ t('tournamentsAdmin.show.needTeams') }}
         </p>
         <template v-else>
-          <p class="text-sm text-sand-11">Aucun planning généré pour l'instant.</p>
+          <p class="text-sm text-sand-11">{{ t('tournamentsAdmin.show.noSchedule') }}</p>
           <Link
             :href="planningHref"
             class="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700"
           >
-            Générer le planning
+            {{ t('tournamentsAdmin.show.generateSchedule') }}
           </Link>
         </template>
       </div>

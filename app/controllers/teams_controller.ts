@@ -25,7 +25,7 @@ export default class TeamsController {
   }
 
   /** Ajoute une équipe au tournoi. */
-  async store({ request, response, params, session }: HttpContext) {
+  async store({ request, response, params, session, i18n }: HttpContext) {
     const tournament = await this.findTournament(params.tournament_id)
 
     const { name } = await request.validateUsing(teamValidator, {
@@ -34,12 +34,12 @@ export default class TeamsController {
 
     await Team.create({ tournamentId: tournament.id, name })
 
-    session.flash('success', `Équipe « ${name} » ajoutée.`)
+    session.flash('success', i18n.t('messages.flash.admin.teamAdded', { name }))
     return response.redirect().toRoute('tournaments.show', { id: tournament.id })
   }
 
   /** Renomme une équipe. */
-  async update({ request, response, params, session }: HttpContext) {
+  async update({ request, response, params, session, i18n }: HttpContext) {
     const tournament = await this.findTournament(params.tournament_id)
     const team = await this.findTeam(tournament.id, params.id)
 
@@ -50,18 +50,19 @@ export default class TeamsController {
     team.name = name
     await team.save()
 
-    session.flash('success', 'Équipe renommée.')
+    session.flash('success', i18n.t('messages.flash.admin.teamRenamed'))
     return response.redirect().toRoute('tournaments.show', { id: tournament.id })
   }
 
   /** Supprime une équipe. */
-  async destroy({ response, params, session }: HttpContext) {
+  async destroy({ response, params, session, i18n }: HttpContext) {
     const tournament = await this.findTournament(params.tournament_id)
     const team = await this.findTeam(tournament.id, params.id)
 
+    const removed = team.name
     await team.delete()
 
-    session.flash('success', `Équipe « ${team.name} » supprimée.`)
+    session.flash('success', i18n.t('messages.flash.admin.teamDeleted', { name: removed }))
     return response.redirect().toRoute('tournaments.show', { id: tournament.id })
   }
 }

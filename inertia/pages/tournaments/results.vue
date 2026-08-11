@@ -7,7 +7,10 @@ import PoolStandings from '~/components/PoolStandings.vue'
 import Bracket from '~/components/Bracket.vue'
 import MatchScoreRow from '~/components/MatchScoreRow.vue'
 import { useLiveTournament } from '~/composables/use_live_tournament'
+import { useI18n } from '~/composables/i18n'
 import type { ResultMatchRow, StandingRow, PoolStanding, Tournament } from '~/app/types'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   tournament: Tournament
@@ -26,7 +29,11 @@ const showPools = computed(
   () => props.tournament.format === 'pools' || props.tournament.format === 'hybrid'
 )
 const sideTitle = computed(() =>
-  showPools.value ? 'Classements par poule' : showBracket.value ? 'Tableau' : 'Classement'
+  showPools.value
+    ? t('tournamentsAdmin.results.poolStandings')
+    : showBracket.value
+      ? t('tournamentsAdmin.results.bracket')
+      : t('tournamentsAdmin.results.standings')
 )
 
 const showHref = `/tournaments/${props.tournament.id}`
@@ -85,17 +92,29 @@ const { state: liveState } = useLiveTournament(props.tournament.publicSlug, (upd
 const live = computed(() => {
   switch (liveState.value) {
     case 'connected':
-      return { label: 'En direct', dot: 'bg-primary', text: 'text-primary-800' }
+      return {
+        label: t('tournamentsAdmin.results.liveConnected'),
+        dot: 'bg-primary',
+        text: 'text-primary-800',
+      }
     case 'connecting':
-      return { label: 'Connexion…', dot: 'bg-amber-400', text: 'text-sand-11' }
+      return {
+        label: t('tournamentsAdmin.results.liveConnecting'),
+        dot: 'bg-amber-400',
+        text: 'text-sand-11',
+      }
     default:
-      return { label: 'Hors ligne', dot: 'bg-sand-8', text: 'text-sand-10' }
+      return {
+        label: t('tournamentsAdmin.results.liveOffline'),
+        dot: 'bg-sand-8',
+        text: 'text-sand-10',
+      }
   }
 })
 </script>
 
 <template>
-  <Head :title="`Résultats — ${tournament.name}`" />
+  <Head :title="t('tournamentsAdmin.results.headTitle', { name: tournament.name })" />
 
   <AdminLayout>
     <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
@@ -103,9 +122,11 @@ const live = computed(() => {
         <Link :href="showHref" class="text-sm text-sand-11 hover:text-sand-12">
           ← {{ tournament.name }}
         </Link>
-        <h1 class="mt-1 text-2xl font-bold tracking-tight text-sand-12">Saisie des résultats</h1>
+        <h1 class="mt-1 text-2xl font-bold tracking-tight text-sand-12">
+          {{ t('tournamentsAdmin.results.title') }}
+        </h1>
         <p class="mt-1 text-sand-11">
-          Saisissez les scores au fil des matchs — le classement se met à jour aussitôt.
+          {{ t('tournamentsAdmin.results.intro') }}
         </p>
       </div>
       <div class="flex shrink-0 items-center gap-2">
@@ -116,7 +137,7 @@ const live = computed(() => {
           rel="noopener"
           class="rounded-lg border border-sand-7 px-3 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
         >
-          Classement (PDF) ↗
+          {{ t('tournamentsAdmin.results.standingsPdf') }} ↗
         </a>
         <!-- Lien vers l'écran public (lecture seule) à projeter / partager aux équipes. -->
         <a
@@ -125,7 +146,7 @@ const live = computed(() => {
           rel="noopener"
           class="rounded-lg border border-sand-7 px-3 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
         >
-          Écran public ↗
+          {{ t('tournamentsAdmin.results.publicScreen') }} ↗
         </a>
       </div>
     </div>
@@ -135,19 +156,21 @@ const live = computed(() => {
       v-if="liveMatches.length === 0"
       class="rounded-2xl border border-dashed border-sand-7 bg-white p-12 text-center"
     >
-      <p class="text-sand-11">Aucun match : générez d'abord le planning.</p>
+      <p class="text-sand-11">{{ t('tournamentsAdmin.results.empty') }}</p>
       <Link
         :href="`/tournaments/${tournament.id}/planning`"
         class="mt-4 inline-block rounded-lg bg-primary px-4 py-2 font-semibold text-white transition hover:bg-primary-700"
       >
-        Générer le planning
+        {{ t('tournamentsAdmin.results.generateSchedule') }}
       </Link>
     </div>
 
     <div v-else class="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <!-- Grille de saisie -->
       <section class="rounded-2xl border border-sand-6 bg-white p-6 lg:col-span-2">
-        <h2 class="mb-4 text-base font-semibold text-sand-12">Scores</h2>
+        <h2 class="mb-4 text-base font-semibold text-sand-12">
+          {{ t('tournamentsAdmin.results.scores') }}
+        </h2>
         <div class="space-y-5">
           <div v-for="slot in slots" :key="slot.time">
             <div class="mb-1 text-xs font-semibold uppercase tracking-wide text-sand-9">
@@ -178,8 +201,8 @@ const live = computed(() => {
             :class="live.text"
             :title="
               liveState === 'connected'
-                ? 'Mises à jour poussées en direct'
-                : 'Temps réel indisponible — la page reste fonctionnelle, rechargez pour la dernière version'
+                ? t('tournamentsAdmin.results.liveTitleConnected')
+                : t('tournamentsAdmin.results.liveTitleOffline')
             "
           >
             <span class="h-2 w-2 rounded-full" :class="live.dot" aria-hidden="true" />
@@ -193,12 +216,12 @@ const live = computed(() => {
           v-else-if="showBracket"
           class="rounded-md bg-sand-2 px-3 py-4 text-center text-sm text-sand-11"
         >
-          Le tableau final est affiché ci-dessous ↓
+          {{ t('tournamentsAdmin.results.bracketBelow') }} ↓
         </p>
         <!-- Championnat : classement global. -->
         <StandingsTable v-else-if="hasResults" :standings="liveStandings" />
         <p v-else class="rounded-md bg-sand-2 px-3 py-4 text-center text-sm text-sand-11">
-          Le classement s'affichera dès le premier score saisi.
+          {{ t('tournamentsAdmin.results.standingsPending') }}
         </p>
       </section>
     </div>
@@ -208,7 +231,9 @@ const live = computed(() => {
       v-if="showBracket && liveMatches.length"
       class="mt-6 rounded-2xl border border-sand-6 bg-white p-6"
     >
-      <h2 class="mb-4 text-base font-semibold text-sand-12">Tableau final</h2>
+      <h2 class="mb-4 text-base font-semibold text-sand-12">
+        {{ t('tournamentsAdmin.results.finalBracket') }}
+      </h2>
       <Bracket :matches="liveMatches" />
     </section>
   </AdminLayout>

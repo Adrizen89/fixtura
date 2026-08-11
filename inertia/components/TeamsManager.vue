@@ -3,6 +3,9 @@ import { nextTick, ref } from 'vue'
 import type { ComponentPublicInstance } from 'vue'
 import { router, useForm } from '@inertiajs/vue3'
 import type { Team } from '~/app/types'
+import { useI18n } from '~/composables/i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   tournamentId: number
@@ -54,7 +57,7 @@ function saveEdit() {
 
 /** Suppression d'une équipe (confirmation, cf. pattern de la liste des tournois). */
 function destroyTeam(team: Team) {
-  if (!confirm(`Supprimer l'équipe « ${team.name} » ?`)) return
+  if (!confirm(t('teamsManager.confirmDelete', { name: team.name }))) return
   router.delete(`/tournaments/${props.tournamentId}/teams/${team.id}`, {
     preserveScroll: true,
   })
@@ -64,10 +67,10 @@ function destroyTeam(team: Team) {
 <template>
   <section class="rounded-2xl border border-sand-6 bg-white p-6">
     <div class="mb-4 flex items-center justify-between">
-      <h2 class="text-base font-semibold text-sand-12">Équipes</h2>
+      <h2 class="text-base font-semibold text-sand-12">{{ t('teamsManager.title') }}</h2>
       <span
         class="rounded-full bg-sand-3 px-2 py-0.5 text-xs font-medium text-sand-11"
-        aria-label="Nombre d'équipes"
+        :aria-label="t('teamsManager.countLabel')"
       >
         {{ teams.length }}
       </span>
@@ -75,7 +78,7 @@ function destroyTeam(team: Team) {
 
     <!-- Ajout -->
     <form class="mb-4" @submit.prevent="addTeam">
-      <label for="new-team" class="sr-only">Nom de l'équipe à ajouter</label>
+      <label for="new-team" class="sr-only">{{ t('teamsManager.addLabel') }}</label>
       <div class="flex gap-2">
         <input
           id="new-team"
@@ -83,7 +86,7 @@ function destroyTeam(team: Team) {
           type="text"
           required
           maxlength="60"
-          placeholder="Nom de l'équipe"
+          :placeholder="t('teamsManager.namePlaceholder')"
           autocomplete="off"
           class="min-w-0 flex-1 rounded-lg border border-sand-7 px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
           :class="{ 'border-red-400': addForm.errors.name }"
@@ -93,7 +96,7 @@ function destroyTeam(team: Team) {
           :disabled="addForm.processing"
           class="shrink-0 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Ajouter
+          {{ t('teamsManager.add') }}
         </button>
       </div>
       <p v-if="addForm.errors.name" class="mt-1 text-sm text-red-700">{{ addForm.errors.name }}</p>
@@ -109,7 +112,9 @@ function destroyTeam(team: Team) {
         <!-- Mode renommage -->
         <form v-if="editingId === team.id" class="space-y-1" @submit.prevent="saveEdit">
           <div class="flex items-center gap-2">
-            <label :for="`edit-team-${team.id}`" class="sr-only">Renommer l'équipe</label>
+            <label :for="`edit-team-${team.id}`" class="sr-only">{{
+              t('teamsManager.renameLabel')
+            }}</label>
             <input
               :id="`edit-team-${team.id}`"
               :ref="setEditInput"
@@ -127,14 +132,14 @@ function destroyTeam(team: Team) {
               :disabled="editForm.processing"
               class="shrink-0 rounded-md bg-primary px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-primary-700 disabled:opacity-60"
             >
-              Enregistrer
+              {{ t('teamsManager.save') }}
             </button>
             <button
               type="button"
               class="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-sand-11 transition hover:text-sand-12"
               @click="cancelEdit"
             >
-              Annuler
+              {{ t('teamsManager.cancel') }}
             </button>
           </div>
           <p v-if="editForm.errors.name" class="text-sm text-red-700">{{ editForm.errors.name }}</p>
@@ -149,7 +154,7 @@ function destroyTeam(team: Team) {
               v-if="team.contactEmail"
               :href="`mailto:${team.contactEmail}`"
               class="ml-1 text-xs font-normal text-sand-10 hover:text-sand-12 hover:underline"
-              :title="`Contact : ${team.contactEmail}`"
+              :title="t('teamsManager.contact', { email: team.contactEmail })"
             >
               · {{ team.contactEmail }}
             </a>
@@ -159,14 +164,14 @@ function destroyTeam(team: Team) {
             class="shrink-0 text-xs font-medium text-sand-11 transition hover:text-sand-12"
             @click="startEdit(team)"
           >
-            Renommer
+            {{ t('teamsManager.rename') }}
           </button>
           <button
             type="button"
             class="shrink-0 text-xs font-medium text-red-700 transition hover:underline"
             @click="destroyTeam(team)"
           >
-            Supprimer
+            {{ t('teamsManager.delete') }}
           </button>
         </div>
       </li>
@@ -174,7 +179,7 @@ function destroyTeam(team: Team) {
 
     <!-- État vide -->
     <p v-else class="rounded-md bg-sand-2 px-3 py-4 text-center text-sm text-sand-11">
-      Aucune équipe pour l'instant. Ajoutez la première ci-dessus.
+      {{ t('teamsManager.empty') }}
     </p>
   </section>
 </template>

@@ -2,6 +2,9 @@
 import { computed, onMounted, ref } from 'vue'
 import { router, useForm } from '@inertiajs/vue3'
 import type { TeamRegistrationItem, Tournament } from '~/app/types'
+import { useI18n } from '~/composables/i18n'
+
+const { t } = useI18n()
 
 /**
  * Gestion des inscriptions en ligne d'un tournoi (issues #112 + #113) — côté
@@ -91,38 +94,38 @@ function formatDate(iso: string | null) {
 <template>
   <section class="rounded-2xl border border-sand-6 bg-white p-6">
     <div class="mb-4 flex items-center justify-between gap-3">
-      <h2 class="text-base font-semibold text-sand-12">Inscriptions en ligne</h2>
+      <h2 class="text-base font-semibold text-sand-12">{{ t('registrationManager.title') }}</h2>
       <span
         v-if="isOpen && isFull"
         class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800"
       >
-        Complet
+        {{ t('registrationManager.full') }}
       </span>
       <span
         v-else-if="isOpen"
         class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800"
       >
-        Ouvertes
+        {{ t('registrationManager.open') }}
       </span>
       <span v-else class="rounded-full bg-sand-3 px-2 py-0.5 text-xs font-medium text-sand-11">
-        Fermées
+        {{ t('registrationManager.closed') }}
       </span>
     </div>
 
     <p class="mb-4 text-sm text-sand-11">
-      Partagez un lien public pour que les équipes demandent leur inscription (sans compte). Vous
-      validez ou refusez chaque demande ci-dessous.
+      {{ t('registrationManager.intro') }}
       <template v-if="capacity !== null">
-        {{ occupancy }} / {{ capacity }} place(s) occupée(s).
+        {{ t('registrationManager.occupancy', { occupancy, capacity }) }}
       </template>
-      <template v-else> {{ teamsCount }} équipe(s) confirmée(s). </template>
+      <template v-else> {{ t('registrationManager.confirmed', { count: teamsCount }) }} </template>
     </p>
 
     <!-- Réglages : capacité + ouverture -->
     <form class="space-y-3" @submit.prevent="submit">
       <div>
         <label for="reg-capacity" class="mb-1 block text-sm font-medium text-sand-12">
-          Capacité maximale <span class="font-normal text-sand-10">(laisser vide = illimité)</span>
+          {{ t('registrationManager.capacityLabel') }}
+          <span class="font-normal text-sand-10">{{ t('registrationManager.capacityHint') }}</span>
         </label>
         <input
           id="reg-capacity"
@@ -130,7 +133,7 @@ function formatDate(iso: string | null) {
           type="number"
           min="1"
           max="1000"
-          placeholder="Illimité"
+          :placeholder="t('registrationManager.unlimited')"
           class="w-40 rounded-lg border border-sand-7 px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
           :class="{ 'border-red-400': form.errors.capacity }"
         />
@@ -147,7 +150,7 @@ function formatDate(iso: string | null) {
           class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700 disabled:opacity-60"
           @click="toggle(true)"
         >
-          Ouvrir les inscriptions
+          {{ t('registrationManager.openRegistration') }}
         </button>
         <template v-else>
           <button
@@ -155,7 +158,7 @@ function formatDate(iso: string | null) {
             :disabled="form.processing"
             class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700 disabled:opacity-60"
           >
-            Enregistrer la capacité
+            {{ t('registrationManager.saveCapacity') }}
           </button>
           <button
             type="button"
@@ -163,7 +166,7 @@ function formatDate(iso: string | null) {
             class="rounded-lg border border-sand-7 px-4 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12 disabled:opacity-60"
             @click="toggle(false)"
           >
-            Fermer les inscriptions
+            {{ t('registrationManager.closeRegistration') }}
           </button>
         </template>
       </div>
@@ -175,7 +178,7 @@ function formatDate(iso: string | null) {
         for="reg-link"
         class="mb-1 block text-xs font-semibold uppercase tracking-wide text-sand-9"
       >
-        Lien d'inscription
+        {{ t('registrationManager.linkLabel') }}
       </label>
       <div class="flex flex-wrap items-center gap-2">
         <input
@@ -190,7 +193,7 @@ function formatDate(iso: string | null) {
           class="shrink-0 rounded-lg border border-sand-7 px-3 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
           @click="copyLink"
         >
-          {{ copied ? 'Copié ✓' : 'Copier' }}
+          {{ copied ? t('registrationManager.copied') : t('registrationManager.copy') }}
         </button>
         <a
           :href="publicUrl"
@@ -198,28 +201,28 @@ function formatDate(iso: string | null) {
           rel="noopener"
           class="shrink-0 rounded-lg border border-sand-7 px-3 py-2 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
         >
-          Ouvrir ↗
+          {{ t('registrationManager.openLink') }} ↗
         </a>
       </div>
       <p v-if="!isOpen" class="mt-2 text-xs text-sand-10">
-        Les inscriptions sont fermées : ce lien affiche « fermé » tant que vous ne les rouvrez pas.
+        {{ t('registrationManager.closedHint') }}
       </p>
     </div>
 
     <!-- Demandes d'inscription à traiter (#113) -->
     <div class="mt-4 border-t border-sand-4 pt-4">
       <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-sand-12">
-        Demandes d'inscription
+        {{ t('registrationManager.requestsTitle') }}
         <span
           v-if="pendingCount"
           class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800"
         >
-          {{ pendingCount }} en attente
+          {{ t('registrationManager.pendingBadge', { count: pendingCount }) }}
         </span>
       </h3>
 
       <p v-if="registrations.length === 0" class="text-sm text-sand-10">
-        Aucune demande pour l'instant. Partagez le lien ci-dessus pour recevoir des inscriptions.
+        {{ t('registrationManager.noRequests') }}
       </p>
 
       <!-- En attente : validables / refusables -->
@@ -242,7 +245,7 @@ function formatDate(iso: string | null) {
               class="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-primary-700 disabled:opacity-60"
               @click="decide(reg, 'approve')"
             >
-              Valider
+              {{ t('registrationManager.approve') }}
             </button>
             <button
               type="button"
@@ -250,7 +253,7 @@ function formatDate(iso: string | null) {
               class="rounded-lg border border-sand-7 px-3 py-1.5 text-sm font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12 disabled:opacity-60"
               @click="decide(reg, 'reject')"
             >
-              Refuser
+              {{ t('registrationManager.reject') }}
             </button>
           </div>
         </li>
@@ -260,7 +263,7 @@ function formatDate(iso: string | null) {
       <div v-if="decided.length" class="mt-3">
         <details class="text-sm">
           <summary class="cursor-pointer text-sand-11 hover:text-sand-12">
-            {{ decided.length }} demande(s) traitée(s)
+            {{ t('registrationManager.processed', { count: decided.length }) }}
           </summary>
           <ul class="mt-2 space-y-1.5">
             <li
@@ -276,13 +279,13 @@ function formatDate(iso: string | null) {
                 v-if="reg.status === 'approved'"
                 class="shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800"
               >
-                Validée
+                {{ t('registrationManager.approved') }}
               </span>
               <span
                 v-else
                 class="shrink-0 rounded-full bg-sand-3 px-2 py-0.5 text-xs font-medium text-sand-11"
               >
-                Refusée
+                {{ t('registrationManager.rejected') }}
               </span>
             </li>
           </ul>

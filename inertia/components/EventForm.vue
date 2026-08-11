@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { Link, useForm } from '@inertiajs/vue3'
 import type { EventFormData } from '~/app/types'
+import { useI18n } from '~/composables/i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   initial: EventFormData
@@ -31,18 +34,20 @@ function submit() {
   <form class="space-y-8" @submit.prevent="submit">
     <!-- Général -->
     <section class="rounded-2xl border border-sand-6 bg-white p-6">
-      <h2 class="mb-4 text-base font-semibold text-sand-12">Général</h2>
+      <h2 class="mb-4 text-base font-semibold text-sand-12">
+        {{ t('eventForm.sections.general') }}
+      </h2>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div class="sm:col-span-2">
           <label for="name" class="mb-1 block text-sm font-medium text-sand-12">
-            Nom de l'événement
+            {{ t('eventForm.name.label') }}
           </label>
           <input
             id="name"
             v-model="form.name"
             type="text"
             required
-            placeholder="Tournoi de Pâques"
+            :placeholder="t('eventForm.name.placeholder')"
             class="w-full rounded-lg border border-sand-7 px-3 py-2 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
             :class="{ 'border-red-400': form.errors.name }"
           />
@@ -50,7 +55,9 @@ function submit() {
         </div>
 
         <div>
-          <label for="eventDate" class="mb-1 block text-sm font-medium text-sand-12">Date</label>
+          <label for="eventDate" class="mb-1 block text-sm font-medium text-sand-12">{{
+            t('eventForm.eventDate.label')
+          }}</label>
           <input
             id="eventDate"
             v-model="form.eventDate"
@@ -68,15 +75,14 @@ function submit() {
 
     <!-- Horaires & terrains partagés -->
     <section class="rounded-2xl border border-sand-6 bg-white p-6">
-      <h2 class="mb-1 text-base font-semibold text-sand-12">Horaires & terrains partagés</h2>
+      <h2 class="mb-1 text-base font-semibold text-sand-12">{{ t('eventForm.schedule.title') }}</h2>
       <p class="mb-4 text-sm text-sand-11">
-        Ces paramètres sont communs à toutes les catégories : le planning combiné est généré sur ce
-        pool de terrains, sans collision de créneau entre catégories.
+        {{ t('eventForm.schedule.hint') }}
       </p>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label for="startTime" class="mb-1 block text-sm font-medium text-sand-12">
-            Heure de début
+            {{ t('eventForm.schedule.startTime') }}
           </label>
           <input
             id="startTime"
@@ -93,7 +99,7 @@ function submit() {
 
         <div>
           <label for="numTerrains" class="mb-1 block text-sm font-medium text-sand-12">
-            Nombre de terrains (pool partagé)
+            {{ t('eventForm.schedule.numTerrains') }}
           </label>
           <input
             id="numTerrains"
@@ -112,7 +118,7 @@ function submit() {
 
         <div>
           <label for="matchDurationMin" class="mb-1 block text-sm font-medium text-sand-12">
-            Durée d'un match (min)
+            {{ t('eventForm.schedule.matchDuration') }}
           </label>
           <input
             id="matchDurationMin"
@@ -131,7 +137,7 @@ function submit() {
 
         <div>
           <label for="breakDurationMin" class="mb-1 block text-sm font-medium text-sand-12">
-            Pause entre matchs (min)
+            {{ t('eventForm.schedule.breakDuration') }}
           </label>
           <input
             id="breakDurationMin"
@@ -150,8 +156,8 @@ function submit() {
 
         <div>
           <label for="lunchStart" class="mb-1 block text-sm font-medium text-sand-12">
-            Début pause déjeuner
-            <span class="font-normal text-sand-10">(optionnel)</span>
+            {{ t('eventForm.schedule.lunchStart') }}
+            <span class="font-normal text-sand-10">{{ t('eventForm.common.optional') }}</span>
           </label>
           <input
             id="lunchStart"
@@ -167,7 +173,7 @@ function submit() {
 
         <div>
           <label for="lunchDurationMin" class="mb-1 block text-sm font-medium text-sand-12">
-            Durée pause déjeuner (min)
+            {{ t('eventForm.schedule.lunchDuration') }}
           </label>
           <input
             id="lunchDurationMin"
@@ -191,14 +197,14 @@ function submit() {
         :href="cancelHref"
         class="rounded-lg border border-sand-7 px-4 py-2.5 font-medium text-sand-11 transition hover:bg-sand-3"
       >
-        Annuler
+        {{ t('eventForm.actions.cancel') }}
       </Link>
       <button
         type="submit"
         :disabled="form.processing"
         class="rounded-lg bg-primary px-5 py-2.5 font-semibold text-white transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {{ form.processing ? 'Enregistrement…' : submitLabel }}
+        {{ form.processing ? t('eventForm.actions.saving') : submitLabel }}
       </button>
     </div>
   </form>

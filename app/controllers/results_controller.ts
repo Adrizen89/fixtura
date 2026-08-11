@@ -85,7 +85,7 @@ export default class ResultsController {
    * Enregistre (ou corrige) le score d'un match — « dernier écrit gagne », à tout
    * moment. Un score réel termine le match et annule un éventuel forfait antérieur.
    */
-  async update({ request, response, params, auth, session }: HttpContext) {
+  async update({ request, response, params, auth, session, i18n }: HttpContext) {
     const tournament = await this.findTournament(params.id)
     const match = await this.findMatch(tournament, params.matchId)
 
@@ -136,7 +136,7 @@ export default class ResultsController {
 
     await this.pushLiveState(tournament, match.id)
 
-    session.flash('success', 'Score enregistré.')
+    session.flash('success', i18n.t('messages.flash.admin.scoreSaved'))
     return response.redirect().toRoute('tournaments.results', { id: tournament.id })
   }
 
@@ -146,14 +146,17 @@ export default class ResultsController {
    * l'événement pour que l'heure affichée reste stable (même logique que la
    * persistance du planning). Ne touche ni au score ni au statut.
    */
-  async reschedule({ request, response, params, auth, session }: HttpContext) {
+  async reschedule({ request, response, params, auth, session, i18n }: HttpContext) {
     const tournament = await this.findTournament(params.id)
     const match = await this.findMatch(tournament, params.matchId)
 
     const { time, terrainNumber } = await request.validateUsing(matchScheduleValidator)
 
     if (terrainNumber !== undefined && terrainNumber > tournament.numTerrains) {
-      session.flash('error', `Ce tournoi n'a que ${tournament.numTerrains} terrain(s).`)
+      session.flash(
+        'error',
+        i18n.t('messages.flash.admin.tooManyTerrains', { count: tournament.numTerrains })
+      )
       return response.redirect().toRoute('tournaments.results', { id: tournament.id })
     }
 
@@ -169,7 +172,7 @@ export default class ResultsController {
 
     await this.pushLiveState(tournament, match.id)
 
-    session.flash('success', `Match décalé à ${time}.`)
+    session.flash('success', i18n.t('messages.flash.admin.matchRescheduled', { time }))
     return response.redirect().toRoute('tournaments.results', { id: tournament.id })
   }
 
@@ -179,7 +182,7 @@ export default class ResultsController {
    * (3–0 pour l'adversaire — cf. CLAUDE.md §9) afin d'impacter le classement comme une
    * victoire normale. Reste corrigeable ensuite via la saisie d'un score réel.
    */
-  async forfeit({ request, response, params, auth, session }: HttpContext) {
+  async forfeit({ request, response, params, auth, session, i18n }: HttpContext) {
     const tournament = await this.findTournament(params.id)
     const match = await this.findMatch(tournament, params.matchId)
 
@@ -189,7 +192,7 @@ export default class ResultsController {
     // non encore résolu).
     const { homeTeamId, awayTeamId } = match
     if (homeTeamId === null || awayTeamId === null) {
-      session.flash('error', "Ce match n'a pas encore d'équipes définies.")
+      session.flash('error', i18n.t('messages.flash.admin.matchNoTeams'))
       return response.redirect().toRoute('tournaments.results', { id: tournament.id })
     }
 
@@ -216,7 +219,7 @@ export default class ResultsController {
     await this.pushLiveState(tournament, match.id)
 
     const forfeited = side === 'home' ? match.homeTeam.name : match.awayTeam.name
-    session.flash('success', `Forfait de « ${forfeited} » enregistré (défaite 3–0).`)
+    session.flash('success', i18n.t('messages.flash.admin.forfeitRecorded', { team: forfeited }))
     return response.redirect().toRoute('tournaments.results', { id: tournament.id })
   }
 
