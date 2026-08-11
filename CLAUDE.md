@@ -236,6 +236,15 @@ final #106 alignés).
 - Écran public strictement **lecture seule**, accessible par `public_slug` non devinable.
 - Données minimales (nom d'équipe, email organisateur) → RGPD léger.
 - Fonts self-hostées (woff2), pas de CDN tiers traçant.
+- **Dépendances & audit (issue #101)** : `npm audit` = **0 vulnérabilité**. La seule
+  restante (uuid < 11.1.1, GHSA-w5hq-g745-h8pq, tirée transitivement par `exceljs`) est
+  résolue par un **`overrides`** ciblé (`exceljs` → `uuid ^11.1.1`) — non cassant :
+  exceljs n'utilise que `uuid.v4`, dont l'export CJS est stable, et la faille ne
+  concerne que `v3/v5/v6` avec buffer (jamais atteinte). **TypeScript reste en 5.8.x** :
+  la montée en **TS 7** (native, `latest`) est **bloquée** car `@adonisjs/assembler`
+  (build de prod) dépend de l'API programmatique `ts.getParsedCommandLineOfConfigFile`,
+  absente du paquet natif — le `tsc --noEmit` passe mais `node ace build` échoue.
+  À réévaluer quand AdonisJS supportera le compilateur natif. ESLint 10 : déjà en place.
 - **Limitation de débit (issue #116)** : middleware nommé `throttle`
   (`app/middleware/throttle_middleware.ts`) sur le limiteur **en mémoire**
   `app/services/rate_limit.ts` (fenêtre glissante par IP). Appliqué aux endpoints
