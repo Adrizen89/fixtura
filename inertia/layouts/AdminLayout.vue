@@ -56,6 +56,13 @@ function logout() {
               class="text-sand-11 transition hover:text-sand-12"
               >Membres</Link
             >
+            <!-- Journal d'audit — réservé au responsable (issue #117). -->
+            <Link
+              v-if="user.role === 'owner'"
+              href="/journal"
+              class="text-sand-11 transition hover:text-sand-12"
+              >Journal</Link
+            >
             <!-- Personnalisation de l'écran public — responsable (issue #40). -->
             <Link
               v-if="user.role === 'owner'"

@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import { exportClubData, exportFileName } from '#services/club_data'
 import { ClubPolicy } from '#policies/club_policy'
+import { recordAudit, AUDIT_ACTIONS } from '#services/audit_log'
 
 /**
  * Espace compte de l'organisateur connecté — actions RGPD en libre-service.
@@ -16,7 +17,7 @@ export default class AccountController {
    * du club de l'organisateur connecté sous forme de fichier JSON. Toujours scopé
    * au `club_id` du compte — jamais un autre club.
    */
-  async exportData({ auth, response }: HttpContext) {
+  async exportData({ auth, request, response }: HttpContext) {
     const user = auth.user!
     if (!ClubPolicy.exportData(user)) {
       return response.forbidden({ message: 'Réservé au responsable du club.' })
@@ -24,6 +25,7 @@ export default class AccountController {
 
     const generatedAt = DateTime.now().toISO()!
     const data = await exportClubData(user.clubId, generatedAt)
+    await recordAudit(user, request.ip(), AUDIT_ACTIONS.CLUB_DATA_EXPORTED)
     const slug = String(data.club.slug ?? 'club')
 
     response.header('Content-Type', 'application/json; charset=utf-8')

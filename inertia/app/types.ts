@@ -23,6 +23,17 @@ export interface FlashMessages {
   error: string | null
 }
 
+/** Une entrée du journal d'audit (issue #117). */
+export interface AuditLogEntry {
+  id: number
+  action: string
+  actorEmail: string | null
+  target: string | null
+  metadata: Record<string, unknown> | null
+  ip: string | null
+  createdAt: string
+}
+
 export type TournamentStatus = 'draft' | 'scheduled' | 'live' | 'finished'
 
 export type TournamentFormat =
