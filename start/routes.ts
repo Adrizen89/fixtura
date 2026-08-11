@@ -14,6 +14,7 @@ import { middleware } from '#start/kernel'
 const AuthController = () => import('#controllers/auth_controller')
 const TournamentsController = () => import('#controllers/tournaments_controller')
 const TeamsController = () => import('#controllers/teams_controller')
+const TeamsImportController = () => import('#controllers/teams_import_controller')
 const PlanningController = () => import('#controllers/planning_controller')
 const ResultsController = () => import('#controllers/results_controller')
 const ExportController = () => import('#controllers/export_controller')
@@ -185,6 +186,13 @@ router
       .as('tournaments.registration.update')
     // Équipes gérées depuis la page du tournoi (ajout / renommage / suppression).
     router.resource('tournaments.teams', TeamsController).only(['store', 'update', 'destroy'])
+    // Import CSV/Excel : aperçu (JSON) puis confirmation d'insertion (issue #120).
+    router
+      .post('/tournaments/:id/teams/import/preview', [TeamsImportController, 'preview'])
+      .as('tournaments.teams.import.preview')
+    router
+      .post('/tournaments/:id/teams/import', [TeamsImportController, 'store'])
+      .as('tournaments.teams.import')
     // Génération du planning : aperçu (GET) puis validation/persistance (POST).
     router
       .get('/tournaments/:id/planning', [PlanningController, 'preview'])

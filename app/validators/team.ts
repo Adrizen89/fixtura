@@ -46,3 +46,20 @@ export const teamValidator = vine.compile(
     name: vine.string().trim().minLength(1).maxLength(60).use(uniqueTeamName()),
   })
 )
+
+/**
+ * Confirmation d'un import d'équipes (issue #120) : liste de noms retenus dans
+ * l'aperçu. On borne le format ici (1–60 caractères) ; la déduplication et
+ * l'unicité vis-à-vis des équipes déjà présentes sont réappliquées à l'insertion
+ * (le service `team_import` reste la source de vérité, l'aperçu pouvant être
+ * périmé). `distinct` interdit les doublons exacts dans la charge utile.
+ */
+export const teamImportValidator = vine.compile(
+  vine.object({
+    names: vine
+      .array(vine.string().trim().minLength(1).maxLength(60))
+      .minLength(1)
+      .maxLength(500)
+      .distinct(),
+  })
+)

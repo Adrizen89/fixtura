@@ -75,6 +75,7 @@
     "@vinejs/vine": "^4.4.0",
     "@vue/server-renderer": "^3.5.40",
     "edge.js": "^6.4.0",
+    "exceljs": "^4.4.0",
     "ioredis": "^5.11.1",
     "luxon": "^3.7.2",
     "pg": "^8.22.0",

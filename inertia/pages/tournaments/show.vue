@@ -4,6 +4,7 @@ import { Head, Link } from '@inertiajs/vue3'
 import AdminLayout from '~/layouts/AdminLayout.vue'
 import StatusBadge from '~/components/StatusBadge.vue'
 import TeamsManager from '~/components/TeamsManager.vue'
+import TeamsImport from '~/components/TeamsImport.vue'
 import RegistrationManager from '~/components/RegistrationManager.vue'
 import PlanningGrid from '~/components/PlanningGrid.vue'
 import type { PlanningView, Tournament } from '~/app/types'
@@ -96,6 +97,9 @@ function hhmm(v: string | null) {
 
       <!-- Équipes -->
       <TeamsManager :tournament-id="tournament.id" :teams="teams" />
+
+      <!-- Import CSV / Excel d'une liste d'équipes (#120) -->
+      <TeamsImport :tournament-id="tournament.id" />
     </div>
 
     <!-- Écran public : lien, mode TV et QR code à afficher au bord des terrains (#40) -->
