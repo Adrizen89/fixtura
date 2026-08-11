@@ -1,0 +1,29 @@
+# PostgreSQL pour le développement local de Fixtura.
+#
+# Fournit une base prête à l'emploi, alignée sur `.env.example`
+# (utilisateur/base `fixtura`, port 5432, sans mot de passe via `trust`) — aucune
+# variable à modifier à la main. L'application, elle, se lance en `npm` sur la machine
+# hôte (le HMR Vite fonctionne alors nativement) : cf. « Démarrage rapide (Docker) »
+# dans le README.
+#
+# ⚠️ `trust` (pas de mot de passe) : réservé au dev local, jamais en production.
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: fixtura-db
+    environment:
+      POSTGRES_USER: fixtura
+      POSTGRES_DB: fixtura
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - '5432:5432'
+    volumes:
+      - fixtura_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U fixtura -d fixtura']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  fixtura_pgdata:
