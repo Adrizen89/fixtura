@@ -54,6 +54,8 @@ export default defineConfig({
     () => import('@adonisjs/auth/auth_provider'),
     () => import('@adonisjs/inertia/inertia_provider'),
     () => import('@adonisjs/transmit/transmit_provider'),
+    // Suivi des erreurs serveur — inerte sans SENTRY_DSN (issue #118, §10).
+    () => import('#providers/observability_provider'),
   ],
 
   /*

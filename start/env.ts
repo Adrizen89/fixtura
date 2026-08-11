@@ -49,4 +49,16 @@ export default await Env.create(new URL('../', import.meta.url), {
   REDIS_HOST: Env.schema.string.optional({ format: 'host' }),
   REDIS_PORT: Env.schema.number.optional(),
   REDIS_PASSWORD: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Suivi des erreurs — Sentry (issue #118)
+  |----------------------------------------------------------
+  |
+  | Optionnelle : présente, elle active la remontée des erreurs
+  | serveur vers Sentry (cf. app/services/error_reporter.ts).
+  | Absente (dev, CI, prod sans DSN) → suivi désactivé, aucune
+  | donnée n'est envoyée à un tiers (RGPD, cf. §10).
+  */
+  SENTRY_DSN: Env.schema.string.optional(),
 })
