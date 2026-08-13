@@ -31,7 +31,7 @@ const year = new Date().getFullYear()
   <footer
     class="border-t"
     :class="
-      variant === 'public' ? 'border-sand-6 text-sand-9' : 'border-sand-6 bg-white text-sand-11'
+      variant === 'public' ? 'border-sand-6 text-sand-9' : 'border-sand-6 bg-surface text-sand-11'
     "
   >
     <div

@@ -68,7 +68,7 @@ const { currentPage, lastPage } = props.pagination
       </p>
     </div>
 
-    <section class="overflow-hidden rounded-2xl border border-sand-6 bg-white">
+    <section class="overflow-hidden rounded-2xl border border-sand-6 bg-surface">
       <div v-if="hasEntries" class="overflow-x-auto">
         <table class="w-full text-left text-sm">
           <thead

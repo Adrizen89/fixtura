@@ -60,7 +60,7 @@ function submit() {
         </div>
 
         <form
-          class="space-y-4 rounded-2xl border border-sand-6 bg-white p-6 shadow-sm"
+          class="space-y-4 rounded-2xl border border-sand-6 bg-surface p-6 shadow-sm"
           @submit.prevent="submit"
         >
           <div

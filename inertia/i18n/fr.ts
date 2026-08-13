@@ -10,6 +10,15 @@ export default {
   locale: {
     switch: 'Choisir la langue',
   },
+  theme: {
+    label: 'Thème',
+    toGoLight: 'Passer en thème clair',
+    toGoDark: 'Passer en thème sombre',
+    toGoSystem: 'Suivre le thème du système',
+    light: 'Clair',
+    dark: 'Sombre',
+    system: 'Système',
+  },
   common: {
     skipToContent: 'Aller au contenu',
     backHome: "Retour à l'accueil",

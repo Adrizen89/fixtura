@@ -43,7 +43,7 @@ function submit() {
 <template>
   <form class="space-y-8" @submit.prevent="submit">
     <!-- Général -->
-    <section class="rounded-2xl border border-sand-6 bg-white p-6">
+    <section class="rounded-2xl border border-sand-6 bg-surface p-6">
       <h2 class="mb-4 text-base font-semibold text-sand-12">
         {{ t('tournamentForm.sections.general') }}
       </h2>
@@ -102,7 +102,7 @@ function submit() {
     </section>
 
     <!-- Format -->
-    <section class="rounded-2xl border border-sand-6 bg-white p-6">
+    <section class="rounded-2xl border border-sand-6 bg-surface p-6">
       <h2 class="mb-1 text-base font-semibold text-sand-12">
         {{ t('tournamentForm.format.title') }}
       </h2>
@@ -115,7 +115,7 @@ function submit() {
           <select
             id="format"
             v-model="form.format"
-            class="w-full rounded-lg border border-sand-7 bg-white px-3 py-2 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+            class="w-full rounded-lg border border-sand-7 bg-surface px-3 py-2 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
             :class="{ 'border-red-400': form.errors.format }"
           >
             <option value="championship">
@@ -232,7 +232,7 @@ function submit() {
     </section>
 
     <!-- Barème de points (issue #104) -->
-    <section class="rounded-2xl border border-sand-6 bg-white p-6">
+    <section class="rounded-2xl border border-sand-6 bg-surface p-6">
       <h2 class="mb-1 text-base font-semibold text-sand-12">
         {{ t('tournamentForm.scoring.title') }}
       </h2>
@@ -300,7 +300,7 @@ function submit() {
     </section>
 
     <!-- Horaires & terrains -->
-    <section class="rounded-2xl border border-sand-6 bg-white p-6">
+    <section class="rounded-2xl border border-sand-6 bg-surface p-6">
       <h2 class="mb-1 text-base font-semibold text-sand-12">
         {{ t('tournamentForm.schedule.title') }}
       </h2>

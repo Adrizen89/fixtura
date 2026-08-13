@@ -39,7 +39,7 @@ function destroy(t: Tournament) {
       </div>
       <Link
         href="/tournaments/create"
-        class="shrink-0 rounded-lg bg-primary px-4 py-2.5 font-semibold text-white transition hover:bg-primary-700"
+        class="shrink-0 rounded-lg bg-primary px-4 py-2.5 font-semibold text-white shadow-sm transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
       >
         + {{ translate('tournamentsAdmin.index.newTournament') }}
       </Link>
@@ -48,77 +48,121 @@ function destroy(t: Tournament) {
     <!-- État vide -->
     <div
       v-if="tournaments.length === 0"
-      class="rounded-2xl border border-dashed border-sand-7 bg-white p-12 text-center"
+      class="rounded-2xl border border-dashed border-sand-7 bg-surface-2 p-12 text-center"
     >
+      <div
+        class="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-xl bg-primary-100 text-primary-800"
+        aria-hidden="true"
+      >
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect x="3" y="4" width="18" height="18" rx="3" />
+          <path d="M3 9h18M8 2v4M16 2v4" />
+        </svg>
+      </div>
       <p class="text-sand-11">{{ translate('tournamentsAdmin.index.empty') }}</p>
       <Link
         href="/tournaments/create"
-        class="mt-4 inline-block rounded-lg bg-primary px-4 py-2 font-semibold text-white transition hover:bg-primary-700"
+        class="mt-4 inline-block rounded-lg bg-primary px-4 py-2 font-semibold text-white shadow-sm transition hover:bg-primary-700"
       >
         {{ translate('tournamentsAdmin.index.createFirst') }}
       </Link>
     </div>
 
     <!-- Liste -->
-    <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div v-else class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
       <article
         v-for="t in tournaments"
         :key="t.id"
-        class="flex flex-col rounded-2xl border border-sand-6 bg-white p-5 transition hover:border-sand-8 hover:shadow-sm"
+        class="flex flex-col overflow-hidden rounded-2xl border border-sand-6 bg-surface shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-sand-7 hover:shadow-md"
       >
-        <div class="mb-3 flex items-start justify-between gap-3">
-          <div class="min-w-0">
-            <Link
-              :href="`/tournaments/${t.id}`"
-              class="block truncate text-lg font-semibold text-sand-12 hover:text-primary"
-            >
-              {{ t.name }}
-            </Link>
-            <p class="text-sm text-sand-11">{{ t.category }}</p>
+        <div class="p-5">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <Link
+                :href="`/tournaments/${t.id}`"
+                class="block truncate text-lg font-bold tracking-tight text-sand-12 hover:text-primary"
+              >
+                {{ t.name }}
+              </Link>
+              <p class="mt-0.5 truncate text-sm text-sand-11">{{ t.category }}</p>
+            </div>
+            <StatusBadge :status="t.status" />
           </div>
-          <StatusBadge :status="t.status" />
+
+          <div class="mt-3 flex items-center gap-2 text-sm text-sand-11">
+            <span class="text-primary" aria-hidden="true">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="4" width="18" height="18" rx="3" />
+                <path d="M3 9h18M8 2v4M16 2v4" />
+              </svg>
+            </span>
+            <span>{{ formatDate(t.eventDate) }}</span>
+          </div>
+
+          <dl
+            class="mt-4 grid grid-cols-3 gap-1 rounded-xl border border-sand-5 bg-surface-2 px-2 py-3"
+          >
+            <div class="text-center">
+              <dd class="text-xl font-extrabold tabular-nums tracking-tight text-sand-12">
+                {{ t.teamsCount ?? 0 }}
+              </dd>
+              <dt class="text-[0.7rem] font-semibold text-sand-9">
+                {{ translate('tournamentsAdmin.index.teams') }}
+              </dt>
+            </div>
+            <div class="text-center">
+              <dd class="text-xl font-extrabold tabular-nums tracking-tight text-sand-12">
+                {{ t.numTerrains }}
+              </dd>
+              <dt class="text-[0.7rem] font-semibold text-sand-9">
+                {{ translate('tournamentsAdmin.index.pitches') }}
+              </dt>
+            </div>
+            <div class="text-center">
+              <dd class="text-xl font-extrabold tabular-nums tracking-tight text-sand-12">
+                {{ t.startTime.slice(0, 5) }}
+              </dd>
+              <dt class="text-[0.7rem] font-semibold text-sand-9">
+                {{ translate('tournamentsAdmin.index.start') }}
+              </dt>
+            </div>
+          </dl>
         </div>
 
-        <dl class="grid grid-cols-2 gap-2 text-sm text-sand-11">
-          <div>
-            <dt class="text-xs uppercase tracking-wide text-sand-9">
-              {{ translate('tournamentsAdmin.index.date') }}
-            </dt>
-            <dd class="text-sand-12">{{ formatDate(t.eventDate) }}</dd>
-          </div>
-          <div>
-            <dt class="text-xs uppercase tracking-wide text-sand-9">
-              {{ translate('tournamentsAdmin.index.pitches') }}
-            </dt>
-            <dd class="text-sand-12">{{ t.numTerrains }}</dd>
-          </div>
-          <div>
-            <dt class="text-xs uppercase tracking-wide text-sand-9">
-              {{ translate('tournamentsAdmin.index.teams') }}
-            </dt>
-            <dd class="text-sand-12">{{ t.teamsCount ?? 0 }}</dd>
-          </div>
-          <div>
-            <dt class="text-xs uppercase tracking-wide text-sand-9">
-              {{ translate('tournamentsAdmin.index.start') }}
-            </dt>
-            <dd class="text-sand-12">{{ t.startTime.slice(0, 5) }}</dd>
-          </div>
-        </dl>
-
-        <div class="mt-4 flex items-center gap-3 border-t border-sand-5 pt-3 text-sm">
-          <Link :href="`/tournaments/${t.id}`" class="font-medium text-primary hover:underline">
+        <div class="mt-auto flex items-center gap-1 border-t border-sand-5 px-3 py-2.5 text-sm">
+          <Link
+            :href="`/tournaments/${t.id}`"
+            class="rounded-lg px-2.5 py-1.5 font-semibold text-primary transition hover:bg-primary-50"
+          >
             {{ translate('tournamentsAdmin.index.open') }}
           </Link>
           <Link
             :href="`/tournaments/${t.id}/edit`"
-            class="font-medium text-sand-11 hover:text-sand-12"
+            class="rounded-lg px-2.5 py-1.5 font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12"
           >
             {{ translate('tournamentsAdmin.index.edit') }}
           </Link>
           <button
             type="button"
-            class="ml-auto font-medium text-red-700 hover:underline"
+            class="ml-auto rounded-lg px-2.5 py-1.5 font-medium text-sand-10 transition hover:bg-red-50 hover:text-red-700"
             @click="destroy(t)"
           >
             {{ translate('tournamentsAdmin.index.delete') }}

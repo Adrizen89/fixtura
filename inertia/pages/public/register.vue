@@ -72,7 +72,7 @@ function formatDate(iso: string | null) {
           </p>
         </div>
 
-        <div class="rounded-2xl border border-sand-6 bg-white p-6 shadow-sm">
+        <div class="rounded-2xl border border-sand-6 bg-surface p-6 shadow-sm">
           <!-- Message de confirmation (après inscription) -->
           <div
             v-if="flash?.success"

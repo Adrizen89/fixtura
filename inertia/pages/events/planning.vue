@@ -56,25 +56,25 @@ function validate() {
 
     <!-- Résumé -->
     <div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-      <div class="rounded-xl border border-sand-6 bg-white p-4">
+      <div class="rounded-xl border border-sand-6 bg-surface p-4">
         <dt class="text-xs uppercase tracking-wide text-sand-9">
           {{ t('eventsAdmin.planning.matches') }}
         </dt>
         <dd class="mt-0.5 text-xl font-semibold text-sand-12">{{ preview.matchCount }}</dd>
       </div>
-      <div class="rounded-xl border border-sand-6 bg-white p-4">
+      <div class="rounded-xl border border-sand-6 bg-surface p-4">
         <dt class="text-xs uppercase tracking-wide text-sand-9">
           {{ t('eventsAdmin.planning.categories') }}
         </dt>
         <dd class="mt-0.5 text-xl font-semibold text-sand-12">{{ preview.categories.length }}</dd>
       </div>
-      <div class="rounded-xl border border-sand-6 bg-white p-4">
+      <div class="rounded-xl border border-sand-6 bg-surface p-4">
         <dt class="text-xs uppercase tracking-wide text-sand-9">
           {{ t('eventsAdmin.planning.slots') }}
         </dt>
         <dd class="mt-0.5 text-xl font-semibold text-sand-12">{{ preview.slotsCount }}</dd>
       </div>
-      <div class="rounded-xl border border-sand-6 bg-white p-4">
+      <div class="rounded-xl border border-sand-6 bg-surface p-4">
         <dt class="text-xs uppercase tracking-wide text-sand-9">
           {{ t('eventsAdmin.planning.timeRange') }}
         </dt>
@@ -85,7 +85,7 @@ function validate() {
     </div>
 
     <!-- Grille par catégorie -->
-    <section class="rounded-2xl border border-sand-6 bg-white p-6">
+    <section class="rounded-2xl border border-sand-6 bg-surface p-6">
       <div class="mb-4 flex flex-wrap gap-2 border-b border-sand-5">
         <button
           v-for="c in preview.categories"

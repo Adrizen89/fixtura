@@ -33,7 +33,7 @@ function submit() {
 <template>
   <form class="space-y-8" @submit.prevent="submit">
     <!-- Général -->
-    <section class="rounded-2xl border border-sand-6 bg-white p-6">
+    <section class="rounded-2xl border border-sand-6 bg-surface p-6">
       <h2 class="mb-4 text-base font-semibold text-sand-12">
         {{ t('eventForm.sections.general') }}
       </h2>
@@ -74,7 +74,7 @@ function submit() {
     </section>
 
     <!-- Horaires & terrains partagés -->
-    <section class="rounded-2xl border border-sand-6 bg-white p-6">
+    <section class="rounded-2xl border border-sand-6 bg-surface p-6">
       <h2 class="mb-1 text-base font-semibold text-sand-12">{{ t('eventForm.schedule.title') }}</h2>
       <p class="mb-4 text-sm text-sand-11">
         {{ t('eventForm.schedule.hint') }}

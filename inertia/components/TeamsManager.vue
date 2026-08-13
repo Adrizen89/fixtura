@@ -65,7 +65,7 @@ function destroyTeam(team: Team) {
 </script>
 
 <template>
-  <section class="rounded-2xl border border-sand-6 bg-white p-6">
+  <section class="rounded-2xl border border-sand-6 bg-surface p-6">
     <div class="mb-4 flex items-center justify-between">
       <h2 class="text-base font-semibold text-sand-12">{{ t('teamsManager.title') }}</h2>
       <span
@@ -123,7 +123,7 @@ function destroyTeam(team: Team) {
               required
               maxlength="60"
               autocomplete="off"
-              class="min-w-0 flex-1 rounded-md border border-sand-7 bg-white px-2 py-1 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+              class="min-w-0 flex-1 rounded-md border border-sand-7 bg-surface px-2 py-1 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
               :class="{ 'border-red-400': editForm.errors.name }"
               @keyup.escape="cancelEdit"
             />

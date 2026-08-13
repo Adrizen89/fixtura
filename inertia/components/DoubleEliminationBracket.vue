@@ -129,7 +129,7 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
               <div
                 v-for="m in col.matches"
                 :key="m.id"
-                class="rounded-lg border border-sand-6 bg-white"
+                class="rounded-lg border border-sand-6 bg-surface"
               >
                 <div
                   v-for="side in sides"
@@ -161,7 +161,7 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
     <!-- Grande finale -->
     <div v-if="grandFinal" class="border-t border-sand-5 pt-4">
       <h3 class="mb-2 text-sm font-bold text-sand-12">{{ t('bracket.grandFinal') }}</h3>
-      <div class="max-w-xs rounded-lg border border-sand-6 bg-white">
+      <div class="max-w-xs rounded-lg border border-sand-6 bg-surface">
         <div
           v-for="side in sides"
           :key="side"

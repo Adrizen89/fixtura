@@ -91,7 +91,7 @@ function formatDate(iso: string | null) {
     </div>
 
     <!-- Inviter un organisateur -->
-    <section class="mb-8 rounded-2xl border border-sand-6 bg-white p-5">
+    <section class="mb-8 rounded-2xl border border-sand-6 bg-surface p-5">
       <h2 class="mb-3 text-lg font-semibold text-sand-12">{{ t('membersAdmin.inviteHeading') }}</h2>
       <form class="flex flex-col gap-3 sm:flex-row sm:items-start" @submit.prevent="invite">
         <div class="flex-1">
@@ -139,7 +139,7 @@ function formatDate(iso: string | null) {
         <li
           v-for="inv in invitations"
           :key="inv.id"
-          class="rounded-xl border border-sand-6 bg-white p-4"
+          class="rounded-xl border border-sand-6 bg-surface p-4"
         >
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="min-w-0">
@@ -185,7 +185,7 @@ function formatDate(iso: string | null) {
       <h2 class="mb-3 text-lg font-semibold text-sand-12">
         {{ t('membersAdmin.membersHeading', { count: members.length }) }}
       </h2>
-      <ul class="divide-y divide-sand-5 rounded-2xl border border-sand-6 bg-white">
+      <ul class="divide-y divide-sand-5 rounded-2xl border border-sand-6 bg-surface">
         <li
           v-for="member in members"
           :key="member.id"

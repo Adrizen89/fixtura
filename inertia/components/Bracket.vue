@@ -126,7 +126,7 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
             <div
               v-for="m in col.matches"
               :key="m.id"
-              class="rounded-lg border border-sand-6 bg-white"
+              class="rounded-lg border border-sand-6 bg-surface"
             >
               <div
                 v-for="side in sides"
@@ -159,7 +159,7 @@ const teamScore = (m: ResultMatchRow, side: 'home' | 'away') =>
       <h3 class="mb-2 text-xs font-semibold uppercase tracking-wide text-sand-9">
         {{ ROUND_LABEL.third }}
       </h3>
-      <div class="max-w-xs rounded-lg border border-sand-6 bg-white">
+      <div class="max-w-xs rounded-lg border border-sand-6 bg-surface">
         <div
           v-for="side in sides"
           :key="side"

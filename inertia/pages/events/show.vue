@@ -115,7 +115,7 @@ function hhmm(v: string | null) {
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <!-- Paramètres partagés -->
-      <section class="rounded-2xl border border-sand-6 bg-white p-6 lg:col-span-2">
+      <section class="rounded-2xl border border-sand-6 bg-surface p-6 lg:col-span-2">
         <h2 class="mb-4 text-base font-semibold text-sand-12">
           {{ t('eventsAdmin.show.sharedSettings') }}
         </h2>
@@ -159,7 +159,7 @@ function hhmm(v: string | null) {
       </section>
 
       <!-- Ajouter une catégorie -->
-      <section class="rounded-2xl border border-sand-6 bg-white p-6">
+      <section class="rounded-2xl border border-sand-6 bg-surface p-6">
         <h2 class="mb-4 text-base font-semibold text-sand-12">
           {{ t('eventsAdmin.show.addCategory') }}
         </h2>
@@ -203,7 +203,7 @@ function hhmm(v: string | null) {
             <select
               id="cat-format"
               v-model="form.format"
-              class="w-full rounded-lg border border-sand-7 bg-white px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+              class="w-full rounded-lg border border-sand-7 bg-surface px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
             >
               <option value="championship">{{ t('eventsAdmin.show.formatChampionship') }}</option>
               <option value="pools">{{ t('eventsAdmin.show.formatPools') }}</option>
@@ -257,7 +257,7 @@ function hhmm(v: string | null) {
     </div>
 
     <!-- Catégories -->
-    <section class="mt-6 rounded-2xl border border-sand-6 bg-white p-6">
+    <section class="mt-6 rounded-2xl border border-sand-6 bg-surface p-6">
       <h2 class="mb-4 text-base font-semibold text-sand-12">
         {{ t('eventsAdmin.show.categoriesHeading') }}
         <span class="text-sand-10">({{ categories.length }})</span>
@@ -303,7 +303,7 @@ function hhmm(v: string | null) {
     </section>
 
     <!-- Planning combiné -->
-    <section class="mt-6 rounded-2xl border border-sand-6 bg-white p-6">
+    <section class="mt-6 rounded-2xl border border-sand-6 bg-surface p-6">
       <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="text-base font-semibold text-sand-12">

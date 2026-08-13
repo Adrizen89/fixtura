@@ -92,7 +92,7 @@ function formatDate(iso: string | null) {
 </script>
 
 <template>
-  <section class="rounded-2xl border border-sand-6 bg-white p-6">
+  <section class="rounded-2xl border border-sand-6 bg-surface p-6">
     <div class="mb-4 flex items-center justify-between gap-3">
       <h2 class="text-base font-semibold text-sand-12">{{ t('registrationManager.title') }}</h2>
       <span

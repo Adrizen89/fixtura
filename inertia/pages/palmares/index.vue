@@ -58,7 +58,7 @@ function winRatePct(rate: number) {
     <!-- État vide -->
     <div
       v-if="isEmpty"
-      class="rounded-2xl border border-dashed border-sand-7 bg-white p-12 text-center"
+      class="rounded-2xl border border-dashed border-sand-7 bg-surface p-12 text-center"
     >
       <p class="text-sand-11">{{ t('palmaresAdmin.emptyTitle') }}</p>
       <p class="mt-1 text-sm text-sand-9">
@@ -72,7 +72,7 @@ function winRatePct(rate: number) {
         <h2 class="mb-4 text-lg font-semibold text-sand-12">
           {{ t('palmaresAdmin.teamRecordsHeading') }}
         </h2>
-        <div class="overflow-x-auto rounded-2xl border border-sand-6 bg-white">
+        <div class="overflow-x-auto rounded-2xl border border-sand-6 bg-surface">
           <table class="w-full border-collapse text-sm">
             <caption class="sr-only">
               {{
@@ -150,7 +150,7 @@ function winRatePct(rate: number) {
           <li
             v-for="e in editions"
             :key="e.tournamentId"
-            class="rounded-2xl border border-sand-6 bg-white p-4"
+            class="rounded-2xl border border-sand-6 bg-surface p-4"
           >
             <div class="flex flex-wrap items-center justify-between gap-3">
               <div class="min-w-0">

@@ -50,25 +50,25 @@ function validate() {
 
     <!-- Résumé -->
     <div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-      <div class="rounded-xl border border-sand-6 bg-white p-4">
+      <div class="rounded-xl border border-sand-6 bg-surface p-4">
         <dt class="text-xs uppercase tracking-wide text-sand-9">
           {{ t('tournamentsAdmin.planning.matches') }}
         </dt>
         <dd class="mt-0.5 text-xl font-semibold text-sand-12">{{ preview.matchCount }}</dd>
       </div>
-      <div class="rounded-xl border border-sand-6 bg-white p-4">
+      <div class="rounded-xl border border-sand-6 bg-surface p-4">
         <dt class="text-xs uppercase tracking-wide text-sand-9">
           {{ t('tournamentsAdmin.planning.rounds') }}
         </dt>
         <dd class="mt-0.5 text-xl font-semibold text-sand-12">{{ preview.roundsCount }}</dd>
       </div>
-      <div class="rounded-xl border border-sand-6 bg-white p-4">
+      <div class="rounded-xl border border-sand-6 bg-surface p-4">
         <dt class="text-xs uppercase tracking-wide text-sand-9">
           {{ t('tournamentsAdmin.planning.slots') }}
         </dt>
         <dd class="mt-0.5 text-xl font-semibold text-sand-12">{{ preview.slotsCount }}</dd>
       </div>
-      <div class="rounded-xl border border-sand-6 bg-white p-4">
+      <div class="rounded-xl border border-sand-6 bg-surface p-4">
         <dt class="text-xs uppercase tracking-wide text-sand-9">
           {{ t('tournamentsAdmin.planning.timeRange') }}
         </dt>
@@ -79,7 +79,7 @@ function validate() {
     </div>
 
     <!-- Grille -->
-    <section class="rounded-2xl border border-sand-6 bg-white p-6">
+    <section class="rounded-2xl border border-sand-6 bg-surface p-6">
       <PlanningGrid :slots="preview.slots" />
     </section>
 

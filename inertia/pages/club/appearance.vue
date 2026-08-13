@@ -84,7 +84,7 @@ function submit() {
       <!-- Réglages -->
       <div class="space-y-6 lg:col-span-2">
         <!-- Logo -->
-        <section class="rounded-2xl border border-sand-6 bg-white p-6">
+        <section class="rounded-2xl border border-sand-6 bg-surface p-6">
           <h2 class="mb-1 text-base font-semibold text-sand-12">
             {{ t('clubAdmin.logoHeading') }}
           </h2>
@@ -133,7 +133,7 @@ function submit() {
         </section>
 
         <!-- Couleur -->
-        <section class="rounded-2xl border border-sand-6 bg-white p-6">
+        <section class="rounded-2xl border border-sand-6 bg-surface p-6">
           <h2 class="mb-1 text-base font-semibold text-sand-12">
             {{ t('clubAdmin.colorHeading') }}
           </h2>
@@ -149,7 +149,7 @@ function submit() {
               v-model="colorHex"
               type="color"
               :aria-label="t('clubAdmin.colorPickerLabel')"
-              class="h-10 w-14 cursor-pointer rounded border border-sand-7 bg-white p-1"
+              class="h-10 w-14 cursor-pointer rounded border border-sand-7 bg-surface p-1"
             />
             <input
               v-model="colorHex"
@@ -181,7 +181,7 @@ function submit() {
           <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-sand-9">
             {{ t('clubAdmin.previewHeading') }}
           </h2>
-          <div class="overflow-hidden rounded-2xl border border-sand-6 bg-white">
+          <div class="overflow-hidden rounded-2xl border border-sand-6 bg-surface">
             <div class="h-2" :style="{ backgroundColor: previewColor }" />
             <div class="flex items-center gap-3 p-5">
               <img

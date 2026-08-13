@@ -129,7 +129,7 @@ function confirmImport() {
 </script>
 
 <template>
-  <section class="rounded-2xl border border-sand-6 bg-white p-6">
+  <section class="rounded-2xl border border-sand-6 bg-surface p-6">
     <div class="flex items-center justify-between">
       <div>
         <h2 class="text-base font-semibold text-sand-12">{{ t('teamsImport.title') }}</h2>

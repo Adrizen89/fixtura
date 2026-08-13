@@ -4,8 +4,19 @@
 |--------------------------------------------------------------------------
 | Thème Fixtura (Tailwind v4 — CSS-first)
 |--------------------------------------------------------------------------
-| Palette « sand » neutre pour les surfaces admin + un vert « terrain » comme
-| couleur primaire.
+| Identité « terrain » : neutres « sand » chauds pour les surfaces + un vert
+| terrain comme couleur primaire. Depuis la refonte visuelle (fondations),
+| trois ajouts structurants :
+|
+|  1. Tokens sémantiques et de surface (`surface`, `ground`, `info`, `gold`…)
+|     pour découpler les composants des couleurs brutes.
+|  2. Ombres douces et chaudes (barème `--shadow-*` surchargé) → profondeur
+|     sans lourdeur.
+|  3. **Mode sombre** piloté par `data-theme` (toggle admin) ET par la
+|     préférence système. Tailwind v4 exposant chaque couleur via
+|     `var(--color-…)`, on ne redéfinit ici que **les valeurs des tokens** :
+|     tous les utilitaires (`bg-sand-2`, `text-sand-12`, `bg-primary`, …)
+|     basculent alors automatiquement, sans toucher au balisage des pages.
 |
 | Police : Inter, **self-hostée** en woff2 (RGPD §10 — aucun CDN tiers traçant,
 | cf. CLAUDE.md §4). Fichier variable (une seule requête pour toutes les graisses)
@@ -45,7 +56,7 @@
   --color-primary-800: #166534;
   --color-primary-900: #14532d;
 
-  /* Neutres « sand » */
+  /* Neutres « sand » — surfaces admin (mode clair, référence). */
   --color-sand-1: #fdfdfc;
   --color-sand-2: #f9f9f8;
   --color-sand-3: #f1f0ef;
@@ -58,4 +69,167 @@
   --color-sand-10: #82827c;
   --color-sand-11: #63635e;
   --color-sand-12: #21201c;
+
+  /*
+  | Surfaces sémantiques — remplacent les `bg-white` en dur pour être thémables.
+  |  · surface   : cartes, en-têtes, panneaux (le « papier »)
+  |  · surface-2 : surface légèrement enfoncée (stat-blocks, champs, états vides)
+  |  · ground    : fond de page
+  */
+  --color-surface: #ffffff;
+  --color-surface-2: #faf9f6;
+  --color-ground: #f6f5f0;
+
+  /* Sémantique — podium (or/argent/bronze), distincte de l'accent. */
+  --color-gold: #b8860b;
+  --color-silver: #7f8791;
+  --color-bronze: #a76a3c;
+
+  /* Ombres douces et chaudes (barème par défaut surchargé → profondeur discrète). */
+  --shadow-xs: 0 1px 2px rgba(35, 33, 24, 0.06);
+  --shadow-sm: 0 1px 2px rgba(35, 33, 24, 0.06), 0 1px 1px rgba(35, 33, 24, 0.04);
+  --shadow-md: 0 4px 12px rgba(35, 33, 24, 0.08), 0 2px 4px rgba(35, 33, 24, 0.05);
+  --shadow-lg: 0 14px 34px rgba(35, 33, 24, 0.1), 0 4px 10px rgba(35, 33, 24, 0.05);
+}
+
+/*
+|--------------------------------------------------------------------------
+| Mode sombre — redéfinition des valeurs de tokens uniquement
+|--------------------------------------------------------------------------
+| Deux déclencheurs, mêmes valeurs :
+|   · préférence système  → `@media (prefers-color-scheme: dark)`, sauf choix
+|     explicite « clair » (`:root:not([data-theme="light"])`) ;
+|   · choix explicite      → `:root[data-theme="dark"]` (le toggle admin gagne
+|     dans les deux sens).
+| La rampe « sand » est **repensée** pour le sombre (pas une simple inversion) :
+| chaude, contrastée, lisible. On surcharge aussi le petit lot de couleurs
+| Tailwind par défaut réellement employées (erreurs, alertes) pour qu'elles
+| restent lisibles sur fond sombre.
+*/
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --color-sand-1: #0f110e;
+    --color-sand-2: #141613;
+    --color-sand-3: #1c1f1a;
+    --color-sand-4: #232720;
+    --color-sand-5: #2b2f28;
+    --color-sand-6: #333831;
+    --color-sand-7: #3f453b;
+    --color-sand-8: #4f5749;
+    --color-sand-9: #8b8d81;
+    --color-sand-10: #9a9c90;
+    --color-sand-11: #c6c8bd;
+    --color-sand-12: #f1f2ec;
+
+    --color-surface: #191c17;
+    --color-surface-2: #212520;
+    --color-ground: #101210;
+
+    --color-primary: #2fbe72;
+    --color-primary-50: #12271b;
+    --color-primary-100: #173322;
+    --color-primary-200: #1e4530;
+    --color-primary-600: #2fbe72;
+    --color-primary-700: #27a862;
+    --color-primary-800: #8fe6b1;
+    --color-primary-900: #b6f0cf;
+
+    --color-gold: #e3b23c;
+    --color-silver: #a2a9b3;
+    --color-bronze: #cf8b57;
+
+    /* Couleurs Tailwind par défaut employées dans les pages (erreurs, alertes). */
+    --color-red-50: #3a1714;
+    --color-red-200: #7f2a22;
+    --color-red-400: #f0857a;
+    --color-red-700: #f0857a;
+    --color-red-800: #f6a99f;
+    --color-amber-50: #2a1e08;
+    --color-amber-100: #33260f;
+    --color-amber-300: #6b5220;
+    --color-amber-400: #e0a94a;
+    --color-amber-700: #e0a94a;
+    --color-amber-800: #e8bd6a;
+    --color-amber-900: #f0cf8f;
+    --color-green-50: #12271b;
+    --color-green-100: #163020;
+    --color-green-200: #1e4530;
+    --color-green-800: #8fe6b1;
+    --color-blue-100: #172641;
+    --color-blue-800: #a9c8ff;
+    --color-orange-100: #33240f;
+    --color-orange-900: #e6a866;
+
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.42);
+    --shadow-lg: 0 18px 40px rgba(0, 0, 0, 0.5);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-sand-1: #0f110e;
+  --color-sand-2: #141613;
+  --color-sand-3: #1c1f1a;
+  --color-sand-4: #232720;
+  --color-sand-5: #2b2f28;
+  --color-sand-6: #333831;
+  --color-sand-7: #3f453b;
+  --color-sand-8: #4f5749;
+  --color-sand-9: #8b8d81;
+  --color-sand-10: #9a9c90;
+  --color-sand-11: #c6c8bd;
+  --color-sand-12: #f1f2ec;
+
+  --color-surface: #191c17;
+  --color-surface-2: #212520;
+  --color-ground: #101210;
+
+  --color-primary: #2fbe72;
+  --color-primary-50: #12271b;
+  --color-primary-100: #173322;
+  --color-primary-200: #1e4530;
+  --color-primary-600: #2fbe72;
+  --color-primary-700: #27a862;
+  --color-primary-800: #8fe6b1;
+  --color-primary-900: #b6f0cf;
+
+  --color-gold: #e3b23c;
+  --color-silver: #a2a9b3;
+  --color-bronze: #cf8b57;
+
+  --color-red-50: #3a1714;
+  --color-red-200: #7f2a22;
+  --color-red-400: #f0857a;
+  --color-red-700: #f0857a;
+  --color-red-800: #f6a99f;
+  --color-amber-50: #2a1e08;
+  --color-amber-100: #33260f;
+  --color-amber-300: #6b5220;
+  --color-amber-400: #e0a94a;
+  --color-amber-700: #e0a94a;
+  --color-amber-800: #e8bd6a;
+  --color-amber-900: #f0cf8f;
+  --color-green-50: #12271b;
+  --color-green-100: #163020;
+  --color-green-200: #1e4530;
+  --color-green-800: #8fe6b1;
+  --color-blue-100: #172641;
+  --color-blue-800: #a9c8ff;
+  --color-orange-100: #33240f;
+  --color-orange-900: #e6a866;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.42);
+  --shadow-lg: 0 18px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Le fond de page suit le thème (l'écran public surcharge localement au besoin). */
+:root {
+  color-scheme: light;
 }

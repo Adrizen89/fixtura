@@ -3,6 +3,22 @@
 
 <head>
   <meta charset="utf-8">
+
+  {{--
+    Applique le thème (clair/sombre) AVANT le premier rendu, pour éviter tout
+    flash : lit le cookie de préférence `theme` posé par le toggle admin. Sans
+    cookie, aucun attribut n'est posé → la préférence système (`prefers-color-scheme`)
+    s'applique. Volontairement inline et synchrone, tout en haut du <head>.
+  --}}
+  <script>
+    (function () {
+      try {
+        var m = document.cookie.match(/(?:^|;\s*)theme=(light|dark)/)
+        if (m) document.documentElement.setAttribute('data-theme', m[1])
+      } catch (e) {}
+    })()
+  </script>
+
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#16a34a">
 
@@ -18,7 +34,7 @@
   @stack('dumper')
 </head>
 
-<body class="min-h-screen bg-sand-1 font-sans text-sand-12 antialiased">
+<body class="min-h-screen bg-ground font-sans text-sand-12 antialiased">
   @inertia()
 </body>
 

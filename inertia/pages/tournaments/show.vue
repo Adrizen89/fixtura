@@ -73,7 +73,7 @@ function hhmm(v: string | null) {
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <!-- Paramètres -->
-      <section class="rounded-2xl border border-sand-6 bg-white p-6 lg:col-span-2">
+      <section class="rounded-2xl border border-sand-6 bg-surface p-6 lg:col-span-2">
         <h2 class="mb-4 text-base font-semibold text-sand-12">
           {{ t('tournamentsAdmin.show.settings') }}
         </h2>
@@ -124,7 +124,7 @@ function hhmm(v: string | null) {
     </div>
 
     <!-- Écran public : lien, mode TV et QR code à afficher au bord des terrains (#40) -->
-    <section class="mt-6 rounded-2xl border border-sand-6 bg-white p-6">
+    <section class="mt-6 rounded-2xl border border-sand-6 bg-surface p-6">
       <div class="flex flex-col gap-6 sm:flex-row sm:items-center">
         <div class="flex shrink-0 justify-center">
           <img
@@ -176,7 +176,7 @@ function hhmm(v: string | null) {
     <RegistrationManager class="mt-6" :tournament="tournament" :registrations="registrations" />
 
     <!-- Planning -->
-    <section class="mt-6 rounded-2xl border border-sand-6 bg-white p-6">
+    <section class="mt-6 rounded-2xl border border-sand-6 bg-surface p-6">
       <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="text-base font-semibold text-sand-12">

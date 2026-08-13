@@ -46,7 +46,7 @@ function destroy(e: EventItem) {
     <!-- État vide -->
     <div
       v-if="events.length === 0"
-      class="rounded-2xl border border-dashed border-sand-7 bg-white p-12 text-center"
+      class="rounded-2xl border border-dashed border-sand-7 bg-surface p-12 text-center"
     >
       <p class="text-sand-11">{{ t('eventsAdmin.index.empty') }}</p>
       <Link
@@ -62,7 +62,7 @@ function destroy(e: EventItem) {
       <article
         v-for="e in events"
         :key="e.id"
-        class="flex flex-col rounded-2xl border border-sand-6 bg-white p-5 transition hover:border-sand-8 hover:shadow-sm"
+        class="flex flex-col rounded-2xl border border-sand-6 bg-surface p-5 transition hover:border-sand-8 hover:shadow-sm"
       >
         <div class="mb-3 flex items-start justify-between gap-3">
           <Link

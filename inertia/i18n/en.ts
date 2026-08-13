@@ -9,6 +9,15 @@ export default {
   locale: {
     switch: 'Choose language',
   },
+  theme: {
+    label: 'Theme',
+    toGoLight: 'Switch to light theme',
+    toGoDark: 'Switch to dark theme',
+    toGoSystem: 'Follow system theme',
+    light: 'Light',
+    dark: 'Dark',
+    system: 'System',
+  },
   common: {
     skipToContent: 'Skip to content',
     backHome: 'Back to home',

@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { Link, usePage, router } from '@inertiajs/vue3'
 import SiteFooter from '~/components/SiteFooter.vue'
 import LocaleSwitcher from '~/components/LocaleSwitcher.vue'
+import ThemeToggle from '~/components/ThemeToggle.vue'
 import { useI18n } from '~/composables/i18n'
 import type { AuthUser, CurrentClub, FlashMessages } from '~/app/types'
 
@@ -33,7 +34,7 @@ function logout() {
       {{ t('common.skipToContent') }}
     </a>
 
-    <header class="border-b border-sand-6 bg-white">
+    <header class="border-b border-sand-6 bg-surface">
       <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
         <div class="flex items-center gap-6">
           <Link href="/tournaments" class="flex items-center gap-2 font-bold text-sand-12">
@@ -94,6 +95,7 @@ function logout() {
             <span class="block text-xs text-sand-9">{{ roleLabel }}</span>
           </span>
           <LocaleSwitcher class="hidden sm:flex" />
+          <ThemeToggle />
           <button
             type="button"
             class="rounded-md border border-sand-7 px-3 py-1.5 font-medium text-sand-11 transition hover:bg-sand-3 hover:text-sand-12 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"

@@ -154,7 +154,7 @@ const live = computed(() => {
     <!-- Pas de planning : rien à saisir -->
     <div
       v-if="liveMatches.length === 0"
-      class="rounded-2xl border border-dashed border-sand-7 bg-white p-12 text-center"
+      class="rounded-2xl border border-dashed border-sand-7 bg-surface p-12 text-center"
     >
       <p class="text-sand-11">{{ t('tournamentsAdmin.results.empty') }}</p>
       <Link
@@ -167,7 +167,7 @@ const live = computed(() => {
 
     <div v-else class="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <!-- Grille de saisie -->
-      <section class="rounded-2xl border border-sand-6 bg-white p-6 lg:col-span-2">
+      <section class="rounded-2xl border border-sand-6 bg-surface p-6 lg:col-span-2">
         <h2 class="mb-4 text-base font-semibold text-sand-12">
           {{ t('tournamentsAdmin.results.scores') }}
         </h2>
@@ -191,7 +191,7 @@ const live = computed(() => {
 
       <!-- Classement en direct -->
       <section
-        class="rounded-2xl border border-sand-6 bg-white p-6 lg:sticky lg:top-6 lg:self-start"
+        class="rounded-2xl border border-sand-6 bg-surface p-6 lg:sticky lg:top-6 lg:self-start"
       >
         <div class="mb-4 flex items-center justify-between gap-3">
           <h2 class="text-base font-semibold text-sand-12">{{ sideTitle }}</h2>
@@ -229,7 +229,7 @@ const live = computed(() => {
     <!-- Tableau d'élimination (pleine largeur) -->
     <section
       v-if="showBracket && liveMatches.length"
-      class="mt-6 rounded-2xl border border-sand-6 bg-white p-6"
+      class="mt-6 rounded-2xl border border-sand-6 bg-surface p-6"
     >
       <h2 class="mb-4 text-base font-semibold text-sand-12">
         {{ t('tournamentsAdmin.results.finalBracket') }}

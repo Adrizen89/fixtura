@@ -22,7 +22,7 @@ const { t } = useI18n()
       {{ t('common.skipToContent') }}
     </a>
 
-    <header class="border-b border-sand-6 bg-white">
+    <header class="border-b border-sand-6 bg-surface">
       <div class="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-3">
         <Link href="/" class="flex items-center gap-2 font-bold text-sand-12">
           <span class="grid h-8 w-8 place-items-center rounded-lg bg-primary text-white">F</span>
@@ -35,7 +35,7 @@ const { t } = useI18n()
     </header>
 
     <main id="content" class="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
-      <div class="rounded-2xl border border-sand-6 bg-white p-6 sm:p-8">
+      <div class="rounded-2xl border border-sand-6 bg-surface p-6 sm:p-8">
         <h1 class="text-2xl font-bold tracking-tight text-sand-12 sm:text-3xl">{{ title }}</h1>
         <p v-if="updatedAt" class="mt-1 text-sm text-sand-10">
           {{ t('legalLayout.updatedAt', { date: updatedAt }) }}

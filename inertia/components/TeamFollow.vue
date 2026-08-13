@@ -169,7 +169,7 @@ watch(
 </script>
 
 <template>
-  <section class="mb-8 rounded-2xl border border-sand-6 bg-white p-4 sm:p-5">
+  <section class="mb-8 rounded-2xl border border-sand-6 bg-surface p-4 sm:p-5">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-2">
         <label for="follow-team" class="text-sm font-semibold text-sand-12 sm:text-base">
@@ -177,7 +177,7 @@ watch(
         </label>
         <select
           id="follow-team"
-          class="rounded-lg border border-sand-7 bg-white px-3 py-1.5 text-sm font-medium text-sand-12 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:text-base"
+          class="rounded-lg border border-sand-7 bg-surface px-3 py-1.5 text-sm font-medium text-sand-12 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:text-base"
           :value="followedTeamId ?? ''"
           @change="onSelect"
         >
