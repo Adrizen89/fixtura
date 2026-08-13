@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.1.7](https://github.com/Adrizen89/fixtura/compare/v0.1.6...v0.1.7) (2026-08-13)
+
+
+### ✨ Fonctionnalités
+
+* add configurable scoring system per tournament ([#104](https://github.com/Adrizen89/fixtura/issues/104)) ([cb8fd74](https://github.com/Adrizen89/fixtura/commit/cb8fd74f2967911cd3bb6ddcbd65ad73162a59c8))
+* API de lecture publique JSON (planning, résultats, classement) ([#122](https://github.com/Adrizen89/fixtura/issues/122)) ([#138](https://github.com/Adrizen89/fixtura/issues/138)) ([2408683](https://github.com/Adrizen89/fixtura/commit/24086836715c9661e89a309eebff4a93fd3f570a))
+* classement final (podium 1er–4e) du tableau à élimination ([#128](https://github.com/Adrizen89/fixtura/issues/128)) ([c7467fd](https://github.com/Adrizen89/fixtura/commit/c7467fd98e032cf61627562184c579e4936a5220)), closes [#106](https://github.com/Adrizen89/fixtura/issues/106)
+* export iCal / abonnement calendrier du planning ([#121](https://github.com/Adrizen89/fixtura/issues/121)) ([ad507b0](https://github.com/Adrizen89/fixtura/commit/ad507b04a85c1a753c2ceca9163b5cb6de8115c6))
+* format système suisse — moteur pur + intégration ([#110](https://github.com/Adrizen89/fixtura/issues/110)) ([2a497f2](https://github.com/Adrizen89/fixtura/commit/2a497f23b8957903876025e436446fc6b9f1346c))
+* historique & consultation des éditions terminées ([#108](https://github.com/Adrizen89/fixtura/issues/108)) ([#124](https://github.com/Adrizen89/fixtura/issues/124)) ([8fb0d69](https://github.com/Adrizen89/fixtura/commit/8fb0d69ca65771d51edd34b0186c964ed7b177fa))
+* implement double elimination bracket format ([#111](https://github.com/Adrizen89/fixtura/issues/111)) ([#133](https://github.com/Adrizen89/fixtura/issues/133)) ([cbe79a1](https://github.com/Adrizen89/fixtura/commit/cbe79a15b3eba40f00cf2e977749e45f5e2e396a))
+* import d'équipes depuis un fichier CSV / Excel ([#120](https://github.com/Adrizen89/fixtura/issues/120)) ([bbfb737](https://github.com/Adrizen89/fixtura/commit/bbfb7370772b0408693c570f5b6c35e24a0d6a7c))
+* journal d'audit des actions sensibles ([#117](https://github.com/Adrizen89/fixtura/issues/117)) ([e692aee](https://github.com/Adrizen89/fixtura/commit/e692aee89a7ba4668a247e2f8767e58ca66658ba))
+* limitation de débit sur le login et les endpoints publics ([#116](https://github.com/Adrizen89/fixtura/issues/116)) ([#135](https://github.com/Adrizen89/fixtura/issues/135)) ([4568b76](https://github.com/Adrizen89/fixtura/commit/4568b76f2227a008905ad8b8d31546d2806711f1))
+* palmarès (vainqueurs par édition) + bilan cumulé par équipe ([#109](https://github.com/Adrizen89/fixtura/issues/109)) ([#130](https://github.com/Adrizen89/fixtura/issues/130)) ([61f48ee](https://github.com/Adrizen89/fixtura/commit/61f48eec78cf339d0f91ee8fc957537cdec99c78))
+* public team registration for tournaments ([#112](https://github.com/Adrizen89/fixtura/issues/112)) ([f11cf14](https://github.com/Adrizen89/fixtura/commit/f11cf14e297ff4ae029aa01c2a3ee0eb36f32253))
+* repêchage des meilleurs 2ᵉˢ en phase finale hybride ([#107](https://github.com/Adrizen89/fixtura/issues/107)) ([2734266](https://github.com/Adrizen89/fixtura/commit/27342666c3d122c39a4afdc86c4a29a8f0df0a10))
+* résolution d'un nul en élimination directe (tirs au but) ([#126](https://github.com/Adrizen89/fixtura/issues/126)) ([a5fc7b4](https://github.com/Adrizen89/fixtura/commit/a5fc7b4d5aed4b105c4d3dcf424a07dd26bf865f)), closes [#105](https://github.com/Adrizen89/fixtura/issues/105)
+* suivi des erreurs serveur (Sentry) + endpoints de santé ([#118](https://github.com/Adrizen89/fixtura/issues/118)) ([6e0da65](https://github.com/Adrizen89/fixtura/commit/6e0da6501d9718daf42b7c542dfcf5922281368a))
+* validation des inscriptions en ligne ([#113](https://github.com/Adrizen89/fixtura/issues/113)) + internationalisation FR/EN ([#123](https://github.com/Adrizen89/fixtura/issues/123)) ([#142](https://github.com/Adrizen89/fixtura/issues/142)) ([9ffe5d0](https://github.com/Adrizen89/fixtura/commit/9ffe5d01ce807981c668209f06c5cf2ff82fabc2))
+
+
+### 🐛 Corrections
+
+* **deps:** résout les vulnérabilités npm audit via override uuid ([#101](https://github.com/Adrizen89/fixtura/issues/101)) ([#143](https://github.com/Adrizen89/fixtura/issues/143)) ([27ae39a](https://github.com/Adrizen89/fixtura/commit/27ae39a169ed6ce0f38fa7c4a2caaf9b9ff22afa))
+
+
+### 📝 Documentation
+
+* exige Node 24 (min 22.18) et documente l'échec node ace sur Node 20 ([#145](https://github.com/Adrizen89/fixtura/issues/145)) ([b8f5f73](https://github.com/Adrizen89/fixtura/commit/b8f5f738082f2a142095cf5039e054e7118b2e66))
+* guide produit « Comment fonctionne Fixtura » (HTML + PDF) ([#146](https://github.com/Adrizen89/fixtura/issues/146)) ([523ae91](https://github.com/Adrizen89/fixtura/commit/523ae91bbe760727b3e930f5148457872b0869d7))
+
 ## [0.1.6](https://github.com/Adrizen89/fixtura/compare/v0.1.5...v0.1.6) (2026-08-08)
 
 
