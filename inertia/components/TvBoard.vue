@@ -73,6 +73,17 @@ const statusLabel = computed<Record<TournamentStatus, string>>(() => ({
 function isFinished(m: ResultMatchRow) {
   return m.homeScore !== null && m.awayScore !== null
 }
+
+/**
+ * Style de la pastille de rang sur le tableau TV (fond sombre fixe) : médailles
+ * or / argent / bronze pour le podium, neutre ensuite — le classement se lit de loin.
+ */
+function rankStyle(rank: number) {
+  if (rank === 1) return { backgroundColor: '#3a2f09', color: '#f0c453' }
+  if (rank === 2) return { backgroundColor: '#252a30', color: '#c7cdd6' }
+  if (rank === 3) return { backgroundColor: '#2c1d10', color: '#e0a066' }
+  return { backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff' }
+}
 </script>
 
 <template>
@@ -195,12 +206,8 @@ function isFinished(m: ResultMatchRow) {
           <tr v-for="row in globalStandings" :key="row.teamId" class="border-b border-white/10">
             <td class="py-[1.2vh]">
               <span
-                class="inline-grid h-[5vh] w-[5vh] place-items-center rounded-full text-[2.6vh] font-black"
-                :style="
-                  row.rank <= 3
-                    ? { backgroundColor: 'var(--accent)', color: '#fff' }
-                    : { backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff' }
-                "
+                class="inline-grid h-[5vh] w-[5vh] place-items-center rounded-2xl text-[2.6vh] font-black tabular-nums"
+                :style="rankStyle(row.rank)"
               >
                 {{ row.rank }}
               </span>

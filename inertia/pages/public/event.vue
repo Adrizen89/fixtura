@@ -103,26 +103,38 @@ function forfeitTeamName(m: PublicEventCategory['matches'][number]) {
 <template>
   <Head :title="t('publicEvent.headTitle', { name: event.name })" />
 
-  <div class="min-h-screen bg-sand-1 text-sand-12">
+  <div class="min-h-screen bg-ground text-sand-12">
     <div class="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
-      <!-- En-tête -->
-      <header class="mb-6 border-b border-sand-6 pb-6">
-        <div class="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-              {{ event.name }}
-            </h1>
-            <p v-if="event.eventDate" class="mt-1 text-base text-sand-11 sm:text-lg">
-              {{ formatDate(event.eventDate) }}
-            </p>
+      <!-- En-tête « scoreboard » -->
+      <header class="mb-6 overflow-hidden rounded-2xl shadow-md">
+        <div
+          class="relative bg-gradient-to-br from-primary-700 to-primary px-5 py-6 text-white sm:px-7 sm:py-7"
+        >
+          <div
+            class="pointer-events-none absolute inset-0 opacity-10"
+            style="
+              background-image: radial-gradient(circle at 1px 1px, #fff 1px, transparent 0);
+              background-size: 16px 16px;
+            "
+            aria-hidden="true"
+          />
+          <div class="relative flex flex-wrap items-start justify-between gap-4">
+            <div class="min-w-0">
+              <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+                {{ event.name }}
+              </h1>
+              <p v-if="event.eventDate" class="mt-1 text-sm text-white/85 sm:text-base">
+                {{ formatDate(event.eventDate) }}
+              </p>
+            </div>
+            <span
+              v-if="liveState === 'connected'"
+              class="flex items-center gap-1.5 text-xs font-medium text-white/75"
+            >
+              <span class="h-2 w-2 rounded-full bg-white/90" aria-hidden="true" />
+              {{ t('publicEvent.autoUpdate') }}
+            </span>
           </div>
-          <span
-            v-if="liveState === 'connected'"
-            class="flex items-center gap-1.5 text-xs font-medium text-sand-10"
-          >
-            <span class="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
-            {{ t('publicEvent.autoUpdate') }}
-          </span>
         </div>
       </header>
 

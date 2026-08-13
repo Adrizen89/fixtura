@@ -61,6 +61,8 @@ const brandStyle = computed(() => {
 })
 
 const accent = computed(() => props.club.primaryColor || '#16a34a')
+/** Teinte foncée de l'accent pour le dégradé de l'en-tête « scoreboard ». */
+const accentDeep = computed(() => `color-mix(in srgb, ${accent.value} 76%, black)`)
 
 const showBracket = computed(
   () =>
@@ -165,11 +167,18 @@ function shootoutTeamName(m: ResultMatchRow) {
   return null
 }
 
-/** Classe de fond du podium (3 premiers) pour la lisibilité de loin. */
+/** Fond de ligne du podium (léger) : liseré or au leader, pour la lisibilité de loin. */
 function rowClass(rank: number) {
-  if (rank === 1) return 'bg-primary-100'
-  if (rank <= 3) return 'bg-primary-50'
+  if (rank === 1) return 'bg-gold/10'
   return ''
+}
+
+/** Pastille de rang : médailles or / argent / bronze pour le podium, neutre ensuite. */
+function rankChip(rank: number): string {
+  if (rank === 1) return 'bg-gold/15 text-gold ring-1 ring-gold/40'
+  if (rank === 2) return 'bg-silver/15 text-silver ring-1 ring-silver/40'
+  if (rank === 3) return 'bg-bronze/15 text-bronze ring-1 ring-bronze/40'
+  return 'bg-sand-3 text-sand-11'
 }
 </script>
 
@@ -192,55 +201,66 @@ function rowClass(rank: number) {
     :live-state="liveState"
   />
 
-  <div v-else class="min-h-screen bg-sand-1 text-sand-12" :style="brandStyle">
-    <!-- Bandeau d'accent aux couleurs du club. -->
-    <div class="h-1.5 w-full" :style="{ backgroundColor: accent }" />
+  <div v-else class="min-h-screen bg-ground text-sand-12" :style="brandStyle">
     <div class="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
-      <!-- En-tête -->
-      <header class="mb-8 border-b border-sand-6 pb-6">
-        <div class="flex flex-wrap items-start justify-between gap-3">
-          <div class="flex items-center gap-4">
-            <img
-              v-if="club.logo"
-              :src="club.logo"
-              alt=""
-              class="h-14 w-14 shrink-0 rounded-xl object-contain sm:h-16 sm:w-16"
-            />
-            <div>
-              <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-                {{ tournament.name }}
-              </h1>
-              <p class="mt-1 text-base text-sand-11 sm:text-lg">
-                {{ tournament.category
-                }}<span v-if="tournament.eventDate"> · {{ formatDate(tournament.eventDate) }}</span>
-              </p>
-            </div>
-          </div>
-          <div class="flex flex-col items-end gap-2">
-            <span
-              class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-bold uppercase tracking-wide sm:text-base"
-              :class="
-                tournament.status === 'live'
-                  ? 'bg-primary text-white'
-                  : tournament.status === 'finished'
-                    ? 'bg-sand-4 text-sand-11'
-                    : 'bg-sand-3 text-sand-11'
-              "
-            >
-              <span
-                v-if="tournament.status === 'live'"
-                class="h-2.5 w-2.5 animate-pulse rounded-full bg-white"
-                aria-hidden="true"
+      <!-- En-tête « scoreboard » aux couleurs du club -->
+      <header class="mb-8 overflow-hidden rounded-2xl shadow-md">
+        <div
+          class="relative px-5 py-6 text-white sm:px-7 sm:py-7"
+          :style="{ background: `linear-gradient(135deg, ${accentDeep}, ${accent})` }"
+        >
+          <div
+            class="pointer-events-none absolute inset-0 opacity-10"
+            style="
+              background-image: radial-gradient(circle at 1px 1px, #fff 1px, transparent 0);
+              background-size: 16px 16px;
+            "
+            aria-hidden="true"
+          />
+          <div class="relative flex flex-wrap items-start justify-between gap-4">
+            <div class="flex items-center gap-4">
+              <img
+                v-if="club.logo"
+                :src="club.logo"
+                alt=""
+                class="h-14 w-14 shrink-0 rounded-xl bg-white/10 object-contain p-1 sm:h-16 sm:w-16"
               />
-              {{ statusLabel[tournament.status] }}
-            </span>
-            <span
-              v-if="liveState === 'connected'"
-              class="flex items-center gap-1.5 text-xs font-medium text-sand-10"
-            >
-              <span class="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
-              {{ t('publicTournament.autoUpdate') }}
-            </span>
+              <div class="min-w-0">
+                <div class="text-xs font-bold uppercase tracking-widest text-white/80">
+                  {{ tournament.category }}
+                </div>
+                <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+                  {{ tournament.name }}
+                </h1>
+                <p v-if="tournament.eventDate" class="mt-1 text-sm text-white/85 sm:text-base">
+                  {{ formatDate(tournament.eventDate) }}
+                </p>
+              </div>
+            </div>
+            <div class="flex shrink-0 flex-col items-end gap-2">
+              <span
+                class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-bold uppercase tracking-wide sm:text-base"
+                :class="
+                  tournament.status === 'live'
+                    ? 'border-white/30 bg-white/20 text-white'
+                    : 'border-white/20 bg-white/10 text-white/85'
+                "
+              >
+                <span
+                  v-if="tournament.status === 'live'"
+                  class="h-2.5 w-2.5 animate-pulse rounded-full bg-white"
+                  aria-hidden="true"
+                />
+                {{ statusLabel[tournament.status] }}
+              </span>
+              <span
+                v-if="liveState === 'connected'"
+                class="flex items-center gap-1.5 text-xs font-medium text-white/75"
+              >
+                <span class="h-2 w-2 rounded-full bg-white/90" aria-hidden="true" />
+                {{ t('publicTournament.autoUpdate') }}
+              </span>
+            </div>
           </div>
         </div>
       </header>
@@ -345,8 +365,8 @@ function rowClass(rank: number) {
                 >
                   <td class="py-3 pr-2 text-center align-middle">
                     <span
-                      class="inline-flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold sm:h-8 sm:w-8 sm:text-base"
-                      :class="row.rank <= 3 ? 'bg-primary text-white' : 'bg-sand-3 text-sand-11'"
+                      class="inline-flex h-7 w-7 items-center justify-center rounded-lg text-sm font-bold tabular-nums sm:h-8 sm:w-8 sm:text-base"
+                      :class="rankChip(row.rank)"
                     >
                       {{ row.rank }}
                     </span>
