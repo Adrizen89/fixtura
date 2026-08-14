@@ -48,7 +48,7 @@
     "@swc/core": "1.15.47",
     "@tailwindcss/vite": "^4.3.3",
     "@types/luxon": "^3.7.3",
-    "@types/node": "^24.0.0",
+    "@types/node": "^26.2.0",
     "@types/qrcode-svg": "^1.1.5",
     "@vitejs/plugin-vue": "^6.0.8",
     "eslint": "^10.8.0",
